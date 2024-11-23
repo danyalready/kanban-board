@@ -1,25 +1,32 @@
-import { useState } from 'react';
-import { DndContext } from '@dnd-kit/core';
+import { KanbanBoard } from './KanbanBoard';
 
-import { Droppable } from './Droppable';
-import { Draggable } from './Draggable';
+const initialColumns = [
+    {
+        id: 'column-1',
+        name: 'To Do',
+        items: [
+            { id: 'item-1', content: 'Task 1' },
+            { id: 'item-2', content: 'Task 2' },
+        ],
+    },
+    {
+        id: 'column-2',
+        name: 'In Progress',
+        items: [{ id: 'item-3', content: 'Task 3' }],
+    },
+    {
+        id: 'column-3',
+        name: 'Done',
+        items: [],
+    },
+];
 
 function App() {
-    const [isDropped, setIsDropped] = useState(false);
-    const draggableMarkup = <Draggable>Drag me</Draggable>;
-
     return (
-        <DndContext onDragEnd={handleDragEnd}>
-            {!isDropped ? draggableMarkup : null}
-            <Droppable>{isDropped ? draggableMarkup : 'Drop here'}</Droppable>
-        </DndContext>
+        <div>
+            <KanbanBoard columns={initialColumns} />
+        </div>
     );
-
-    function handleDragEnd(event) {
-        if (event.over && event.over.id === 'droppable') {
-            setIsDropped(true);
-        }
-    }
 }
 
 export default App;
