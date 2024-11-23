@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from "react";
 
 export interface KanbanItem {
     id: string;
@@ -11,13 +11,15 @@ export interface KanbanColumn {
     items: KanbanItem[];
 }
 
-export const KanbanContext = createContext<{ columns: KanbanColumn[] }>({ columns: [] });
+export const KanbanContext = createContext<{ columns: KanbanColumn[] }>({
+    columns: [],
+});
 
 export function useKanbanContext() {
     const context = useContext(KanbanContext);
 
     if (!context) {
-        throw new Error('useKanbanContext must be used within a KanbanContextProvider');
+        throw new Error("useKanbanContext must be used within a KanbanContextProvider");
     }
 
     return context;

@@ -1,8 +1,8 @@
-import { DndContext } from '@dnd-kit/core';
+import { DndContext } from "@dnd-kit/core";
 
-import { KanbanColumn } from './KanbanColumn';
-import { KanbanContextProvider } from './KanbanContextProvider';
-import { useKanbanContext, type KanbanColumn as KanbanColumnType } from './KanbanContext';
+import { KanbanColumn } from "./KanbanColumn";
+import { KanbanContextProvider } from "./KanbanContextProvider";
+import { useKanbanContext, type KanbanColumn as KanbanColumnType } from "./KanbanContext";
 
 function KanbanColumns() {
     const { columns } = useKanbanContext();
@@ -12,9 +12,15 @@ function KanbanColumns() {
 
     return (
         <DndContext onDragEnd={handleDragEnd}>
-            <div className="kanban-board">
+            <div className="flex gap-1">
                 {columns.map((column) => (
-                    <KanbanColumn key={column.id} id={column.id} name={column.name} items={column.items} handleAddItem={handleAddItem} />
+                    <KanbanColumn
+                        key={column.id}
+                        id={column.id}
+                        name={column.name}
+                        items={column.items}
+                        handleAddItem={handleAddItem}
+                    />
                 ))}
             </div>
         </DndContext>
