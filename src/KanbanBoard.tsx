@@ -30,8 +30,6 @@ function KanbanColumns() {
 
     return (
         <DndContext onDragEnd={handleDragEnd}>
-            <button>Add ticket +</button>
-
             <div className="flex gap-5 px-4 py-3">
                 {state.columns.map((column) => (
                     <KanbanColumn key={column.id} column={column} />
