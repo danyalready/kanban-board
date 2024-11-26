@@ -1,26 +1,19 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type Dispatch } from "react";
+import { type KanbanAction, type KanbanState } from "./KanbanProvider";
 
-export interface KanbanItem {
-    id: string;
-    content: string;
-}
+type KanbanContextProps = {
+    state: KanbanState;
+    dispatch: Dispatch<KanbanAction>;
+};
 
-export interface KanbanColumn {
-    id: string;
-    name: string;
-    items: KanbanItem[];
-}
+export const KanbanContext = createContext<KanbanContextProps | undefined>(undefined);
 
-export const KanbanContext = createContext<{ columns: KanbanColumn[] }>({
-    columns: [],
-});
-
-export function useKanbanContext() {
+export const useKanbanContext = (): KanbanContextProps => {
     const context = useContext(KanbanContext);
 
     if (!context) {
-        throw new Error("useKanbanContext must be used within a KanbanContextProvider");
+        throw new Error("useKanbanContext must be used within a KanbanProvider");
     }
 
     return context;
-}
+};

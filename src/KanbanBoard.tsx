@@ -1,24 +1,26 @@
 import { DndContext } from "@dnd-kit/core";
 
 import { KanbanColumn } from "./KanbanColumn";
-import { KanbanContextProvider } from "./KanbanContextProvider";
-import { useKanbanContext, type KanbanColumn as KanbanColumnType } from "./KanbanContext";
+import { useKanbanContext } from "./KanbanContext";
+import { KanbanProvider } from "./KanbanProvider";
 
 function KanbanColumns() {
-    const { columns } = useKanbanContext();
+    const { state } = useKanbanContext();
 
     function handleDragEnd() {}
     function handleAddItem() {}
 
     return (
         <DndContext onDragEnd={handleDragEnd}>
-            <div className="flex gap-1">
-                {columns.map((column) => (
+            <button>Add ticket +</button>
+
+            <div className="flex gap-5 px-4 py-3">
+                {state.columns.map((column) => (
                     <KanbanColumn
                         key={column.id}
                         id={column.id}
-                        name={column.name}
-                        items={column.items}
+                        name={column.title}
+                        tasks={column.tasks}
                         handleAddItem={handleAddItem}
                     />
                 ))}
@@ -27,11 +29,10 @@ function KanbanColumns() {
     );
 }
 
-export function KanbanBoard(props: { columns: KanbanColumnType[] }) {
+export function KanbanBoard() {
     return (
-        <KanbanContextProvider columns={props.columns}>
-            <button className="add-column-button">+ Add Column</button>
+        <KanbanProvider>
             <KanbanColumns />
-        </KanbanContextProvider>
+        </KanbanProvider>
     );
 }
