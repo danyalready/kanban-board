@@ -24,6 +24,9 @@ export function KanbanTask(props: KanbanTaskProps) {
         transition,
     };
 
+    const priorityColor =
+        props.task.priority === "low" ? "#f1c06f" : props.task.priority === "medium" ? "#0e9ceb" : "#fa1877";
+
     return (
         <div
             ref={setNodeRef}
@@ -37,30 +40,13 @@ export function KanbanTask(props: KanbanTaskProps) {
         >
             <div className="flex gap-3">
                 <Badge variant="outline" className="flex gap-1 capitalize">
-                    <Flag
-                        size={10}
-                        color={
-                            props.task.priority === "low"
-                                ? "#f1c06f"
-                                : props.task.priority === "medium"
-                                  ? "#0e9ceb"
-                                  : "#fa1877"
-                        }
-                        fill={
-                            props.task.priority === "low"
-                                ? "#f1c06f"
-                                : props.task.priority === "medium"
-                                  ? "#0e9ceb"
-                                  : "#fa1877"
-                        }
-                    />
+                    <Flag size={10} color={priorityColor} fill={priorityColor} />
                     {props.task.priority}
                 </Badge>
             </div>
             <div className="flex items-start justify-between">
                 <h3 className="font-medium">{props.task.title}</h3>
             </div>
-            {props.task.description && <div>{props.task.description}</div>}
 
             <Separator orientation="horizontal" />
 

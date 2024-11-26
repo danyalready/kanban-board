@@ -52,9 +52,6 @@ export function KanbanColumn(props: ColumnProps) {
                                     <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button size="icon" variant="link">
-                                <Plus />
-                            </Button>
                         </div>
                     </div>
 
