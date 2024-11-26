@@ -14,6 +14,7 @@ import {
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 
 import { useKanbanContext } from "@/kanbanContext";
+import { type Task } from "@/kanbanReducer";
 
 import { KanbanColumn } from "./KanbanColumn";
 import { useState } from "react";
@@ -28,7 +29,7 @@ export function KanbanBoard() {
         }),
     );
 
-    const [activeId, setActiveId] = useState<null | string>(null);
+    const [activeTask, setActiveTask] = useState<null | Task>(null);
 
     return (
         <DndContext
@@ -48,13 +49,13 @@ export function KanbanBoard() {
                     sideEffects: defaultDropAnimationSideEffects({
                         styles: {
                             active: {
-                                opacity: "0.4",
+                                opacity: "0.3",
                             },
                         },
                     }),
                 }}
             >
-                {activeId ? <KanbanTask task={{ id: "dragged", title: "Dragged" }} /> : null}
+                {activeTask ? <KanbanTask task={activeTask} /> : null}
             </DragOverlay>
         </DndContext>
     );
@@ -68,7 +69,17 @@ export function KanbanBoard() {
     }
 
     function handleDragStart(event: DragStartEvent) {
-        setActiveId(event.active.id.toString());
+        const activeColumn = findColumn(event.active.id.toString());
+
+        if (!activeColumn) {
+            return;
+        }
+
+        const task = activeColumn.tasks.find((task) => task.id === event.active.id.toString());
+
+        if (task) {
+            setActiveTask(task);
+        }
     }
 
     function handleDragOver(event: DragOverEvent) {
@@ -95,7 +106,7 @@ export function KanbanBoard() {
         const { active, over } = event;
 
         if (!over) {
-            setActiveId(null);
+            setActiveTask(null);
             return;
         }
 
@@ -103,7 +114,7 @@ export function KanbanBoard() {
         const overColumn = findColumn(over.id.toString());
 
         if (!activeColumn || !overColumn || activeColumn.id !== overColumn.id) {
-            setActiveId(null);
+            setActiveTask(null);
             return;
         }
 
@@ -120,6 +131,6 @@ export function KanbanBoard() {
             });
         }
 
-        setActiveId(null);
+        setActiveTask(null);
     }
 }
