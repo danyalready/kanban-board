@@ -1,10 +1,11 @@
 import { KanbanBoard } from "./KanbanBoard";
+import { KanbanProvider } from "./KanbanProvider";
 
 function App() {
     return (
-        <div>
+        <KanbanProvider>
             <KanbanBoard />
-        </div>
+        </KanbanProvider>
     );
 }
 

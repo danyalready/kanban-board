@@ -16,6 +16,7 @@ export interface KanbanState {
 
 export type KanbanAction =
     | { type: "ADD_COLUMN"; payload: { id: string; title: string } }
+    | { type: "UPDATE_COLUMN"; payload: { columnId: string; updatedColumn: Partial<Column> } }
     | { type: "DELETE_COLUMN"; payload: { columnId: string } }
     | { type: "ADD_TASK"; payload: { columnId: string; task: Task } }
     | { type: "UPDATE_TASK"; payload: { columnId: string; taskId: string; updatedTask: Partial<Task> } }
@@ -28,6 +29,22 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
             const { id, title } = action.payload;
 
             return { columns: [...state.columns, { id, title, tasks: [] }] };
+        }
+        case "UPDATE_COLUMN": {
+            const { columnId, updatedColumn } = action.payload;
+
+            return {
+                columns: state.columns.map((column) => {
+                    if (column.id === columnId) {
+                        return {
+                            ...column,
+                            ...updatedColumn,
+                        };
+                    }
+
+                    return column;
+                }),
+            };
         }
         case "DELETE_COLUMN": {
             const { columnId } = action.payload;
