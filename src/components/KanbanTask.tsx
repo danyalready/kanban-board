@@ -1,15 +1,18 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Calendar, Flag, MessageCircleMore } from "lucide-react";
 
 import { type Task } from "@/kanbanReducer";
+import { cn } from "@/lib/utils";
+
 import { Badge } from "./ui/badge";
-import { Calendar, Flag, MessageCircleMore } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { Avatar } from "./ui/avatar";
-import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface KanbanTaskProps {
     task: Task;
+    className?: string;
 }
 
 export function KanbanTask(props: KanbanTaskProps) {
@@ -27,17 +30,37 @@ export function KanbanTask(props: KanbanTaskProps) {
             style={style}
             {...listeners}
             {...attributes}
-            className="flex flex-col gap-3 rounded-md bg-card p-3 shadow-sm ring-1 ring-inset ring-border"
+            className={cn(
+                "flex flex-col gap-3 rounded-md bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
+                props.className,
+            )}
         >
             <div className="flex gap-3">
-                <Badge variant="outline" className="flex gap-1">
-                    <Flag size={10} fill="black" /> Normal
+                <Badge variant="outline" className="flex gap-1 capitalize">
+                    <Flag
+                        size={10}
+                        color={
+                            props.task.priority === "low"
+                                ? "#f1c06f"
+                                : props.task.priority === "medium"
+                                  ? "#0e9ceb"
+                                  : "#fa1877"
+                        }
+                        fill={
+                            props.task.priority === "low"
+                                ? "#f1c06f"
+                                : props.task.priority === "medium"
+                                  ? "#0e9ceb"
+                                  : "#fa1877"
+                        }
+                    />
+                    {props.task.priority}
                 </Badge>
             </div>
             <div className="flex items-start justify-between">
                 <h3 className="font-medium">{props.task.title}</h3>
             </div>
-            <div>{props.task.description}</div>
+            {props.task.description && <div>{props.task.description}</div>}
 
             <Separator orientation="horizontal" />
 
@@ -47,14 +70,14 @@ export function KanbanTask(props: KanbanTaskProps) {
                     <AvatarFallback>DO</AvatarFallback>
                 </Avatar>
 
-                <div className="flex h-full gap-2">
+                <div className="flex h-5 gap-2">
                     <div className="flex items-center gap-1">
-                        <MessageCircleMore size={10} />
-                        <span className="text-xs">2</span>
+                        <MessageCircleMore size={12} />
+                        <span className="text-xs">{props.task.comments.length}</span>
                     </div>
                     <Separator orientation="vertical" />
                     <div className="flex items-center gap-1">
-                        <Calendar size={10} />
+                        <Calendar size={12} />
                         <span className="text-xs">Today</span>
                     </div>
                 </div>

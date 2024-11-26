@@ -12,12 +12,12 @@ import {
     type DragEndEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
+import { useState } from "react";
 
 import { useKanbanContext } from "@/kanbanContext";
 import { type Task } from "@/kanbanReducer";
 
 import { KanbanColumn } from "./KanbanColumn";
-import { useState } from "react";
 import { KanbanTask } from "./KanbanTask";
 
 export function KanbanBoard() {
@@ -39,7 +39,7 @@ export function KanbanBoard() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-5 bg-background p-6">
+            <div className="flex gap-2 overflow-hidden bg-background p-6">
                 {state.columns.map((column) => (
                     <KanbanColumn key={column.id} column={column} />
                 ))}
@@ -50,12 +50,13 @@ export function KanbanBoard() {
                         styles: {
                             active: {
                                 opacity: "0",
+                                visibility: "hidden",
                             },
                         },
                     }),
                 }}
             >
-                {activeTask ? <KanbanTask task={activeTask} /> : null}
+                {activeTask ? <KanbanTask task={activeTask} className="rotate-6" /> : null}
             </DragOverlay>
         </DndContext>
     );
