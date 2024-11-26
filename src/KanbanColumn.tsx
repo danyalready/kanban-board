@@ -1,18 +1,14 @@
 import { useDroppable } from "@dnd-kit/core";
-import { type PropsWithChildren } from "react";
 
-import { type Task } from "./KanbanProvider";
+import { type Column } from "./KanbanProvider";
+import { KanbanTask } from "./KanbanTask";
 
 interface ColumnProps {
-    id: string;
-    name: string;
-    tasks: Task[];
-
-    handleAddItem: () => void;
+    column: Column;
 }
 
-export function KanbanColumn(props: PropsWithChildren<ColumnProps>) {
-    const { isOver, setNodeRef } = useDroppable({ id: props.name });
+export function KanbanColumn(props: ColumnProps) {
+    const { isOver, setNodeRef } = useDroppable({ id: props.column.id });
     const style = { color: isOver ? "green" : undefined };
 
     return (
@@ -21,9 +17,13 @@ export function KanbanColumn(props: PropsWithChildren<ColumnProps>) {
             style={style}
             className="w-[340px] rounded-xl px-4 py-3 shadow-sm ring-1 ring-inset ring-gray-200"
         >
-            <h2 className="pb-4">{props.name}</h2>
+            <h2 className="pb-4">{props.column.title}</h2>
 
-            <div className="flex flex-col gap-4">{props.children}</div>
+            <div className="flex flex-col gap-4">
+                {props.column.tasks.map((task) => (
+                    <KanbanTask key={task.id} task={task} />
+                ))}
+            </div>
         </div>
     );
 }

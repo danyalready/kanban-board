@@ -1,14 +1,32 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 
 import { KanbanColumn } from "./KanbanColumn";
 import { useKanbanContext } from "./KanbanContext";
 import { KanbanProvider } from "./KanbanProvider";
 
 function KanbanColumns() {
-    const { state } = useKanbanContext();
+    const { state, dispatch } = useKanbanContext();
 
-    function handleDragEnd() {}
-    function handleAddItem() {}
+    function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+
+        if (over) {
+            const sourceColumn = state.columns.find((column) =>
+                column.tasks.map((task) => task.id).includes(active.id.toString()),
+            );
+
+            if (sourceColumn && sourceColumn.id !== over.id.toString()) {
+                dispatch({
+                    type: "MOVE_TASK",
+                    payload: {
+                        sourceColumnId: sourceColumn.id,
+                        targetColumnId: over.id.toString(),
+                        taskId: active.id.toString(),
+                    },
+                });
+            }
+        }
+    }
 
     return (
         <DndContext onDragEnd={handleDragEnd}>
@@ -16,13 +34,7 @@ function KanbanColumns() {
 
             <div className="flex gap-5 px-4 py-3">
                 {state.columns.map((column) => (
-                    <KanbanColumn
-                        key={column.id}
-                        id={column.id}
-                        name={column.title}
-                        tasks={column.tasks}
-                        handleAddItem={handleAddItem}
-                    />
+                    <KanbanColumn key={column.id} column={column} />
                 ))}
             </div>
         </DndContext>

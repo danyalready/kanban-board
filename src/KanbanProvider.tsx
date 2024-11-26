@@ -27,7 +27,10 @@ export type KanbanAction =
     | { type: "MOVE_TASK"; payload: { sourceColumnId: string; targetColumnId: string; taskId: string } };
 
 const initialState: KanbanState = {
-    columns: [],
+    columns: [
+        { id: "column-1", title: "To Do", tasks: [{ id: "task-1", title: "Move me" }] },
+        { id: "column-2", title: "In Progress", tasks: [] },
+    ],
 };
 
 function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
@@ -97,9 +100,11 @@ function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
                             tasks: column.tasks.filter((task) => task.id !== taskId),
                         };
                     }
+
                     if (column.id === targetColumnId) {
                         return { ...column, tasks: [...column.tasks, taskToMove] };
                     }
+
                     return column;
                 }),
             };
