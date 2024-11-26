@@ -1,5 +1,6 @@
 import { createContext, useContext, type Dispatch } from "react";
-import { type KanbanAction, type KanbanState } from "./KanbanProvider";
+
+import { KanbanAction, KanbanState } from "./kanbanReducer";
 
 type KanbanContextProps = {
     state: KanbanState;

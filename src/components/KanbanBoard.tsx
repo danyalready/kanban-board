@@ -1,7 +1,8 @@
 import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 
+import { useKanbanContext } from "@/kanbanContext";
+
 import { KanbanColumn } from "./KanbanColumn";
-import { useKanbanContext } from "./KanbanContext";
 import { KanbanProvider } from "./KanbanProvider";
 
 function KanbanColumns() {

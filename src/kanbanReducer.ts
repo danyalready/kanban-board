@@ -1,7 +1,3 @@
-import { PropsWithChildren, useReducer } from "react";
-
-import { KanbanContext } from "./KanbanContext";
-
 export type Task = {
     id: string;
     title: string;
@@ -26,30 +22,7 @@ export type KanbanAction =
     | { type: "DELETE_TASK"; payload: { columnId: string; taskId: string } }
     | { type: "MOVE_TASK"; payload: { sourceColumnId: string; targetColumnId: string; taskId: string } };
 
-const initialState: KanbanState = {
-    columns: [
-        {
-            id: "column-1",
-            title: "To Do",
-            tasks: [
-                { id: "task-1", title: "🥦 Go to grocery" },
-                { id: "task-2", title: "🦮 Walk the dog" },
-            ],
-        },
-        { id: "column-2", title: "In Progress", tasks: [{ id: "task-3", title: "Exercise" }] },
-        {
-            id: "column-3",
-            title: "✅ Compleated",
-            tasks: [
-                { id: "task-4", title: "Play guitar 🎸" },
-                { id: "task-5", title: "💊 Take the pills" },
-                { id: "task-6", title: "Water the plants 🪴" },
-            ],
-        },
-    ],
-};
-
-function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
+export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
     switch (action.type) {
         case "ADD_COLUMN": {
             const { id, title } = action.payload;
@@ -128,10 +101,4 @@ function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
         default:
             return state;
     }
-}
-
-export function KanbanProvider(props: PropsWithChildren) {
-    const [state, dispatch] = useReducer(kanbanReducer, initialState); // TODO: get the initial data from the local storage.
-
-    return <KanbanContext.Provider value={{ state, dispatch }}>{props.children}</KanbanContext.Provider>;
 }

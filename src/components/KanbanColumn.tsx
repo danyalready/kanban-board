@@ -1,6 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 
-import { type Column } from "./KanbanProvider";
+import { type Column } from "@/kanbanReducer";
+
 import { KanbanTask } from "./KanbanTask";
 
 interface ColumnProps {

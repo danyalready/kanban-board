@@ -1,6 +1,6 @@
 import { useDraggable } from "@dnd-kit/core";
 
-import { type Task } from "./KanbanProvider";
+import { type Task } from "@/kanbanReducer";
 
 interface KanbanTaskProps {
     task: Task;
