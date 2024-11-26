@@ -18,11 +18,13 @@ export function KanbanColumn(props: ColumnProps) {
             <div
                 ref={setNodeRef}
                 style={style}
-                className="w-[340px] rounded-xl px-4 pb-12 pt-3 shadow-sm ring-1 ring-inset ring-gray-200"
+                className="flex w-[320px] flex-col gap-3 rounded-xl bg-secondary py-3 shadow-sm ring-1 ring-inset ring-border"
             >
-                <h2 className="pb-4">{props.column.title}</h2>
+                <div className="flex items-start justify-between px-4">
+                    <h2 className="text-sm font-semibold">{props.column.title}</h2>
+                </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5 px-1">
                     {props.column.tasks.map((task) => (
                         <KanbanTask key={task.id} task={task} />
                     ))}

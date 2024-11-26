@@ -39,7 +39,7 @@ export function KanbanBoard() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-5 px-4 py-3">
+            <div className="flex gap-5 bg-background p-6">
                 {state.columns.map((column) => (
                     <KanbanColumn key={column.id} column={column} />
                 ))}
@@ -49,7 +49,7 @@ export function KanbanBoard() {
                     sideEffects: defaultDropAnimationSideEffects({
                         styles: {
                             active: {
-                                opacity: "0.3",
+                                opacity: "0",
                             },
                         },
                     }),
