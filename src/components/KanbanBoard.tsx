@@ -6,7 +6,8 @@ import {
     DragOverlay,
     DragStartEvent,
     KeyboardSensor,
-    PointerSensor,
+    MouseSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     type DragEndEvent,
@@ -23,7 +24,8 @@ import { KanbanTask } from "./KanbanTask";
 export function KanbanBoard() {
     const { state, dispatch } = useKanbanContext();
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(MouseSensor),
+        useSensor(TouchSensor),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         }),
@@ -41,7 +43,9 @@ export function KanbanBoard() {
         >
             <div className="flex gap-2 overflow-hidden bg-background p-6">
                 {state.columns.map((column) => (
-                    <KanbanColumn key={column.id} column={column} />
+                    <div className="w-80">
+                        <KanbanColumn key={column.id} column={column} />
+                    </div>
                 ))}
             </div>
             <DragOverlay
