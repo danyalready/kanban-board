@@ -106,12 +106,28 @@ export function KanbanBoard() {
                     });
                 }
             } else {
+                const activeIndex = activeColumn.tasks.map((task) => task.id).indexOf(active.id.toString());
+                const overIndex = overColumn.tasks.map((task) => task.id).indexOf(over.id.toString());
+
+                const updatedActiveTasks = [...activeColumn.tasks];
+                const [movedTask] = updatedActiveTasks.splice(activeIndex, 1);
+
+                const updatedOverTasks = [...overColumn.tasks];
+                updatedOverTasks.splice(overIndex + 1, 0, movedTask);
+
                 dispatch({
-                    type: "MOVE_TASK",
+                    type: "UPDATE_COLUMN",
                     payload: {
-                        sourceColumnId: activeColumn.id,
-                        targetColumnId: overColumn.id,
-                        taskId: active.id.toString(),
+                        columnId: activeColumn.id,
+                        updatedColumn: { tasks: updatedActiveTasks },
+                    },
+                });
+
+                dispatch({
+                    type: "UPDATE_COLUMN",
+                    payload: {
+                        columnId: overColumn.id,
+                        updatedColumn: { tasks: updatedOverTasks },
                     },
                 });
             }
