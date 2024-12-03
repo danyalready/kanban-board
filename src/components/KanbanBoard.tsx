@@ -13,7 +13,7 @@ import {
     type DragEndEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import { useKanbanContext } from "@/kanbanContext";
 import { type Task } from "@/kanbanReducer";
@@ -33,6 +33,94 @@ export function KanbanBoard() {
 
     const [activeTask, setActiveTask] = useState<null | Task>(null);
 
+    const findColumn = useCallback(
+        (id: string) => state.columns.find((column) => column.id === id || column.tasks.some((task) => task.id === id)),
+        [state.columns],
+    );
+
+    const handleDragStart = useCallback(
+        (event: DragStartEvent) => {
+            const activeColumn = findColumn(event.active.id.toString());
+
+            if (!activeColumn) {
+                return;
+            }
+
+            const task = activeColumn.tasks.find((task) => task.id === event.active.id.toString());
+
+            if (task) {
+                setActiveTask(task);
+            }
+        },
+        [findColumn],
+    );
+
+    const handleDragOver = useCallback(
+        (event: DragOverEvent) => {
+            const { active, over } = event;
+
+            if (!over) {
+                return;
+            }
+
+            const activeColumn = findColumn(active.id.toString());
+            const overColumn = findColumn(over.id.toString());
+
+            if (!activeColumn || !overColumn || activeColumn.id === overColumn.id) {
+                return;
+            }
+
+            // Only visually indicate potential drop area; actual move happens in handleDragEnd
+        },
+        [findColumn],
+    );
+
+    const handleDragEnd = useCallback(
+        (event: DragEndEvent) => {
+            const { active, over } = event;
+
+            if (!over) {
+                setActiveTask(null);
+                return;
+            }
+
+            const activeColumn = findColumn(active.id.toString());
+            const overColumn = findColumn(over.id.toString());
+
+            if (!activeColumn || !overColumn) {
+                setActiveTask(null);
+                return;
+            }
+
+            if (activeColumn.id === overColumn.id) {
+                const activeIndex = activeColumn.tasks.map((task) => task.id).indexOf(active.id.toString());
+                const overIndex = activeColumn.tasks.map((task) => task.id).indexOf(over.id.toString());
+
+                if (activeIndex !== overIndex) {
+                    dispatch({
+                        type: "UPDATE_COLUMN",
+                        payload: {
+                            columnId: activeColumn.id,
+                            updatedColumn: { tasks: arrayMove(activeColumn.tasks, activeIndex, overIndex) },
+                        },
+                    });
+                }
+            } else {
+                dispatch({
+                    type: "MOVE_TASK",
+                    payload: {
+                        sourceColumnId: activeColumn.id,
+                        targetColumnId: overColumn.id,
+                        taskId: active.id.toString(),
+                    },
+                });
+            }
+
+            setActiveTask(null);
+        },
+        [findColumn, dispatch],
+    );
+
     return (
         <DndContext
             sensors={sensors}
@@ -43,8 +131,8 @@ export function KanbanBoard() {
         >
             <div className="flex gap-2 overflow-hidden bg-background p-6">
                 {state.columns.map((column) => (
-                    <div className="w-80">
-                        <KanbanColumn key={column.id} column={column} />
+                    <div key={column.id} className="w-80">
+                        <KanbanColumn column={column} />
                     </div>
                 ))}
             </div>
@@ -64,78 +152,4 @@ export function KanbanBoard() {
             </DragOverlay>
         </DndContext>
     );
-
-    function findColumn(id: string) {
-        if (state.columns.map((column) => column.id).includes(id)) {
-            return state.columns.find((column) => column.id === id);
-        }
-
-        return state.columns.find((column) => column.tasks.some((task) => task.id === id));
-    }
-
-    function handleDragStart(event: DragStartEvent) {
-        const activeColumn = findColumn(event.active.id.toString());
-
-        if (!activeColumn) {
-            return;
-        }
-
-        const task = activeColumn.tasks.find((task) => task.id === event.active.id.toString());
-
-        if (task) {
-            setActiveTask(task);
-        }
-    }
-
-    function handleDragOver(event: DragOverEvent) {
-        const { active, over } = event;
-
-        if (!over) {
-            return;
-        }
-
-        const activeColumn = findColumn(active.id.toString());
-        const overColumn = findColumn(over.id.toString());
-
-        if (!activeColumn || !overColumn || activeColumn.id === overColumn.id) {
-            return;
-        }
-
-        dispatch({
-            type: "MOVE_TASK",
-            payload: { sourceColumnId: activeColumn.id, targetColumnId: overColumn.id, taskId: active.id.toString() },
-        });
-    }
-
-    function handleDragEnd(event: DragEndEvent) {
-        const { active, over } = event;
-
-        if (!over) {
-            setActiveTask(null);
-            return;
-        }
-
-        const activeColumn = findColumn(active.id.toString());
-        const overColumn = findColumn(over.id.toString());
-
-        if (!activeColumn || !overColumn || activeColumn.id !== overColumn.id) {
-            setActiveTask(null);
-            return;
-        }
-
-        const activeIndex = activeColumn.tasks.map((task) => task.id).indexOf(active.id.toString());
-        const overIndex = activeColumn.tasks.map((task) => task.id).indexOf(over.id.toString());
-
-        if (activeIndex !== overIndex) {
-            dispatch({
-                type: "UPDATE_COLUMN",
-                payload: {
-                    columnId: activeColumn.id,
-                    updatedColumn: { tasks: arrayMove(activeColumn.tasks, activeIndex, overIndex) },
-                },
-            });
-        }
-
-        setActiveTask(null);
-    }
 }
