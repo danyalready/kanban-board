@@ -16,7 +16,9 @@ interface KanbanTaskProps {
 }
 
 export function KanbanTask(props: KanbanTaskProps) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.task.id });
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: props.task.id,
+    });
 
     const style = {
         opacity: isDragging ? 0 : 1,

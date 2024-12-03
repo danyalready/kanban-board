@@ -6,7 +6,7 @@ import {
     DragOverlay,
     DragStartEvent,
     KeyboardSensor,
-    MouseSensor,
+    PointerSensor,
     TouchSensor,
     useSensor,
     useSensors,
@@ -24,7 +24,7 @@ import { KanbanTask } from "./KanbanTask";
 export function KanbanBoard() {
     const { state, dispatch } = useKanbanContext();
     const sensors = useSensors(
-        useSensor(MouseSensor),
+        useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
         useSensor(TouchSensor),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
@@ -32,6 +32,7 @@ export function KanbanBoard() {
     );
 
     const [activeTask, setActiveTask] = useState<null | Task>(null);
+    const [overTaskId, setOverTaskId] = useState<string | null>(null);
 
     const findColumn = useCallback(
         (id: string) => state.columns.find((column) => column.id === id || column.tasks.some((task) => task.id === id)),
@@ -55,25 +56,13 @@ export function KanbanBoard() {
         [findColumn],
     );
 
-    const handleDragOver = useCallback(
-        (event: DragOverEvent) => {
-            const { active, over } = event;
+    const handleDragOver = (event: DragOverEvent) => {
+        if (!event.over) {
+            return;
+        }
 
-            if (!over) {
-                return;
-            }
-
-            const activeColumn = findColumn(active.id.toString());
-            const overColumn = findColumn(over.id.toString());
-
-            if (!activeColumn || !overColumn || activeColumn.id === overColumn.id) {
-                return;
-            }
-
-            // Only visually indicate potential drop area; actual move happens in handleDragEnd
-        },
-        [findColumn],
-    );
+        setOverTaskId(event.over.id.toString());
+    };
 
     const handleDragEnd = useCallback(
         (event: DragEndEvent) => {
@@ -81,6 +70,7 @@ export function KanbanBoard() {
 
             if (!over) {
                 setActiveTask(null);
+                setOverTaskId(null);
                 return;
             }
 
@@ -89,6 +79,7 @@ export function KanbanBoard() {
 
             if (!activeColumn || !overColumn) {
                 setActiveTask(null);
+                setOverTaskId(null);
                 return;
             }
 
@@ -133,6 +124,7 @@ export function KanbanBoard() {
             }
 
             setActiveTask(null);
+            setOverTaskId(null);
         },
         [findColumn, dispatch],
     );
@@ -148,7 +140,7 @@ export function KanbanBoard() {
             <div className="flex gap-2 overflow-hidden bg-background p-6">
                 {state.columns.map((column) => (
                     <div key={column.id} className="w-80">
-                        <KanbanColumn column={column} />
+                        <KanbanColumn column={column} overTaskId={overTaskId} />
                     </div>
                 ))}
             </div>
@@ -157,8 +149,8 @@ export function KanbanBoard() {
                     sideEffects: defaultDropAnimationSideEffects({
                         styles: {
                             active: {
-                                opacity: "0",
                                 visibility: "hidden",
+                                zIndex: "1000",
                             },
                         },
                     }),
