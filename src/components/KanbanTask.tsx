@@ -18,6 +18,10 @@ interface KanbanTaskProps {
 export function KanbanTask(props: KanbanTaskProps) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.task.id,
+        data: {
+            type: "task",
+            task: props.task,
+        },
     });
 
     const style = {

@@ -14,15 +14,18 @@ import {
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { useKanbanContext } from "@/kanbanContext";
 
 interface ColumnProps {
     column: Column;
-    overTaskId: string | null;
     className?: string;
 }
 
 export function KanbanColumn(props: ColumnProps) {
-    const { setNodeRef } = useDroppable({ id: props.column.id });
+    const { setNodeRef } = useDroppable({ id: props.column.id, data: { type: "column", column: props.column } });
+    const { state } = useKanbanContext();
+
+    const tasks = state.tasks.filter((item) => item.columnId === props.column.id);
 
     return (
         <SortableContext id={props.column.id} items={props.column.tasks} strategy={verticalListSortingStrategy}>
@@ -54,8 +57,8 @@ export function KanbanColumn(props: ColumnProps) {
                 </div>
 
                 <div className="flex flex-col gap-1.5 px-1">
-                    {props.column.tasks.map((task) => (
-                        <KanbanTask key={task.id} task={task} />
+                    {tasks.map((item) => (
+                        <KanbanTask key={item.id} task={item} />
                     ))}
                 </div>
 

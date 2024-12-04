@@ -9,35 +9,38 @@ const initialState: KanbanState = {
         {
             id: "column-1",
             title: "To Do",
-            tasks: [
-                {
-                    id: "go-grocery",
-                    title: "🥦 Go to grocery",
-                    priority: "medium",
-                    comments: ["We also need some chopsticks"],
-                },
-                { id: "walk-dog", title: "🦮 Walk the dog", priority: "high", comments: [] },
-            ],
+            tasks: ["go-grocery", "walk-dog"],
         },
         {
             id: "column-2",
             title: "In Progress",
-            tasks: [{ id: "exercise", title: "Exercise", priority: "low", comments: [] }],
+            tasks: ["exercise"],
         },
         {
             id: "column-3",
             title: "✅ Compleated",
-            tasks: [
-                {
-                    id: "guitar",
-                    title: "Play guitar 🎸",
-                    priority: "low",
-                    comments: ["The cyberpunk songs are something!"],
-                },
-                { id: "pills", title: "💊 Take the pills", priority: "low", comments: [] },
-                { id: "plants", title: "Water the plants 🪴", priority: "medium", comments: [] },
-            ],
+            tasks: ["guitar", "pills", "plants"],
         },
+    ],
+    tasks: [
+        {
+            id: "go-grocery",
+            columnId: "column-1",
+            title: "🥦 Go to grocery",
+            priority: "medium",
+            comments: ["We also need some chopsticks"],
+        },
+        { id: "walk-dog", columnId: "column-1", title: "🦮 Walk the dog", priority: "high", comments: [] },
+        { id: "exercise", columnId: "column-2", title: "Exercise", priority: "low", comments: [] },
+        {
+            id: "guitar",
+            columnId: "column-3",
+            title: "Play guitar 🎸",
+            priority: "low",
+            comments: ["The cyberpunk songs are something!"],
+        },
+        { id: "pills", columnId: "column-3", title: "💊 Take the pills", priority: "low", comments: [] },
+        { id: "plants", columnId: "column-3", title: "Water the plants 🪴", priority: "medium", comments: [] },
     ],
 };
 
