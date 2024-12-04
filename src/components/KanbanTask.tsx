@@ -40,7 +40,7 @@ export function KanbanTask(props: KanbanTaskProps) {
             {...listeners}
             {...attributes}
             className={cn(
-                "flex flex-col gap-3 rounded-md bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
+                "flex select-none flex-col gap-3 rounded-md bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
                 props.className,
             )}
         >

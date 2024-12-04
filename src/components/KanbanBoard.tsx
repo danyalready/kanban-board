@@ -12,26 +12,29 @@ import {
     useSensors,
     type DragEndEvent,
 } from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { useMemo, useState } from "react";
 
 import { useKanbanContext } from "@/kanbanContext";
 import { type Task, type Column } from "@/kanbanReducer";
 
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
+import { createPortal } from "react-dom";
 
 export function KanbanBoard() {
     const { state } = useKanbanContext();
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
         useSensor(TouchSensor),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         }),
     );
 
-    const [, setActiveColumn] = useState<null | Column>(null);
+    const columnIds = useMemo(() => state.columns.map((item) => item.id), [state.columns]);
+
+    const [activeColumn, setActiveColumn] = useState<null | Column>(null);
     const [activeTask, setActiveTask] = useState<null | Task>(null);
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -51,16 +54,17 @@ export function KanbanBoard() {
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
-        const { over } = event;
-
-        if (!over) {
-            setActiveColumn(null);
-            setActiveTask(null);
-            return;
-        }
+        const { active, over } = event;
 
         setActiveColumn(null);
         setActiveTask(null);
+
+        if (!over) return;
+
+        const activeId = active.id;
+        const overId = over.id;
+
+        if (activeId === overId) return;
     };
 
     return (
@@ -71,26 +75,30 @@ export function KanbanBoard() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-2 overflow-hidden bg-background p-6">
-                {state.columns.map((column) => (
-                    <div key={column.id} className="w-80">
-                        <KanbanColumn column={column} />
-                    </div>
-                ))}
+            <div className="flex gap-3 overflow-hidden bg-background p-6">
+                <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
+                    {state.columns.map((column) => (
+                        <KanbanColumn key={column.id} column={column} className="w-80" />
+                    ))}
+                </SortableContext>
             </div>
-            <DragOverlay
-                dropAnimation={{
-                    sideEffects: defaultDropAnimationSideEffects({
-                        styles: {
-                            active: {
-                                visibility: "hidden",
+            {createPortal(
+                <DragOverlay
+                    dropAnimation={{
+                        sideEffects: defaultDropAnimationSideEffects({
+                            styles: {
+                                active: {
+                                    visibility: "hidden",
+                                },
                             },
-                        },
-                    }),
-                }}
-            >
-                {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
-            </DragOverlay>
+                        }),
+                    }}
+                >
+                    {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
+                    {activeColumn && <KanbanColumn column={activeColumn} className="rotate-3" />}
+                </DragOverlay>,
+                document.body,
+            )}
         </DndContext>
     );
 }
