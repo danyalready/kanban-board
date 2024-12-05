@@ -1,3 +1,4 @@
+import { arrayMove } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
 
 export type Task = {
@@ -24,6 +25,7 @@ export type KanbanAction =
     | { type: "ADD_COLUMN"; payload: { title: string } }
     | { type: "UPDATE_COLUMN"; payload: { columnId: string; data: Partial<Column> } }
     | { type: "DELETE_COLUMN"; payload: { columnId: string } }
+    | { type: "MOVE_COLUMN"; payload: { columnId: string; targetIndex: number } }
     | { type: "ADD_TASK"; payload: { data: Omit<Task, "id" | "comments"> } }
     | { type: "UPDATE_TASK"; payload: { taskId: string; data: Partial<Task> } }
     | { type: "DELETE_TASK"; payload: { taskId: string } }
@@ -50,6 +52,18 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
             const { columnId } = action.payload;
 
             return { ...state, columns: state.columns.filter((item) => item.id !== columnId) };
+        }
+        case "MOVE_COLUMN": {
+            const { columnId, targetIndex } = action.payload;
+
+            const activeIndex = state.columns.findIndex((item) => item.id === columnId);
+
+            if (activeIndex === -1 || targetIndex === -1) return state;
+
+            return {
+                ...state,
+                columns: arrayMove(state.columns, activeIndex, targetIndex),
+            };
         }
         case "ADD_TASK": {
             const { data } = action.payload;

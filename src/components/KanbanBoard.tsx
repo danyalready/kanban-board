@@ -13,26 +13,22 @@ import {
     type DragEndEvent,
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useKanbanContext } from "@/kanbanContext";
-import { type Task, type Column } from "@/kanbanReducer";
+import type { Column, Task } from "@/kanbanReducer";
 
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
-import { createPortal } from "react-dom";
 
 export function KanbanBoard() {
-    const { state } = useKanbanContext();
+    const { state, dispatch } = useKanbanContext();
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
         useSensor(TouchSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
     );
-
-    const columnIds = useMemo(() => state.columns.map((item) => item.id), [state.columns]);
 
     const [activeColumn, setActiveColumn] = useState<null | Column>(null);
     const [activeTask, setActiveTask] = useState<null | Task>(null);
@@ -64,7 +60,17 @@ export function KanbanBoard() {
         const activeId = active.id;
         const overId = over.id;
 
-        if (activeId === overId) return;
+        if (active.data.current?.type === "column" && over.data.current?.type === "column") {
+            const activeIndex = state.columns.findIndex((column) => column.id === activeId);
+            const overIndex = state.columns.findIndex((column) => column.id === overId);
+
+            if (activeIndex !== -1 && overIndex !== -1) {
+                dispatch({
+                    type: "MOVE_COLUMN",
+                    payload: { columnId: active.id.toString(), targetIndex: overIndex },
+                });
+            }
+        }
     };
 
     return (
@@ -75,13 +81,14 @@ export function KanbanBoard() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-3 overflow-hidden bg-background p-6">
-                <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
+            <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
+                <div className="flex items-start gap-3 overflow-hidden bg-background p-6">
                     {state.columns.map((column) => (
                         <KanbanColumn key={column.id} column={column} className="w-80" />
                     ))}
-                </SortableContext>
-            </div>
+                </div>
+            </SortableContext>
+
             {createPortal(
                 <DragOverlay
                     dropAnimation={{
@@ -94,8 +101,8 @@ export function KanbanBoard() {
                         }),
                     }}
                 >
-                    {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
                     {activeColumn && <KanbanColumn column={activeColumn} className="rotate-3" />}
+                    {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
                 </DragOverlay>,
                 document.body,
             )}
