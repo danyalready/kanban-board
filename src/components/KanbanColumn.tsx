@@ -70,7 +70,7 @@ export function KanbanColumn(props: ColumnProps) {
                 </DropdownMenu>
             </div>
 
-            <SortableContext items={columnTasks.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={props.column.tasks} strategy={verticalListSortingStrategy}>
                 <div className="flex flex-col gap-1.5 px-1">
                     {columnTasks.map((item) => (
                         <KanbanTask key={item.id} task={item} />
