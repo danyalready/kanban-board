@@ -43,14 +43,16 @@ export function KanbanColumn(props: ColumnProps) {
         <div
             ref={setNodeRef}
             style={style}
-            {...listeners}
-            {...attributes}
             className={cn(
-                "flex flex-col gap-3 rounded-xl bg-secondary pt-3 shadow-sm ring-1 ring-inset ring-border",
+                "flex select-none flex-col gap-3 rounded-xl bg-secondary pt-3 shadow-sm ring-1 ring-inset ring-border",
                 props.className,
             )}
         >
-            <div className="flex items-center justify-between px-4">
+            <div
+                {...listeners}
+                {...attributes}
+                className="flex cursor-grab items-center justify-between px-4 active:cursor-grabbing"
+            >
                 <div className="flex items-center gap-2">
                     <h2 className="text-sm font-semibold">{props.column.title}</h2>
                     <span className="text-sm font-light text-gray-500">{props.column.tasks.length}</span>

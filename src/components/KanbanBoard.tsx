@@ -14,7 +14,6 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useState } from "react";
-import { createPortal } from "react-dom";
 
 import { useKanbanContext } from "@/kanbanContext";
 import type { Column, Task } from "@/kanbanReducer";
@@ -81,31 +80,34 @@ export function KanbanBoard() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
-                <div className="flex items-start gap-3 overflow-hidden bg-background p-6">
+            <div className="flex min-h-screen gap-3 overflow-x-auto overflow-y-hidden bg-background p-6">
+                <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
                     {state.columns.map((column) => (
-                        <KanbanColumn key={column.id} column={column} className="w-80" />
+                        <div className="min-h-screen">
+                            <KanbanColumn key={column.id} column={column} className="min-w-80" />
+                        </div>
                     ))}
-                </div>
-            </SortableContext>
+                </SortableContext>
+            </div>
 
-            {createPortal(
-                <DragOverlay
-                    dropAnimation={{
-                        sideEffects: defaultDropAnimationSideEffects({
-                            styles: {
-                                active: {
-                                    visibility: "hidden",
-                                },
+            <DragOverlay
+                dropAnimation={{
+                    sideEffects: defaultDropAnimationSideEffects({
+                        styles: {
+                            active: {
+                                visibility: "hidden",
                             },
-                        }),
-                    }}
-                >
-                    {activeColumn && <KanbanColumn column={activeColumn} className="rotate-3" />}
-                    {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
-                </DragOverlay>,
-                document.body,
-            )}
+                        },
+                    }),
+                }}
+            >
+                {activeColumn && (
+                    <div className="min-h-screen">
+                        <KanbanColumn column={activeColumn} className="min-w-80 rotate-3" />
+                    </div>
+                )}
+                {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
+            </DragOverlay>
         </DndContext>
     );
 }
