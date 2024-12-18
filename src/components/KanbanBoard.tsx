@@ -4,12 +4,12 @@ import {
     DndContext,
     DragOverEvent,
     DragOverlay,
-    DragStartEvent,
     KeyboardSensor,
     PointerSensor,
     TouchSensor,
     useSensor,
     useSensors,
+    type DragStartEvent,
     type DragEndEvent,
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
@@ -45,7 +45,28 @@ export function KanbanBoard() {
     };
 
     const handleDragOver = (event: DragOverEvent) => {
-        if (!event.over) return;
+        const { active, over } = event;
+
+        if (!over) return;
+
+        if (active.data.current?.type === "task" && over.data.current?.type === "task") {
+            const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
+            const targetColumn = state.columns.find((column) => column.id === over.data.current?.task.columnId);
+
+            if (!sourceColumn || !targetColumn) return;
+
+            if (sourceColumn.id !== targetColumn.id) {
+                // const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
+                // const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === over.id);
+
+                const activeTask = state.tasks.find((task) => task.id === active.id);
+                const targetTask = state.tasks.find((task) => task.id === over.id);
+
+                if (!activeTask || !targetTask) return;
+
+                activeTask.columnId = targetTask.columnId;
+            }
+        }
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -56,17 +77,39 @@ export function KanbanBoard() {
 
         if (!over) return;
 
-        const activeId = active.id;
-        const overId = over.id;
-
+        // NOTE: To move "columns"
         if (active.data.current?.type === "column" && over.data.current?.type === "column") {
-            const activeIndex = state.columns.findIndex((column) => column.id === activeId);
-            const overIndex = state.columns.findIndex((column) => column.id === overId);
+            const activeColumnIndex = state.columns.findIndex((column) => column.id === active.id);
+            const targetColumnIndex = state.columns.findIndex((column) => column.id === over.id);
 
-            if (activeIndex !== -1 && overIndex !== -1) {
+            if (activeColumnIndex !== -1 && targetColumnIndex !== -1) {
                 dispatch({
                     type: "MOVE_COLUMN",
-                    payload: { columnId: active.id.toString(), targetIndex: overIndex },
+                    payload: { columnId: active.id, targetIndex: targetColumnIndex },
+                });
+            }
+        }
+
+        // NOTE: To move "tasks"
+        if (active.data.current?.type === "task" && over.data.current?.type === "task") {
+            const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
+            const targetColumn = state.columns.find((column) => column.id === over.data.current?.task.columnId);
+
+            if (!sourceColumn || !targetColumn) return;
+
+            const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
+            const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === over.id);
+
+            if (activeTaskIndex !== -1 && targetTaskIndex !== -1) {
+                dispatch({
+                    type: "MOVE_TASK",
+                    payload: {
+                        activeIndex: activeTaskIndex,
+                        targetIndex: targetTaskIndex,
+                        sourceColumnId: sourceColumn.id,
+                        targetColumnId: targetColumn.id,
+                        taskId: active.id,
+                    },
                 });
             }
         }
@@ -83,9 +126,7 @@ export function KanbanBoard() {
             <div className="flex min-h-screen gap-3 overflow-x-auto overflow-y-hidden bg-background p-6">
                 <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
                     {state.columns.map((column) => (
-                        <div className="min-h-screen">
-                            <KanbanColumn key={column.id} column={column} className="min-w-80" />
-                        </div>
+                        <KanbanColumn key={column.id} column={column} />
                     ))}
                 </SortableContext>
             </div>
@@ -101,11 +142,7 @@ export function KanbanBoard() {
                     }),
                 }}
             >
-                {activeColumn && (
-                    <div className="min-h-screen">
-                        <KanbanColumn column={activeColumn} className="min-w-80 rotate-3" />
-                    </div>
-                )}
+                {activeColumn && <KanbanColumn column={activeColumn} className="rotate-2" />}
                 {activeTask && <KanbanTask task={activeTask} className="rotate-6" />}
             </DragOverlay>
         </DndContext>

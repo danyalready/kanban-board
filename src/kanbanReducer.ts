@@ -1,9 +1,10 @@
+import { UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
 
 export type Task = {
-    id: string;
-    columnId: string;
+    id: UniqueIdentifier;
+    columnId: UniqueIdentifier;
     title: string;
     description?: string;
     priority: "low" | "medium" | "high";
@@ -11,9 +12,9 @@ export type Task = {
 };
 
 export type Column = {
-    id: string;
+    id: UniqueIdentifier;
     title: string;
-    tasks: string[]; // task IDs
+    tasks: UniqueIdentifier[]; // task IDs
 };
 
 export interface KanbanState {
@@ -23,13 +24,22 @@ export interface KanbanState {
 
 export type KanbanAction =
     | { type: "ADD_COLUMN"; payload: { title: string } }
-    | { type: "UPDATE_COLUMN"; payload: { columnId: string; data: Partial<Column> } }
-    | { type: "DELETE_COLUMN"; payload: { columnId: string } }
-    | { type: "MOVE_COLUMN"; payload: { columnId: string; targetIndex: number } }
+    | { type: "UPDATE_COLUMN"; payload: { columnId: UniqueIdentifier; data: Partial<Column> } }
+    | { type: "DELETE_COLUMN"; payload: { columnId: UniqueIdentifier } }
+    | { type: "MOVE_COLUMN"; payload: { columnId: UniqueIdentifier; targetIndex: number } }
     | { type: "ADD_TASK"; payload: { data: Omit<Task, "id" | "comments"> } }
-    | { type: "UPDATE_TASK"; payload: { taskId: string; data: Partial<Task> } }
-    | { type: "DELETE_TASK"; payload: { taskId: string } }
-    | { type: "MOVE_TASK"; payload: { taskId: string; targetColumnId: string } };
+    | { type: "UPDATE_TASK"; payload: { taskId: UniqueIdentifier; data: Partial<Task> } }
+    | { type: "DELETE_TASK"; payload: { taskId: UniqueIdentifier } }
+    | {
+          type: "MOVE_TASK";
+          payload: {
+              taskId: UniqueIdentifier;
+              activeIndex: number;
+              targetIndex: number;
+              sourceColumnId: UniqueIdentifier;
+              targetColumnId: UniqueIdentifier;
+          };
+      };
 
 export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
     switch (action.type) {
@@ -72,9 +82,9 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
 
             return {
                 ...state,
-                columns: state.columns.map((item) => {
-                    return item.id === newTask.columnId ? { ...item, tasks: [...item.tasks, newTask.id] } : item;
-                }),
+                columns: state.columns.map((item) =>
+                    item.id === newTask.columnId ? { ...item, tasks: [...item.tasks, newTask.id] } : item,
+                ),
                 tasks: [...state.tasks, newTask],
             };
         }
@@ -102,35 +112,52 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
             };
         }
         case "MOVE_TASK": {
-            const { taskId, targetColumnId } = action.payload;
+            const { taskId, activeIndex, targetIndex, sourceColumnId, targetColumnId } = action.payload;
 
             const task = state.tasks.find((item) => item.id === taskId);
 
             if (!task) return state;
 
-            const sourceColumn = state.columns.find((item) => item.id === task.columnId);
+            const sourceColumn = state.columns.find((item) => item.id === sourceColumnId);
             const targetColumn = state.columns.find((item) => item.id === targetColumnId);
 
             if (!sourceColumn || !targetColumn) return state;
 
+            // NOTE: Reorders the task in the same column
+            if (sourceColumn.id === targetColumn.id) {
+                return {
+                    ...state,
+                    columns: state.columns.map((column) => {
+                        if (column.id === targetColumnId) {
+                            return {
+                                ...column,
+                                tasks: arrayMove(column.tasks, activeIndex, targetIndex),
+                            };
+                        }
+
+                        return column;
+                    }),
+                };
+            }
+
             return {
                 ...state,
-                columns: state.columns.map((item) => {
-                    if (item.id === sourceColumn.id) {
+                columns: state.columns.map((column) => {
+                    if (column.id === sourceColumn.id) {
                         return {
-                            ...item,
-                            tasks: item.tasks.filter((item) => item !== task.id),
+                            ...column,
+                            tasks: column.tasks.filter((columnTaskId) => columnTaskId !== task.id),
                         };
                     }
 
-                    if (item.id === targetColumn.id) {
+                    if (column.id === targetColumn.id) {
                         return {
-                            ...item,
-                            tasks: [...item.tasks, task.id],
+                            ...column,
+                            tasks: arrayMove(column.tasks, activeIndex, targetIndex),
                         };
                     }
 
-                    return item;
+                    return column;
                 }),
             };
         }
