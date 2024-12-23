@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Ellipsis, Plus } from "lucide-react";
@@ -15,7 +16,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { useMemo } from "react";
 
 interface ColumnProps {
     column: Column;

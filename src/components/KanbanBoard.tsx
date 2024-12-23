@@ -49,23 +49,56 @@ export function KanbanBoard() {
 
         if (!over) return;
 
+        if (active.data.current?.type === "task" && over.data.current?.type === "column") {
+            const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
+
+            if (!sourceColumn || !over.data.current.id) return;
+
+            const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
+
+            const activeTask = state.tasks.find((task) => task.id === active.id);
+
+            if (!activeTask) return;
+
+            dispatch({
+                type: "MOVE_TASK",
+                payload: {
+                    taskId: activeTask.id,
+                    activeIndex: activeTaskIndex,
+                    targetIndex: 0,
+                    sourceColumnId: sourceColumn.id,
+                    targetColumnId: over.data.current.id,
+                },
+            });
+        }
+
         if (active.data.current?.type === "task" && over.data.current?.type === "task") {
             const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
             const targetColumn = state.columns.find((column) => column.id === over.data.current?.task.columnId);
 
             if (!sourceColumn || !targetColumn) return;
 
-            if (sourceColumn.id !== targetColumn.id) {
-                // const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
-                // const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === over.id);
+            if (sourceColumn.id === targetColumn.id) return;
 
-                const activeTask = state.tasks.find((task) => task.id === active.id);
-                const targetTask = state.tasks.find((task) => task.id === over.id);
+            const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
+            const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === over.id);
 
-                if (!activeTask || !targetTask) return;
+            const activeTask = state.tasks.find((task) => task.id === active.id);
+            const targetTask = state.tasks.find((task) => task.id === over.id);
 
-                activeTask.columnId = targetTask.columnId;
-            }
+            if (!activeTask || !targetTask) return;
+
+            // TODO: Moves the task into the another column
+            dispatch({
+                type: "MOVE_TASK",
+                payload: {
+                    taskId: activeTask.id,
+                    activeIndex: activeTaskIndex,
+                    targetIndex: targetTaskIndex,
+                    sourceColumnId: sourceColumn.id,
+                    targetColumnId: targetColumn.id,
+                },
+            });
         }
     };
 
@@ -77,7 +110,7 @@ export function KanbanBoard() {
 
         if (!over) return;
 
-        // NOTE: To move "columns"
+        // NOTE: Reorders the columns
         if (active.data.current?.type === "column" && over.data.current?.type === "column") {
             const activeColumnIndex = state.columns.findIndex((column) => column.id === active.id);
             const targetColumnIndex = state.columns.findIndex((column) => column.id === over.id);
@@ -90,7 +123,7 @@ export function KanbanBoard() {
             }
         }
 
-        // NOTE: To move "tasks"
+        // NOTE: Moves the tasks between columns and reorders
         if (active.data.current?.type === "task" && over.data.current?.type === "task") {
             const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
             const targetColumn = state.columns.find((column) => column.id === over.data.current?.task.columnId);

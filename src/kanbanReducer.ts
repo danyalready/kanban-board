@@ -118,13 +118,8 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
 
             if (!task) return state;
 
-            const sourceColumn = state.columns.find((item) => item.id === sourceColumnId);
-            const targetColumn = state.columns.find((item) => item.id === targetColumnId);
-
-            if (!sourceColumn || !targetColumn) return state;
-
             // NOTE: Reorders the task in the same column
-            if (sourceColumn.id === targetColumn.id) {
+            if (sourceColumnId === targetColumnId) {
                 return {
                     ...state,
                     columns: state.columns.map((column) => {
@@ -140,20 +135,25 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 };
             }
 
+            // NOTE: Moves the task into the another column
             return {
-                ...state,
+                tasks: state.tasks.map((stateTask) =>
+                    stateTask.id === task.id ? { ...task, columnId: targetColumnId } : stateTask,
+                ),
                 columns: state.columns.map((column) => {
-                    if (column.id === sourceColumn.id) {
+                    // NOTE: Removes the task from the source coulmn
+                    if (column.id === sourceColumnId) {
                         return {
                             ...column,
                             tasks: column.tasks.filter((columnTaskId) => columnTaskId !== task.id),
                         };
                     }
 
-                    if (column.id === targetColumn.id) {
+                    // NOTE: Adds the task to the target column
+                    if (column.id === targetColumnId) {
                         return {
                             ...column,
-                            tasks: arrayMove(column.tasks, activeIndex, targetIndex),
+                            tasks: [taskId, ...column.tasks],
                         };
                     }
 
@@ -161,7 +161,8 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 }),
             };
         }
-        default:
+        default: {
             return state;
+        }
     }
 }
