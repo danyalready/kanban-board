@@ -23,7 +23,7 @@ interface ColumnProps {
 }
 
 export function KanbanColumn(props: ColumnProps) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({
         id: props.column.id,
         data: {
             type: "column",
@@ -33,6 +33,7 @@ export function KanbanColumn(props: ColumnProps) {
     const { state } = useKanbanContext();
 
     const style = {
+        background: isOver ? "red" : "none",
         opacity: isDragging ? 0 : 1,
         transform: CSS.Transform.toString(transform),
         transition,

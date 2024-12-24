@@ -2,7 +2,6 @@ import {
     closestCorners,
     defaultDropAnimationSideEffects,
     DndContext,
-    DragOverEvent,
     DragOverlay,
     KeyboardSensor,
     PointerSensor,
@@ -44,78 +43,17 @@ export function KanbanBoard() {
         }
     };
 
-    const handleDragOver = (event: DragOverEvent) => {
-        const { active, over } = event;
-
-        if (!over) return;
-
-        if (active.data.current?.type === "task" && over.data.current?.type === "column") {
-            const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
-
-            if (!sourceColumn || !over.data.current.id) return;
-
-            const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
-
-            const activeTask = state.tasks.find((task) => task.id === active.id);
-
-            if (!activeTask) return;
-
-            dispatch({
-                type: "MOVE_TASK",
-                payload: {
-                    taskId: activeTask.id,
-                    activeIndex: activeTaskIndex,
-                    targetIndex: 0,
-                    sourceColumnId: sourceColumn.id,
-                    targetColumnId: over.data.current.id,
-                },
-            });
-        }
-
-        if (active.data.current?.type === "task" && over.data.current?.type === "task") {
-            const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
-            const targetColumn = state.columns.find((column) => column.id === over.data.current?.task.columnId);
-
-            if (!sourceColumn || !targetColumn) return;
-
-            if (sourceColumn.id === targetColumn.id) return;
-
-            const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
-            const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === over.id);
-
-            const activeTask = state.tasks.find((task) => task.id === active.id);
-            const targetTask = state.tasks.find((task) => task.id === over.id);
-
-            if (!activeTask || !targetTask) return;
-
-            // TODO: Moves the task into the another column
-            dispatch({
-                type: "MOVE_TASK",
-                payload: {
-                    taskId: activeTask.id,
-                    activeIndex: activeTaskIndex,
-                    targetIndex: targetTaskIndex,
-                    sourceColumnId: sourceColumn.id,
-                    targetColumnId: targetColumn.id,
-                },
-            });
-        }
-    };
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-
+    const handleDragEnd = ({ active, over }: DragEndEvent) => {
         setActiveColumn(null);
         setActiveTask(null);
 
         if (!over) return;
 
-        // NOTE: Reorders the columns
+        // NOTE: Moves the column
         if (active.data.current?.type === "column" && over.data.current?.type === "column") {
-            const activeColumnIndex = state.columns.findIndex((column) => column.id === active.id);
             const targetColumnIndex = state.columns.findIndex((column) => column.id === over.id);
 
-            if (activeColumnIndex !== -1 && targetColumnIndex !== -1) {
+            if (targetColumnIndex !== -1) {
                 dispatch({
                     type: "MOVE_COLUMN",
                     payload: { columnId: active.id, targetIndex: targetColumnIndex },
@@ -124,27 +62,23 @@ export function KanbanBoard() {
         }
 
         // NOTE: Moves the tasks between columns and reorders
-        if (active.data.current?.type === "task" && over.data.current?.type === "task") {
-            const sourceColumn = state.columns.find((column) => column.id === active.data.current?.task.columnId);
-            const targetColumn = state.columns.find((column) => column.id === over.data.current?.task.columnId);
+        if (active.data.current?.type === "task") {
+            const targetColumn = state.columns.find(
+                (column) => column.id === over.id || column.tasks.includes(over.id),
+            );
 
-            if (!sourceColumn || !targetColumn) return;
+            if (!targetColumn) return;
 
-            const activeTaskIndex = sourceColumn.tasks.findIndex((taskId) => taskId === active.id);
             const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === over.id);
 
-            if (activeTaskIndex !== -1 && targetTaskIndex !== -1) {
-                dispatch({
-                    type: "MOVE_TASK",
-                    payload: {
-                        activeIndex: activeTaskIndex,
-                        targetIndex: targetTaskIndex,
-                        sourceColumnId: sourceColumn.id,
-                        targetColumnId: targetColumn.id,
-                        taskId: active.id,
-                    },
-                });
-            }
+            dispatch({
+                type: "MOVE_TASK",
+                payload: {
+                    targetIndex: targetTaskIndex,
+                    targetColumnId: targetColumn.id,
+                    taskId: active.id,
+                },
+            });
         }
     };
 
@@ -153,7 +87,6 @@ export function KanbanBoard() {
             sensors={sensors}
             collisionDetection={closestCorners}
             onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
             <div className="flex min-h-screen gap-3 overflow-x-auto overflow-y-hidden bg-background p-6">
