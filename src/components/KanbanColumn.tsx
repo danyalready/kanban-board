@@ -3,10 +3,10 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { Ellipsis, Plus } from "lucide-react";
 
-import type { Column, Task } from "@/kanbanReducer";
-import { cn } from "@/lib/utils";
+import type { Column, Target, Task } from "@/store/kanbanReducer";
+import { cn } from "@/utils/cn";
+import { useKanbanContext } from "@/contexts/KanbanContext";
 
-import { useKanbanContext } from "@/kanbanContext";
 import { KanbanTask } from "./KanbanTask";
 import { Button } from "./ui/button";
 import {
@@ -19,21 +19,21 @@ import {
 
 interface ColumnProps {
     column: Column;
+    target: null | Target;
     className?: string;
 }
 
 export function KanbanColumn(props: ColumnProps) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({
+    const { state } = useKanbanContext();
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.column.id,
         data: {
             type: "column",
             column: props.column,
         },
     });
-    const { state } = useKanbanContext();
 
     const style = {
-        background: isOver ? "red" : "none",
         opacity: isDragging ? 0 : 1,
         transform: CSS.Transform.toString(transform),
         transition,

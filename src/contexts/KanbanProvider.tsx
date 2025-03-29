@@ -1,10 +1,10 @@
 import { PropsWithChildren, useReducer } from "react";
-
-import { kanbanReducer, type KanbanState } from "@/kanbanReducer";
-
-import { KanbanContext } from "../kanbanContext";
+import { kanbanReducer } from "@/store/kanbanReducer";
+import { KanbanState } from "@/store/types";
+import { KanbanContext } from "./KanbanContext";
 
 const initialState: KanbanState = {
+    active: null,
     columns: [
         {
             id: "column-1",
@@ -25,22 +25,20 @@ const initialState: KanbanState = {
     tasks: [
         {
             id: "go-grocery",
-            columnId: "column-1",
             title: "🥦 Go to grocery",
             priority: "medium",
             comments: ["We also need some chopsticks"],
         },
-        { id: "walk-dog", columnId: "column-1", title: "🦮 Walk the dog", priority: "high", comments: [] },
-        { id: "exercise", columnId: "column-2", title: "Exercise", priority: "low", comments: [] },
+        { id: "walk-dog", title: "🦮 Walk the dog", priority: "high", comments: [] },
+        { id: "exercise", title: "Exercise", priority: "low", comments: [] },
         {
             id: "guitar",
-            columnId: "column-3",
             title: "Play guitar 🎸",
             priority: "low",
             comments: ["The cyberpunk songs are something!"],
         },
-        { id: "pills", columnId: "column-3", title: "💊 Take the pills", priority: "low", comments: [] },
-        { id: "plants", columnId: "column-3", title: "Water the plants 🪴", priority: "medium", comments: [] },
+        { id: "pills", title: "💊 Take the pills", priority: "low", comments: [] },
+        { id: "plants", title: "Water the plants 🪴", priority: "medium", comments: [] },
     ],
 };
 

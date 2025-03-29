@@ -3,8 +3,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Calendar, Flag, MessageCircleMore } from "lucide-react";
 
-import { type Task } from "@/kanbanReducer";
-import { cn } from "@/lib/utils";
+import { type Task } from "@/store/kanbanReducer";
+import { cn } from "@/utils/cn";
 
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";

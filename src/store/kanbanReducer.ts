@@ -1,41 +1,14 @@
-import { UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
-
-export type Task = {
-    id: UniqueIdentifier;
-    title: string;
-    description?: string;
-    priority: "low" | "medium" | "high";
-    comments: string[];
-};
-
-export type Column = {
-    id: UniqueIdentifier;
-    title: string;
-    tasks: UniqueIdentifier[]; // task IDs
-};
-
-export interface KanbanState {
-    columns: Column[];
-    tasks: Task[];
-}
-
-export type KanbanAction =
-    | { type: "ADD_COLUMN"; payload: { title: string } }
-    | { type: "UPDATE_COLUMN"; payload: { columnId: UniqueIdentifier; data: Partial<Column> } }
-    | { type: "DELETE_COLUMN"; payload: { columnId: UniqueIdentifier } }
-    | { type: "MOVE_COLUMN"; payload: { columnId: UniqueIdentifier; targetIndex: number } }
-    | { type: "ADD_TASK"; payload: { columnId: UniqueIdentifier; data: Omit<Task, "id" | "comments"> } }
-    | { type: "UPDATE_TASK"; payload: { taskId: UniqueIdentifier; data: Partial<Task> } }
-    | { type: "DELETE_TASK"; payload: { taskId: UniqueIdentifier } }
-    | {
-          type: "MOVE_TASK";
-          payload: { taskId: UniqueIdentifier; targetIndex: number; targetColumnId: UniqueIdentifier };
-      };
+import type { KanbanAction, KanbanState, Task } from "./types";
 
 export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
     switch (action.type) {
+        case "SET_ACTIVE": {
+            const { active } = action.payload;
+
+            return { ...state, active };
+        }
         case "ADD_COLUMN": {
             const { title } = action.payload;
 
@@ -138,6 +111,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
 
             // NOTE: Moves the task into the another column
             return {
+                ...state,
                 tasks: state.tasks.map((stateTask) =>
                     stateTask.id === taskId ? { ...stateTask, columnId: targetColumnId } : stateTask,
                 ),
@@ -152,9 +126,13 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
 
                     // NOTE: Adds the task to the target column
                     if (column.id === targetColumnId) {
+                        const updatedTasks = [...column.tasks];
+
+                        updatedTasks.splice(targetIndex, 0, taskId);
+
                         return {
                             ...column,
-                            tasks: [taskId, ...column.tasks],
+                            tasks: updatedTasks,
                         };
                     }
 
