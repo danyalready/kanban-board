@@ -3,8 +3,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Calendar, Flag, MessageCircleMore } from "lucide-react";
 
-import { type Task } from "@/store/kanbanReducer";
+import { type Task } from "@/store/types";
 import { cn } from "@/utils/cn";
+import { getPriorityColor } from "@/utils/getPriorityColor";
 
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
@@ -28,19 +29,6 @@ export function KanbanTask(props: KanbanTaskProps) {
         opacity: isDragging ? 0 : 1,
         transform: CSS.Transform.toString(transform),
         transition,
-    };
-
-    const getPriorityColor = (priority: "low" | "medium" | "high") => {
-        switch (priority) {
-            case "low":
-                return "#f1c06f";
-            case "medium":
-                return "#0e9ceb";
-            case "high":
-                return "#fa1877";
-            default:
-                return "#fefefe";
-        }
     };
 
     return (

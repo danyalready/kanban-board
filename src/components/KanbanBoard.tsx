@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import {
     closestCorners,
     defaultDropAnimationSideEffects,
@@ -15,10 +16,11 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import { type Target } from "@/store/kanbanReducer";
+import { type Target } from "@/store/types";
 import { useKanbanContext } from "@/contexts/KanbanContext";
 
 import { KanbanColumn } from "./KanbanColumn";
+import { KanbanTask } from "./KanbanTask";
 
 export function KanbanBoard() {
     const { state, dispatch } = useKanbanContext();
@@ -32,14 +34,10 @@ export function KanbanBoard() {
     const handleDragStart = (event: DragStartEvent) => {
         if (event.active.data.current?.type === "column") {
             dispatch({ type: "SET_ACTIVE", payload: { active: event.active.data.current.column } });
-
-            return;
-        }
-
-        if (event.active.data.current?.type === "task") {
+        } else if (event.active.data.current?.type === "task") {
             dispatch({ type: "SET_ACTIVE", payload: { active: event.active.data.current.task } });
-
-            return;
+        } else {
+            console.warn(`Type ${event.active.data.current?.type} is not defined.`);
         }
     };
 
@@ -119,20 +117,29 @@ export function KanbanBoard() {
                 </SortableContext>
             </div>
 
-            <DragOverlay
-                dropAnimation={{
-                    sideEffects: defaultDropAnimationSideEffects({
-                        styles: {
-                            active: {
-                                visibility: "hidden",
+            {createPortal(
+                <DragOverlay
+                    dropAnimation={{
+                        sideEffects: defaultDropAnimationSideEffects({
+                            styles: {
+                                active: {
+                                    visibility: "hidden",
+                                },
                             },
-                        },
-                    }),
-                }}
-            >
-                {state.active && <KanbanColumn column={activeColumn} className="rotate-2" />}
-                {state.active && <KanbanTask task={state.activeTask} className="rotate-6" />}
-            </DragOverlay>
+                        }),
+                    }}
+                >
+                    {/* {state.active && (
+                    <KanbanColumn
+                        // target={null}
+                        // column={state.columns.find((column) => column.id === target?.columnId)}
+                        className="rotate-2"
+                    />
+                )} */}
+                    {/* {state.active && <KanbanTask task={state.activeTask} className="rotate-6" />} */}
+                </DragOverlay>,
+                document.body,
+            )}
         </DndContext>
     );
 }

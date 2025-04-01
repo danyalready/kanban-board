@@ -1,6 +1,8 @@
 import { PropsWithChildren, useReducer } from "react";
+
 import { kanbanReducer } from "@/store/kanbanReducer";
-import { KanbanState } from "@/store/types";
+import type { KanbanState } from "@/store/types";
+
 import { KanbanContext } from "./KanbanContext";
 
 const initialState: KanbanState = {
