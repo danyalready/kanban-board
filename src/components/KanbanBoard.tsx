@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import { type Target } from "@/store/types";
+import { isColumn, isTask, type Target } from "@/store/types";
 import { useKanbanContext } from "@/contexts/KanbanContext";
 
 import { KanbanColumn } from "./KanbanColumn";
@@ -51,15 +51,11 @@ export function KanbanBoard() {
                 const targetIndex = column.tasks.findIndex((taskId) => taskId === over.id);
 
                 setTarget({ columnId: column.id, index: targetIndex });
-
-                return;
             }
-        }
-
-        if (over.data.current?.type === "column") {
+        } else if (over.data.current?.type === "column") {
             setTarget({ columnId: over.id, index: -1 });
-
-            return;
+        } else {
+            console.warn(`Type ${over.data.current?.type} is not defined.`);
         }
     };
 
@@ -129,14 +125,10 @@ export function KanbanBoard() {
                         }),
                     }}
                 >
-                    {/* {state.active && (
-                    <KanbanColumn
-                        // target={null}
-                        // column={state.columns.find((column) => column.id === target?.columnId)}
-                        className="rotate-2"
-                    />
-                )} */}
-                    {/* {state.active && <KanbanTask task={state.activeTask} className="rotate-6" />} */}
+                    {isColumn(state.active) && (
+                        <KanbanColumn target={null} column={state.active} className="rotate-2" />
+                    )}
+                    {isTask(state.active) && <KanbanTask task={state.active} className="rotate-6" />}
                 </DragOverlay>,
                 document.body,
             )}

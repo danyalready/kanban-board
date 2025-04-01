@@ -38,3 +38,11 @@ export type KanbanAction =
           type: "MOVE_TASK";
           payload: { taskId: UniqueIdentifier; targetIndex: number; targetColumnId: UniqueIdentifier };
       };
+
+export function isTask(active: null | Task | Column): active is Task {
+    return Boolean(active && "priority" in active);
+}
+
+export function isColumn(active: null | Task | Column): active is Column {
+    return Boolean(active && "tasks" in active);
+}
