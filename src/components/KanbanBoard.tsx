@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import { isColumn, isTask, type Target } from "@/store/types";
+import { isColumn, isTask, type KanbanState } from "@/store/types";
 import { useKanbanContext } from "@/contexts/KanbanContext";
 
 import { KanbanColumn } from "./KanbanColumn";
@@ -24,44 +24,44 @@ import { KanbanTask } from "./KanbanTask";
 
 export function KanbanBoard() {
     const { state, dispatch } = useKanbanContext();
+    const [clonedKanbanState, setClonedKanbanState] = useState<null | KanbanState>(null);
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
         useSensor(TouchSensor),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
     );
-    const [target, setTarget] = useState<null | Target>(null);
 
     const handleDragStart = (event: DragStartEvent) => {
         if (event.active.data.current?.type === "column") {
             dispatch({ type: "SET_ACTIVE", payload: { active: event.active.data.current.column } });
         } else if (event.active.data.current?.type === "task") {
+            setClonedKanbanState(state);
             dispatch({ type: "SET_ACTIVE", payload: { active: event.active.data.current.task } });
         } else {
             console.warn(`Type ${event.active.data.current?.type} is not defined.`);
         }
     };
 
-    const handleDragOver = ({ over }: DragOverEvent) => {
-        if (!over) return;
+    const handleDragOver = ({ active, over }: DragOverEvent) => {
+        if (active.data.current?.type !== "task" || !over) return;
 
         if (over.data.current?.type === "task") {
-            const column = state.columns.find((column) => column.tasks.includes(over.id));
+            const overColumn = state.columns.find((column) => column.tasks.includes(over.id));
 
-            if (column) {
-                const targetIndex = column.tasks.findIndex((taskId) => taskId === over.id);
-
-                setTarget({ columnId: column.id, index: targetIndex });
+            if (overColumn) {
+                // const targetIndex = overColumn.tasks.findIndex((taskId) => taskId === over.id);
+                // setTarget({ columnId: overColumn.id, index: targetIndex });
             }
         } else if (over.data.current?.type === "column") {
-            setTarget({ columnId: over.id, index: -1 });
+            dispatch({ type: "MOVE_TASK", payload: { targetColumnId: over.id, targetIndex: -1, taskId: active.id } });
         } else {
             console.warn(`Type ${over.data.current?.type} is not defined.`);
         }
     };
 
     const handleDragEnd = ({ active, over }: DragEndEvent) => {
+        setClonedKanbanState(null);
         dispatch({ type: "SET_ACTIVE", payload: { active: null } });
-        setTarget(null);
 
         if (!over) return;
 
@@ -108,7 +108,7 @@ export function KanbanBoard() {
             <div className="flex min-h-screen gap-3 overflow-x-auto overflow-y-hidden bg-background p-6">
                 <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
                     {state.columns.map((column) => (
-                        <KanbanColumn key={column.id} column={column} target={target} />
+                        <KanbanColumn key={column.id} column={column} />
                     ))}
                 </SortableContext>
             </div>
@@ -125,9 +125,7 @@ export function KanbanBoard() {
                         }),
                     }}
                 >
-                    {isColumn(state.active) && (
-                        <KanbanColumn target={null} column={state.active} className="rotate-2" />
-                    )}
+                    {isColumn(state.active) && <KanbanColumn column={state.active} className="rotate-2" />}
                     {isTask(state.active) && <KanbanTask task={state.active} className="rotate-6" />}
                 </DragOverlay>,
                 document.body,

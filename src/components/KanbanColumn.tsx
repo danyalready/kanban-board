@@ -3,7 +3,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { Ellipsis, Plus } from "lucide-react";
 
-import type { Column, Target, Task } from "@/store/types";
+import type { Column, Task } from "@/store/types";
 import { cn } from "@/utils/cn";
 import { useKanbanContext } from "@/contexts/KanbanContext";
 
@@ -19,7 +19,6 @@ import {
 
 interface ColumnProps {
     column: Column;
-    target: null | Target;
     className?: string;
 }
 
