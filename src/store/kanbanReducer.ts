@@ -8,106 +8,84 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
             return action.payload.state;
         }
         case "SET_ACTIVE": {
-            const { active } = action.payload;
-
-            return { ...state, active };
+            return { ...state, active: action.payload.active };
         }
         case "ADD_COLUMN": {
-            const { title } = action.payload;
-
-            const newColumn = { id: uuidv4(), title, tasks: [] };
+            const newColumn = { id: uuidv4(), title: action.payload.title, tasks: [] };
 
             return { ...state, columns: [...state.columns, newColumn] };
         }
         case "UPDATE_COLUMN": {
-            const { columnId, data } = action.payload;
-
             return {
                 ...state,
-                columns: state.columns.map((item) => (item.id === columnId ? { ...item, ...data } : item)),
+                columns: state.columns.map((item) =>
+                    item.id === action.payload.columnId ? { ...item, ...action.payload.data } : item,
+                ),
             };
         }
         case "DELETE_COLUMN": {
-            const { columnId } = action.payload;
-
-            return { ...state, columns: state.columns.filter((item) => item.id !== columnId) };
+            return { ...state, columns: state.columns.filter((item) => item.id !== action.payload.columnId) };
         }
         case "MOVE_COLUMN": {
-            const { columnId, targetIndex } = action.payload;
-
-            const activeIndex = state.columns.findIndex((item) => item.id === columnId);
-
-            if (activeIndex === -1 || targetIndex === -1) return state;
+            const activeIndex = state.columns.findIndex((item) => item.id === action.payload.columnId);
+            if (activeIndex === -1 || action.payload.targetIndex === -1) return state;
 
             return {
                 ...state,
-                columns: arrayMove(state.columns, activeIndex, targetIndex),
+                columns: arrayMove(state.columns, activeIndex, action.payload.targetIndex),
             };
         }
         case "ADD_TASK": {
-            const { columnId, data } = action.payload;
-
-            const newTask: Task = { id: uuidv4(), comments: [], ...data };
+            const newTask: Task = { id: uuidv4(), comments: [], ...action.payload.data };
 
             return {
                 ...state,
                 columns: state.columns.map((item) =>
-                    item.id === columnId ? { ...item, tasks: [...item.tasks, newTask.id] } : item,
+                    item.id === action.payload.columnId ? { ...item, tasks: [...item.tasks, newTask.id] } : item,
                 ),
                 tasks: [...state.tasks, newTask],
             };
         }
         case "UPDATE_TASK": {
-            const { taskId, data } = action.payload;
-
             return {
                 ...state,
-                tasks: state.tasks.map((item) => (item.id === taskId ? { ...item, ...data } : item)),
+                tasks: state.tasks.map((item) =>
+                    item.id === action.payload.taskId ? { ...item, ...action.payload.data } : item,
+                ),
             };
         }
         case "DELETE_TASK": {
-            const { taskId } = action.payload;
-
-            const task = state.tasks.find((item) => item.id === taskId);
-
+            const task = state.tasks.find((item) => item.id === action.payload.taskId);
             if (!task) return state;
 
             const taskColumn = state.columns.find((column) => column.tasks.includes(task.id));
-
             if (!taskColumn) return state;
 
             return {
                 ...state,
                 columns: state.columns.map((stateColumn) =>
                     stateColumn.id === taskColumn.id
-                        ? { ...stateColumn, tasks: stateColumn.tasks.filter((id) => id !== taskId) }
+                        ? { ...stateColumn, tasks: stateColumn.tasks.filter((id) => id !== action.payload.taskId) }
                         : stateColumn,
                 ),
-                tasks: state.tasks.filter((item) => item.id !== taskId),
+                tasks: state.tasks.filter((item) => item.id !== action.payload.taskId),
             };
         }
         case "MOVE_TASK": {
-            const { taskId, targetIndex, targetColumnId } = action.payload;
-
-            const sourceColumn = state.columns.find((column) => column.tasks.includes(taskId));
-
-            if (!sourceColumn) {
-                console.warn("No source-column found.");
-
-                return state;
-            }
+            const sourceColumn = state.columns.find((column) => column.tasks.includes(action.payload.taskId));
+            if (!sourceColumn) return state;
 
             // Reorders the task in the same column
-            if (sourceColumn.id === targetColumnId) {
-                const activeIndex = sourceColumn.tasks.findIndex((id) => id === taskId);
+            if (sourceColumn.id === action.payload.targetColumnId) {
+                const activeIndex = sourceColumn.tasks.findIndex((id) => id === action.payload.taskId);
 
                 return {
                     ...state,
                     columns: state.columns.map((column) => {
-                        if (column.id === targetColumnId) {
+                        if (column.id === action.payload.targetColumnId) {
                             return {
                                 ...column,
-                                tasks: arrayMove(column.tasks, activeIndex, targetIndex),
+                                tasks: arrayMove(column.tasks, activeIndex, action.payload.targetIndex),
                             };
                         }
 
@@ -124,15 +102,15 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                     if (stateColumn.id === sourceColumn.id) {
                         return {
                             ...stateColumn,
-                            tasks: stateColumn.tasks.filter((columnTaskId) => columnTaskId !== taskId),
+                            tasks: stateColumn.tasks.filter((columnTaskId) => columnTaskId !== action.payload.taskId),
                         };
                     }
 
                     // Adds the task to the target column
-                    if (stateColumn.id === targetColumnId) {
+                    if (stateColumn.id === action.payload.targetColumnId) {
                         const updatedTasks = [...stateColumn.tasks];
 
-                        updatedTasks.splice(targetIndex, 0, taskId);
+                        updatedTasks.splice(action.payload.targetIndex, 0, action.payload.taskId);
 
                         return {
                             ...stateColumn,

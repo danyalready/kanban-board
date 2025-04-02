@@ -11,12 +11,12 @@ import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Avatar } from "./ui/avatar";
 
-interface KanbanTaskProps {
+interface Props {
     task: Task;
     className?: string;
 }
 
-export function KanbanTask(props: KanbanTaskProps) {
+export default function KanbanTask(props: Props) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.task.id,
         data: {

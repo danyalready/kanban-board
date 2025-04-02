@@ -3,7 +3,7 @@ import { PropsWithChildren, useReducer } from "react";
 import { kanbanReducer } from "@/store/kanbanReducer";
 import type { KanbanState } from "@/store/types";
 
-import { KanbanContext } from "./KanbanContext";
+import { KanbanContext } from "./kanbanContext";
 
 const initialState: KanbanState = {
     active: null,
@@ -44,8 +44,8 @@ const initialState: KanbanState = {
     ],
 };
 
-export function KanbanProvider(props: PropsWithChildren) {
-    const [state, dispatch] = useReducer(kanbanReducer, initialState); // TODO: get the initial data from the local storage.
+export default function KanbanProvider(props: PropsWithChildren) {
+    const [state, dispatch] = useReducer(kanbanReducer, initialState);
 
     return <KanbanContext.Provider value={{ state, dispatch }}>{props.children}</KanbanContext.Provider>;
 }

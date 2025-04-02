@@ -5,9 +5,8 @@ import { Ellipsis, Plus } from "lucide-react";
 
 import type { Column, Task } from "@/store/types";
 import { cn } from "@/utils/cn";
-import { useKanbanContext } from "@/contexts/KanbanContext";
+import { useKanbanContext } from "@/contexts/kanbanContext";
 
-import { KanbanTask } from "./KanbanTask";
 import { Button } from "./ui/button";
 import {
     DropdownMenu,
@@ -16,13 +15,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import KanbanTask from "./KanbanTask";
 
-interface ColumnProps {
+interface Props {
     column: Column;
     className?: string;
 }
 
-export function KanbanColumn(props: ColumnProps) {
+export default function KanbanColumn(props: Props) {
     const { state } = useKanbanContext();
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.column.id,
