@@ -26,6 +26,7 @@ export interface KanbanState {
 }
 
 export type KanbanAction =
+    | { type: "SET_STATE"; payload: KanbanState }
     | { type: "SET_ACTIVE"; payload: { active: null | Task | Column } }
     | { type: "ADD_COLUMN"; payload: { title: string } }
     | { type: "UPDATE_COLUMN"; payload: { columnId: UniqueIdentifier; data: Partial<Column> } }

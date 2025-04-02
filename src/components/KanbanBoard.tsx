@@ -24,7 +24,7 @@ import { KanbanTask } from "./KanbanTask";
 
 export function KanbanBoard() {
     const { state, dispatch } = useKanbanContext();
-    const [clonedKanbanState, setClonedKanbanState] = useState<null | KanbanState>(null);
+    const [clonedKanbanState, setClonedKanbanState] = useState<KanbanState>(state);
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
         useSensor(TouchSensor),
@@ -32,10 +32,11 @@ export function KanbanBoard() {
     );
 
     const handleDragStart = (event: DragStartEvent) => {
+        setClonedKanbanState(state);
+
         if (event.active.data.current?.type === "column") {
             dispatch({ type: "SET_ACTIVE", payload: { active: event.active.data.current.column } });
         } else if (event.active.data.current?.type === "task") {
-            setClonedKanbanState(state);
             dispatch({ type: "SET_ACTIVE", payload: { active: event.active.data.current.task } });
         } else {
             console.warn(`Type ${event.active.data.current?.type} is not defined.`);
@@ -46,11 +47,23 @@ export function KanbanBoard() {
         if (active.data.current?.type !== "task" || !over) return;
 
         if (over.data.current?.type === "task") {
-            const overColumn = state.columns.find((column) => column.tasks.includes(over.id));
+            if (active.data.current?.sortable.containerId !== over.data.current?.sortable.containerId) {
+                const targetColumn = state.columns.find((column) => column.tasks.includes(over.id));
 
-            if (overColumn) {
-                // const targetIndex = overColumn.tasks.findIndex((taskId) => taskId === over.id);
-                // setTarget({ columnId: overColumn.id, index: targetIndex });
+                if (!targetColumn) {
+                    console.warn("No target-column found.");
+
+                    return;
+                }
+
+                dispatch({
+                    type: "MOVE_TASK",
+                    payload: {
+                        targetColumnId: targetColumn.id,
+                        targetIndex: over.data.current?.sortable.index,
+                        taskId: active.id,
+                    },
+                });
             }
         } else if (over.data.current?.type === "column") {
             dispatch({ type: "MOVE_TASK", payload: { targetColumnId: over.id, targetIndex: -1, taskId: active.id } });
@@ -60,7 +73,6 @@ export function KanbanBoard() {
     };
 
     const handleDragEnd = ({ active, over }: DragEndEvent) => {
-        setClonedKanbanState(null);
         dispatch({ type: "SET_ACTIVE", payload: { active: null } });
 
         if (!over) return;
@@ -101,6 +113,7 @@ export function KanbanBoard() {
         <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
+            onDragCancel={() => dispatch({ type: "SET_STATE", payload: clonedKanbanState })}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
