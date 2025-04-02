@@ -51,7 +51,11 @@ export default function KanbanTask(props: Props) {
                     {props.task.priority}
                 </Badge>
 
-                <div {...listeners} {...attributes} className={cn("cursor-grab p-1", props.gripClassName)}>
+                <div
+                    {...listeners}
+                    {...attributes}
+                    className={cn("cursor-grab p-1 text-gray-400", props.gripClassName)}
+                >
                     <Grip size={16} />
                 </div>
             </div>

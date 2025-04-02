@@ -110,7 +110,11 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                     if (stateColumn.id === action.payload.targetColumnId) {
                         const updatedTasks = [...stateColumn.tasks];
 
-                        updatedTasks.splice(action.payload.targetIndex, 0, action.payload.taskId);
+                        if (action.payload.targetIndex === -1) {
+                            updatedTasks.push(action.payload.taskId);
+                        } else {
+                            updatedTasks.splice(action.payload.targetIndex, 0, action.payload.taskId);
+                        }
 
                         return {
                             ...stateColumn,

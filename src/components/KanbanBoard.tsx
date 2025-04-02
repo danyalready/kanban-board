@@ -89,28 +89,36 @@ export default function KanbanBoard() {
         ({ active, over }: DragOverEvent) => {
             if (active.data.current?.type !== "task" || !over) return;
 
-            if (over.data.current?.type === "task") {
-                if (active.data.current?.sortable.containerId !== over.data.current?.sortable.containerId) {
-                    const targetColumn = state.columns.find((column) => column.tasks.includes(over.id));
+            switch (over.data.current?.type) {
+                case "task": {
+                    if (active.data.current?.sortable.containerId !== over.data.current?.sortable.containerId) {
+                        const targetColumn = state.columns.find((column) => column.tasks.includes(over.id));
 
-                    if (targetColumn) {
-                        dispatch({
-                            type: "MOVE_TASK",
-                            payload: {
-                                targetColumnId: targetColumn.id,
-                                targetIndex: over.data.current?.sortable.index,
-                                taskId: active.id,
-                            },
-                        });
+                        if (targetColumn) {
+                            dispatch({
+                                type: "MOVE_TASK",
+                                payload: {
+                                    targetColumnId: targetColumn.id,
+                                    targetIndex: over.data.current?.sortable.index,
+                                    taskId: active.id,
+                                },
+                            });
+                        }
                     }
+
+                    break;
                 }
-            } else if (over.data.current?.type === "column") {
-                dispatch({
-                    type: "MOVE_TASK",
-                    payload: { targetColumnId: over.id, targetIndex: -1, taskId: active.id },
-                });
-            } else {
-                console.warn(`Type ${over.data.current?.type} is not defined.`);
+                case "column": {
+                    dispatch({
+                        type: "MOVE_TASK",
+                        payload: { targetColumnId: over.id, targetIndex: -1, taskId: active.id },
+                    });
+
+                    break;
+                }
+                default: {
+                    console.warn(`Type ${over.data.current?.type} is not defined.`);
+                }
             }
         },
         [dispatch, state.columns],
