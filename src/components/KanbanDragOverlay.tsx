@@ -19,8 +19,12 @@ export default function KanbanDragOverlay(props: Props) {
                 }),
             }}
         >
-            {isColumn(props.active) && <KanbanColumn column={props.active} className="rotate-2 shadow-lg" />}
-            {isTask(props.active) && <KanbanTask task={props.active} className="rotate-6 shadow-lg" />}
+            {isColumn(props.active) && (
+                <KanbanColumn column={props.active} className="rotate-2 shadow-xl" headerClassName="cursor-grabbing" />
+            )}
+            {isTask(props.active) && (
+                <KanbanTask task={props.active} className="rotate-2 shadow-xl" gripClassName="cursor-grabbing" />
+            )}
         </DragOverlay>,
         document.body,
     );

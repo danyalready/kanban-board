@@ -20,6 +20,7 @@ import KanbanTask from "./KanbanTask";
 interface Props {
     column: Column;
     className?: string;
+    headerClassName?: string;
 }
 
 export default function KanbanColumn(props: Props) {
@@ -58,7 +59,7 @@ export default function KanbanColumn(props: Props) {
                 <div
                     {...listeners}
                     {...attributes}
-                    className="flex cursor-grab items-center justify-between px-4 active:cursor-grabbing"
+                    className={cn("flex cursor-grab items-center justify-between px-4", props.headerClassName)}
                 >
                     <div className="flex items-center gap-2">
                         <h2 className="text-sm font-semibold">{props.column.title}</h2>

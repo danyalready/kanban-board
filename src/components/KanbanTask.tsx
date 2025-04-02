@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Calendar, Flag, MessageCircleMore } from "lucide-react";
+import { Calendar, Flag, MessageCircleMore, Grip } from "lucide-react";
 
 import { type Task } from "@/store/types";
 import { cn } from "@/utils/cn";
@@ -14,6 +14,7 @@ import { Avatar } from "./ui/avatar";
 interface Props {
     task: Task;
     className?: string;
+    gripClassName?: string;
 }
 
 export default function KanbanTask(props: Props) {
@@ -35,14 +36,12 @@ export default function KanbanTask(props: Props) {
         <div
             ref={setNodeRef}
             style={style}
-            {...listeners}
-            {...attributes}
             className={cn(
                 "flex select-none flex-col gap-3 rounded-md bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
                 props.className,
             )}
         >
-            <div className="flex gap-3">
+            <div className="flex items-center justify-between gap-3">
                 <Badge variant="outline" className="flex gap-1 capitalize">
                     <Flag
                         size={10}
@@ -51,6 +50,10 @@ export default function KanbanTask(props: Props) {
                     />
                     {props.task.priority}
                 </Badge>
+
+                <div {...listeners} {...attributes} className={cn("cursor-grab p-1", props.gripClassName)}>
+                    <Grip size={16} />
+                </div>
             </div>
             <div className="flex items-start justify-between">
                 <h3 className="font-medium">{props.task.title}</h3>
