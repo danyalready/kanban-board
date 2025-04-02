@@ -5,7 +5,7 @@ import type { KanbanAction, KanbanState, Task } from "./types";
 export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
     switch (action.type) {
         case "SET_STATE": {
-            return action.payload;
+            return action.payload.state;
         }
         case "SET_ACTIVE": {
             const { active } = action.payload;

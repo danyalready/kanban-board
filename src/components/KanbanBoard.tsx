@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import {
-    closestCorners,
+    rectIntersection,
     defaultDropAnimationSideEffects,
     DndContext,
     DragOverlay,
@@ -112,8 +112,8 @@ export function KanbanBoard() {
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragCancel={() => dispatch({ type: "SET_STATE", payload: clonedKanbanState })}
+            collisionDetection={rectIntersection}
+            onDragCancel={() => dispatch({ type: "SET_STATE", payload: { state: clonedKanbanState } })}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
@@ -138,8 +138,8 @@ export function KanbanBoard() {
                         }),
                     }}
                 >
-                    {isColumn(state.active) && <KanbanColumn column={state.active} className="rotate-2" />}
-                    {isTask(state.active) && <KanbanTask task={state.active} className="rotate-6" />}
+                    {isColumn(state.active) && <KanbanColumn column={state.active} className="rotate-2 shadow-lg" />}
+                    {isTask(state.active) && <KanbanTask task={state.active} className="rotate-6 shadow-lg" />}
                 </DragOverlay>,
                 document.body,
             )}
