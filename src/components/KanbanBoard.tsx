@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import { type KanbanState } from "@/store/types";
+import { KanbanActionType, type KanbanState } from "@/store/types";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 
 import KanbanColumn from "./KanbanColumn";
@@ -36,10 +36,10 @@ export default function KanbanBoard() {
             if (current) {
                 switch (current.type) {
                     case "column":
-                        dispatch({ type: "SET_ACTIVE", payload: { active: current.column } });
+                        dispatch({ type: KanbanActionType.SetActive, payload: { active: current.column } });
                         break;
                     case "task":
-                        dispatch({ type: "SET_ACTIVE", payload: { active: current.task } });
+                        dispatch({ type: KanbanActionType.SetActive, payload: { active: current.task } });
                         break;
                     default:
                         console.warn(`Type ${current.type} is not defined.`);
@@ -52,7 +52,7 @@ export default function KanbanBoard() {
     const moveColumn = useCallback(
         (activeId: UniqueIdentifier, overId: UniqueIdentifier) => {
             const targetIndex = state.columns.findIndex((column) => column.id === overId);
-            dispatch({ type: "MOVE_COLUMN", payload: { columnId: activeId, targetIndex } });
+            dispatch({ type: KanbanActionType.MoveColumn, payload: { columnId: activeId, targetIndex } });
         },
         [dispatch, state.columns],
     );
@@ -126,7 +126,7 @@ export default function KanbanBoard() {
 
     const handleDragEnd = useCallback(
         ({ active, over }: DragEndEvent) => {
-            dispatch({ type: "SET_ACTIVE", payload: { active: null } });
+            dispatch({ type: KanbanActionType.SetActive, payload: { active: null } });
 
             if (over) {
                 if (active.data.current?.type === "column" && over.data.current?.type === "column") {
@@ -143,7 +143,7 @@ export default function KanbanBoard() {
         <DndContext
             sensors={sensors}
             collisionDetection={rectIntersection}
-            onDragCancel={() => dispatch({ type: "SET_STATE", payload: { state: clonedKanbanState } })}
+            onDragCancel={() => dispatch({ type: KanbanActionType.SetState, payload: { state: clonedKanbanState } })}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}

@@ -1,21 +1,21 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
-import type { KanbanAction, KanbanState, Task } from "./types";
+import { KanbanActionType, type KanbanAction, type KanbanState, type Task } from "./types";
 
 export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanState {
     switch (action.type) {
-        case "SET_STATE": {
+        case KanbanActionType.SetState: {
             return action.payload.state;
         }
-        case "SET_ACTIVE": {
+        case KanbanActionType.SetActive: {
             return { ...state, active: action.payload.active };
         }
-        case "ADD_COLUMN": {
+        case KanbanActionType.AddColumn: {
             const newColumn = { id: uuidv4(), title: action.payload.title, tasks: [] };
 
             return { ...state, columns: [...state.columns, newColumn] };
         }
-        case "UPDATE_COLUMN": {
+        case KanbanActionType.UpdateColumn: {
             return {
                 ...state,
                 columns: state.columns.map((item) =>
@@ -23,10 +23,10 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 ),
             };
         }
-        case "DELETE_COLUMN": {
+        case KanbanActionType.DeleteColumn: {
             return { ...state, columns: state.columns.filter((item) => item.id !== action.payload.columnId) };
         }
-        case "MOVE_COLUMN": {
+        case KanbanActionType.MoveColumn: {
             const activeIndex = state.columns.findIndex((item) => item.id === action.payload.columnId);
             if (activeIndex === -1 || action.payload.targetIndex === -1) return state;
 
@@ -35,7 +35,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 columns: arrayMove(state.columns, activeIndex, action.payload.targetIndex),
             };
         }
-        case "ADD_TASK": {
+        case KanbanActionType.AddTask: {
             const newTask: Task = { id: uuidv4(), comments: [], ...action.payload.data };
 
             return {
@@ -46,7 +46,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 tasks: [...state.tasks, newTask],
             };
         }
-        case "UPDATE_TASK": {
+        case KanbanActionType.UpdateTask: {
             return {
                 ...state,
                 tasks: state.tasks.map((item) =>
@@ -54,7 +54,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 ),
             };
         }
-        case "DELETE_TASK": {
+        case KanbanActionType.DeleteTask: {
             const task = state.tasks.find((item) => item.id === action.payload.taskId);
             if (!task) return state;
 
@@ -71,7 +71,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 tasks: state.tasks.filter((item) => item.id !== action.payload.taskId),
             };
         }
-        case "MOVE_TASK": {
+        case KanbanActionType.MoveTask: {
             const sourceColumn = state.columns.find((column) => column.tasks.includes(action.payload.taskId));
             if (!sourceColumn) return state;
 

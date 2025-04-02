@@ -25,16 +25,29 @@ export interface KanbanState {
     active: null | Task | Column;
 }
 
+export enum KanbanActionType {
+    SetState = "SET_STATE",
+    SetActive = "SET_ACTIVE",
+    AddColumn = "ADD_COLUMN",
+    UpdateColumn = "UPDATE_COLUMN",
+    DeleteColumn = "DELETE_COLUMN",
+    MoveColumn = "MOVE_COLUMN",
+    AddTask = "ADD_TASK",
+    UpdateTask = "UPDATE_TASK",
+    DeleteTask = "DELETE_TASK",
+    MoveTask = "MOVE_TASK",
+}
+
 export type KanbanAction =
-    | { type: "SET_STATE"; payload: { state: KanbanState } }
-    | { type: "SET_ACTIVE"; payload: { active: null | Task | Column } }
-    | { type: "ADD_COLUMN"; payload: { title: string } }
-    | { type: "UPDATE_COLUMN"; payload: { columnId: UniqueIdentifier; data: Partial<Column> } }
-    | { type: "DELETE_COLUMN"; payload: { columnId: UniqueIdentifier } }
-    | { type: "MOVE_COLUMN"; payload: { columnId: UniqueIdentifier; targetIndex: number } }
-    | { type: "ADD_TASK"; payload: { columnId: UniqueIdentifier; data: Omit<Task, "id" | "comments"> } }
-    | { type: "UPDATE_TASK"; payload: { taskId: UniqueIdentifier; data: Partial<Task> } }
-    | { type: "DELETE_TASK"; payload: { taskId: UniqueIdentifier } }
+    | { type: KanbanActionType.SetState; payload: { state: KanbanState } }
+    | { type: KanbanActionType.SetActive; payload: { active: null | Task | Column } }
+    | { type: KanbanActionType.AddColumn; payload: { title: string } }
+    | { type: KanbanActionType.UpdateColumn; payload: { columnId: UniqueIdentifier; data: Partial<Column> } }
+    | { type: KanbanActionType.DeleteColumn; payload: { columnId: UniqueIdentifier } }
+    | { type: KanbanActionType.MoveColumn; payload: { columnId: UniqueIdentifier; targetIndex: number } }
+    | { type: KanbanActionType.AddTask; payload: { columnId: UniqueIdentifier; data: Omit<Task, "id" | "comments"> } }
+    | { type: KanbanActionType.UpdateTask; payload: { taskId: UniqueIdentifier; data: Partial<Task> } }
+    | { type: KanbanActionType.DeleteTask; payload: { taskId: UniqueIdentifier } }
     | {
           type: "MOVE_TASK";
           payload: { taskId: UniqueIdentifier; targetIndex: number; targetColumnId: UniqueIdentifier };
