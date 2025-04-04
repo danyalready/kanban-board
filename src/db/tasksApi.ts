@@ -16,6 +16,22 @@ export const addTask = (task: Task): Promise<void> => {
     });
 };
 
+export const getTasks = (): Promise<Task[]> => {
+    return new Promise((resolve, reject) => {
+        openDB()
+            .then((db) => {
+                const transaction = db.transaction(["tasks"], "readonly");
+                const store = transaction.objectStore("tasks");
+                const index = store.index("columnId");
+                const request = index.getAll();
+
+                request.onsuccess = () => resolve(request.result as Task[]);
+                request.onerror = () => reject(request.error);
+            })
+            .catch(reject);
+    });
+};
+
 export const getTasksByColumn = (columnId: string): Promise<Task[]> => {
     return new Promise((resolve, reject) => {
         openDB()
