@@ -3,9 +3,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Calendar, Flag, MessageCircleMore, Grip } from "lucide-react";
 
-import { type Task } from "@/store/types";
 import { cn } from "@/utils/cn";
 import { getPriorityColor } from "@/utils/getPriorityColor";
+import type { Task } from "@/db/types";
 
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
@@ -13,6 +13,7 @@ import { Avatar } from "./ui/avatar";
 
 interface Props {
     task: Task;
+    isOverlay?: boolean;
     className?: string;
     gripClassName?: string;
 }
@@ -32,12 +33,15 @@ export default function KanbanTask(props: Props) {
         transition,
     };
 
+    const Element = props.isOverlay ? "div" : "a";
+
     return (
-        <div
+        <Element
             ref={setNodeRef}
             style={style}
+            href={`?task=${props.task.id}`}
             className={cn(
-                "flex select-none flex-col gap-3 rounded-md bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
+                "flex min-w-72 select-none flex-col gap-3 rounded-lg bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
                 props.className,
             )}
         >
@@ -74,7 +78,7 @@ export default function KanbanTask(props: Props) {
                 <div className="flex h-5 gap-2">
                     <div className="flex items-center gap-1">
                         <MessageCircleMore size={12} />
-                        <span className="text-xs">{props.task.comments.length}</span>
+                        <span className="text-xs">{0}</span>
                     </div>
                     <Separator orientation="vertical" />
                     <div className="flex items-center gap-1">
@@ -83,6 +87,6 @@ export default function KanbanTask(props: Props) {
                     </div>
                 </div>
             </div>
-        </div>
+        </Element>
     );
 }

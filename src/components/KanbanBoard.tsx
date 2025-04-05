@@ -10,7 +10,6 @@ import {
     type DragStartEvent,
     type DragEndEvent,
     type DragOverEvent,
-    type UniqueIdentifier,
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
@@ -20,7 +19,15 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import KanbanColumn from "./KanbanColumn";
 import KanbanDragOverlay from "./KanbanDragOverlay";
 
-export default function KanbanBoard() {
+export interface Props {
+    onAddTask: (task: unknown) => void;
+    onDeleteColumn: (columnId: unknown) => void;
+    onMoveColumn: (column: unknown) => void;
+    onMoveTask: (task: unknown) => void;
+    onClickTask: (task: unknown) => void;
+}
+
+export default function KanbanBoard(props: Props) {
     const { state, dispatch } = useKanbanContext();
     const [clonedKanbanState, setClonedKanbanState] = useState<KanbanState>(state);
     const sensors = useSensors(
@@ -50,7 +57,7 @@ export default function KanbanBoard() {
     );
 
     const moveColumn = useCallback(
-        (activeId: UniqueIdentifier, overId: UniqueIdentifier) => {
+        (activeId: string, overId: string) => {
             const targetIndex = state.columns.findIndex((column) => column.id === overId);
             dispatch({ type: KanbanActionType.MoveColumn, payload: { columnId: activeId, targetIndex } });
         },
@@ -58,7 +65,7 @@ export default function KanbanBoard() {
     );
 
     const moveTask = useCallback(
-        (activeId: UniqueIdentifier, overId: UniqueIdentifier) => {
+        (activeId: string, overId: string) => {
             const targetColumn = state.columns.find((column) => column.id === overId || column.tasks.includes(overId));
 
             if (targetColumn) {
@@ -130,9 +137,9 @@ export default function KanbanBoard() {
 
             if (over) {
                 if (active.data.current?.type === "column" && over.data.current?.type === "column") {
-                    moveColumn(active.id, over.id);
+                    moveColumn(active.id.toString(), over.id.toString());
                 } else if (active.data.current?.type === "task") {
-                    moveTask(active.id, over.id);
+                    moveTask(active.id.toString(), over.id.toString());
                 }
             }
         },
@@ -148,15 +155,19 @@ export default function KanbanBoard() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex min-h-screen gap-3 overflow-x-auto overflow-y-hidden bg-background p-6">
+            <div className="flex min-h-screen gap-2 overflow-x-auto overflow-y-hidden bg-background p-6">
                 <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
                     {state.columns.map((column) => (
-                        <KanbanColumn key={column.id} column={column} />
+                        <KanbanColumn
+                            key={column.id}
+                            column={column}
+                            tasks={state.tasks.filter((task) => task.columnId === column.id)}
+                        />
                     ))}
                 </SortableContext>
             </div>
 
-            <KanbanDragOverlay active={state.active} />
+            <KanbanDragOverlay />
         </DndContext>
     );
 }

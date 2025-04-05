@@ -1,11 +1,9 @@
-import { useMemo } from "react";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Ellipsis, Plus } from "lucide-react";
+import { Ellipsis, SquarePlus, Trash2 } from "lucide-react";
 
-import type { Column, Task } from "@/store/types";
 import { cn } from "@/utils/cn";
-import { useKanbanContext } from "@/contexts/kanbanContext";
+import type { Column, Task } from "@/db/types";
 
 import { Button } from "./ui/button";
 import {
@@ -15,16 +13,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Badge } from "./ui/badge";
 import KanbanTask from "./KanbanTask";
 
 interface Props {
     column: Column;
+    tasks: Task[];
     className?: string;
     headerClassName?: string;
 }
 
 export default function KanbanColumn(props: Props) {
-    const { state } = useKanbanContext();
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.column.id,
         data: {
@@ -39,20 +38,12 @@ export default function KanbanColumn(props: Props) {
         transition,
     };
 
-    const columnTasks: Task[] = useMemo(
-        () =>
-            props.column.tasks
-                .map((taskId) => state.tasks.find((task) => task.id === taskId))
-                .filter((task): task is Task => task !== undefined),
-        [props.column.tasks, state.tasks],
-    );
-
     return (
         <div className="min-h-full min-w-80" ref={setNodeRef}>
             <div
                 style={style}
                 className={cn(
-                    "flex select-none flex-col gap-3 rounded-xl bg-secondary pt-3 shadow-sm ring-1 ring-inset ring-border",
+                    "flex select-none flex-col gap-3 rounded-xl bg-secondary pb-1 pt-3 shadow-sm ring-1 ring-inset ring-border",
                     props.className,
                 )}
             >
@@ -62,8 +53,8 @@ export default function KanbanColumn(props: Props) {
                     className={cn("flex cursor-grab items-center justify-between px-4", props.headerClassName)}
                 >
                     <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-semibold">{props.column.title}</h2>
-                        <span className="text-sm font-light text-gray-500">{props.column.tasks.length}</span>
+                        <h2 className="text-sm font-semibold">{props.column.name}</h2>
+                        <Badge variant="outline">{props.tasks.length}</Badge>
                     </div>
 
                     <DropdownMenu>
@@ -72,28 +63,28 @@ export default function KanbanColumn(props: Props) {
                                 <Ellipsis />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                                <SquarePlus />
+                                Add task
+                            </DropdownMenuItem>
+
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">
+                                <Trash2 />
+                                Delete
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
 
-                <SortableContext items={props.column.tasks} strategy={verticalListSortingStrategy}>
-                    <div className="flex flex-col gap-1.5 px-1">
-                        {columnTasks.map((item) => (
-                            <KanbanTask key={item.id} task={item} />
+                <SortableContext items={props.tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
+                    <div className="flex min-h-12 flex-col gap-1 px-1">
+                        {props.tasks.map((task) => (
+                            <KanbanTask key={task.id} task={task} />
                         ))}
                     </div>
                 </SortableContext>
-
-                <div>
-                    <Button variant="link">
-                        <Plus />
-                        Add Task
-                    </Button>
-                </div>
             </div>
         </div>
     );

@@ -1,5 +1,3 @@
-export type UniqueIdentifier = number | string;
-
 export type Priority = "low" | "medium" | "high";
 
 export interface Board {

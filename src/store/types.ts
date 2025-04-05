@@ -1,23 +1,6 @@
 import { UniqueIdentifier } from "@dnd-kit/core";
 
-export interface Task {
-    id: UniqueIdentifier;
-    title: string;
-    description?: string;
-    priority: "low" | "medium" | "high";
-    comments: string[];
-}
-
-export interface Column {
-    id: UniqueIdentifier;
-    title: string;
-    tasks: UniqueIdentifier[];
-}
-
-export interface Target {
-    columnId: UniqueIdentifier;
-    index: number;
-}
+import type { Column, Task } from "@/db/types";
 
 export interface KanbanState {
     columns: Column[];
@@ -58,5 +41,5 @@ export function isTask(active: null | Task | Column): active is Task {
 }
 
 export function isColumn(active: null | Task | Column): active is Column {
-    return Boolean(active && "tasks" in active);
+    return Boolean(active && !("priority" in active));
 }

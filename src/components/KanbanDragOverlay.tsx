@@ -1,16 +1,52 @@
 import { defaultDropAnimationSideEffects, DragOverlay } from "@dnd-kit/core";
 import { createPortal } from "react-dom";
 
-import { Column, isColumn, isTask, Task } from "@/store/types";
+import { isColumn, isTask } from "@/store/types";
+import { useKanbanContext } from "@/contexts/kanbanContext";
+import type { UniqueIdentifier } from "@/db/types";
 
 import KanbanColumn from "./KanbanColumn";
 import KanbanTask from "./KanbanTask";
 
-interface Props {
-    active: null | Task | Column;
-}
+export default function KanbanDragOverlay() {
+    const { state } = useKanbanContext();
 
-export default function KanbanDragOverlay(props: Props) {
+    const getColumnTasks = (columnId: UniqueIdentifier) => {
+        return state.tasks.filter((task) => task.columnId === columnId);
+    };
+
+    const renderOverlayComponent = () => {
+        if (isColumn(state.active)) {
+            return (
+                <KanbanColumn
+                    column={state.active}
+                    tasksCount={0}
+                    className="rotate-2 shadow-xl"
+                    headerClassName="cursor-grabbing"
+                >
+                    <div className="flex min-h-12 flex-col gap-1 px-1">
+                        {getColumnTasks(state.active.id).map((item) => (
+                            <KanbanTask key={item.id} isOverlay task={item} />
+                        ))}
+                    </div>
+                </KanbanColumn>
+            );
+        }
+
+        if (isTask(state.active)) {
+            return (
+                <KanbanTask
+                    task={state.active}
+                    isOverlay
+                    className="rotate-2 shadow-xl"
+                    gripClassName="cursor-grabbing"
+                />
+            );
+        }
+
+        return null;
+    };
+
     return createPortal(
         <DragOverlay
             dropAnimation={{
@@ -19,12 +55,7 @@ export default function KanbanDragOverlay(props: Props) {
                 }),
             }}
         >
-            {isColumn(props.active) && (
-                <KanbanColumn column={props.active} className="rotate-2 shadow-xl" headerClassName="cursor-grabbing" />
-            )}
-            {isTask(props.active) && (
-                <KanbanTask task={props.active} className="rotate-2 shadow-xl" gripClassName="cursor-grabbing" />
-            )}
+            {renderOverlayComponent()}
         </DragOverlay>,
         document.body,
     );
