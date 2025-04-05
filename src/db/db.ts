@@ -1,6 +1,6 @@
 import Dexie, { type Table } from "dexie";
 
-import type { Board, Column, Task } from "./types";
+import type { Board, Column, Task, Comment } from "./types";
 
 class KanbanDB extends Dexie {
     boards!: Table<Board, string>;

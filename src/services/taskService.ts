@@ -13,7 +13,9 @@ export const createTask = async (columnId: string, title: string, position: numb
         createdAt: Date.now(),
         position,
     };
+
     await db.tasks.add(task);
+
     return task;
 };
 
@@ -25,7 +27,8 @@ export const updateTask = async (id: string, updates: Partial<Task>) => {
     return await db.tasks.update(id, updates);
 };
 
-export const deleteTask = async (id: string) => {
-    await db.comments.where("taskId").equals(id).delete(); // cascade
-    return await db.tasks.delete(id);
+export const deleteTask = async (taskId: string) => {
+    await db.comments.where("taskId").equals(taskId).delete(); // cascade
+
+    return await db.tasks.delete(taskId);
 };
