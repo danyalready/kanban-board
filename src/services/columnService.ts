@@ -1,0 +1,23 @@
+import { v4 as uuid } from "uuid";
+
+import { db } from "@/db/db";
+import type { Column } from "@/db/types";
+
+export const createColumn = async (boardId: string, name: string, position: number) => {
+    const column = { id: uuid(), boardId, name, position };
+    await db.columns.add(column);
+    return column;
+};
+
+export const getColumnsByBoard = async (boardId: string) => {
+    return await db.columns.where("boardId").equals(boardId).sortBy("position");
+};
+
+export const updateColumn = async (id: string, updates: Partial<Column>) => {
+    return await db.columns.update(id, updates);
+};
+
+export const deleteColumn = async (id: string) => {
+    await db.tasks.where("columnId").equals(id).delete(); // cascade
+    return await db.columns.delete(id);
+};
