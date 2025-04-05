@@ -32,3 +32,52 @@ export const deleteTask = async (taskId: string) => {
 
     return await db.tasks.delete(taskId);
 };
+
+export const moveTask = async ({
+    taskId,
+    newColumnId,
+    beforeTaskId,
+    afterTaskId,
+}: {
+    taskId: string;
+    newColumnId: string;
+    beforeTaskId?: string;
+    afterTaskId?: string;
+}) => {
+    const task = await db.tasks.get(taskId);
+
+    if (!task) throw new Error("Task not found");
+
+    let newPosition: number;
+
+    if (beforeTaskId && afterTaskId) {
+        const before = await db.tasks.get(beforeTaskId);
+        const after = await db.tasks.get(afterTaskId);
+
+        if (!before || !after) throw new Error("Reference task not found");
+
+        newPosition = (before.position + after.position) / 2;
+    } else if (beforeTaskId) {
+        const before = await db.tasks.get(beforeTaskId);
+
+        if (!before) throw new Error("Reference task not found");
+
+        newPosition = before.position + 100;
+    } else if (afterTaskId) {
+        const after = await db.tasks.get(afterTaskId);
+
+        if (!after) throw new Error("Reference task not found");
+
+        newPosition = after.position - 100;
+    } else {
+        // insert at end
+        const tasks = await db.tasks.where("columnId").equals(newColumnId).sortBy("position");
+
+        newPosition = tasks.length ? tasks[tasks.length - 1].position + 100 : 100;
+    }
+
+    return db.tasks.update(taskId, {
+        columnId: newColumnId,
+        position: newPosition,
+    });
+};
