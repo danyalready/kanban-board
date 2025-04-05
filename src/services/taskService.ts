@@ -33,6 +33,27 @@ export const deleteTask = async (taskId: string) => {
     return await db.tasks.delete(taskId);
 };
 
+const moveCountMap = new Map<string, number>();
+
+const trackMoves = async (columnId: string) => {
+    const count = moveCountMap.get(columnId) || 0;
+
+    moveCountMap.set(columnId, count + 1);
+
+    if (count + 1 >= 10) {
+        await normalizeTaskPositions(columnId);
+        moveCountMap.set(columnId, 0);
+    }
+};
+
+export const normalizeTaskPositions = async (columnId: string) => {
+    const tasks = await db.tasks.where("columnId").equals(columnId).sortBy("position");
+
+    for (let i = 0; i < tasks.length; i++) {
+        await updateTask(tasks[i].id, { position: i * 100 });
+    }
+};
+
 export const moveTask = async ({
     taskId,
     newColumnId,
@@ -76,8 +97,10 @@ export const moveTask = async ({
         newPosition = tasks.length ? tasks[tasks.length - 1].position + 100 : 100;
     }
 
-    return db.tasks.update(taskId, {
+    await db.tasks.update(taskId, {
         columnId: newColumnId,
         position: newPosition,
     });
+
+    await trackMoves(newColumnId);
 };
