@@ -1,10 +1,12 @@
 import { UniqueIdentifier } from "@dnd-kit/core";
 
-import type { Column, Task } from "@/db/types";
+import type { Board, Column, Comment, Task } from "@/db/types";
 
 export interface KanbanState {
+    boards: Board[];
     columns: Column[];
     tasks: Task[];
+    comments: Comment[];
     active: null | Task | Column;
 }
 
