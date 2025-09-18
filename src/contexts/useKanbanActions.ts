@@ -1,31 +1,29 @@
-import { createColumn, updateColumn, getColumnsByBoard, deleteColumn } from "@/services/columnService";
-import { createTask, updateTask, deleteTask, moveTask as svcMoveTask } from "@/services/taskService";
-import { KanbanActionType } from "@/reducers/kanbanTypes";
-
 import { useKanbanContext } from "./kanbanContext";
+import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
 
-export const useKanbanActions = () => {
+export function useKanbanActions() {
     const { dispatch } = useKanbanContext();
 
-    const addColumn = async (boardId: string, name: string) => {
-        const cols = await getColumnsByBoard(boardId);
-        const last = cols.at(-1);
-        const position = last ? last.position + 10 : 10;
-        const column = await createColumn(boardId, name, position);
-
-        dispatch({ type: KanbanActionType.AddColumn, payload: { name: column.name, boardId } });
+    const setActive = (active: KanbanState["active"]) => {
+        dispatch({ type: KanbanActionType.SetActive, payload: { active } });
     };
 
-    const moveTask = async (args: {
+    const setState = (state: KanbanState) => {
+        dispatch({ type: KanbanActionType.SetState, payload: { state } });
+    };
+
+    const moveColumn = (columnId: string, targetIndex: number) => {
+        dispatch({ type: KanbanActionType.MoveColumn, payload: { columnId, targetIndex } });
+    };
+
+    const moveTask = (args: {
         taskId: string;
-        targetColumnId: string;
         targetIndex: number;
         sourceColumnId: string;
+        targetColumnId: string;
     }) => {
-        dispatch({ type: KanbanActionType.MoveTask, payload: args }); // optimistic
-
-        await svcMoveTask({ taskId: args.taskId, newColumnId: args.targetColumnId }); // persists
+        dispatch({ type: KanbanActionType.MoveTask, payload: args });
     };
 
-    return { addColumn, moveTask, updateColumn, deleteColumn, createTask, updateTask, deleteTask };
-};
+    return { setActive, setState, moveColumn, moveTask };
+}

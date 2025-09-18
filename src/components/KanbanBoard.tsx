@@ -13,14 +13,16 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
+import { type KanbanState } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
+import { useKanbanActions } from "@/contexts/useKanbanActions";
 
 import KanbanColumn from "./KanbanColumn";
 import KanbanDragOverlay from "./KanbanDragOverlay";
 
 export default function KanbanBoard() {
-    const { state, dispatch } = useKanbanContext();
+    const { state } = useKanbanContext();
+    const { moveColumn: moveColumnAction, moveTask: moveTaskAction, setActive, setState } = useKanbanActions();
     const [clonedKanbanState, setClonedKanbanState] = useState<KanbanState>(state);
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
@@ -35,25 +37,25 @@ export default function KanbanBoard() {
             if (current) {
                 switch (current.type) {
                     case "column":
-                        dispatch({ type: KanbanActionType.SetActive, payload: { active: current.column } });
+                        setActive(current.column);
                         break;
                     case "task":
-                        dispatch({ type: KanbanActionType.SetActive, payload: { active: current.task } });
+                        setActive(current.task);
                         break;
                     default:
                         console.warn(`Type ${current.type} is not defined.`);
                 }
             }
         },
-        [dispatch],
+        [setActive],
     );
 
     const moveColumn = useCallback(
         (activeId: string, overId: string) => {
             const targetIndex = state.columns.findIndex((column) => column.id === overId);
-            dispatch({ type: KanbanActionType.MoveColumn, payload: { columnId: activeId, targetIndex } });
+            moveColumnAction(activeId, targetIndex);
         },
-        [dispatch, state.columns],
+        [moveColumnAction, state.columns],
     );
 
     const moveTask = useCallback(
@@ -76,18 +78,15 @@ export default function KanbanBoard() {
                 const activeTask = state.tasks.find((task) => task.id === activeId);
                 const sourceColumnId = activeTask ? activeTask.columnId : targetColumn.id;
 
-                dispatch({
-                    type: KanbanActionType.MoveTask,
-                    payload: {
-                        targetIndex: targetTaskIndex,
-                        targetColumnId: targetColumn.id,
-                        taskId: activeId,
-                        sourceColumnId,
-                    },
+                moveTaskAction({
+                    targetIndex: targetTaskIndex,
+                    targetColumnId: targetColumn.id,
+                    taskId: activeId,
+                    sourceColumnId,
                 });
             }
         },
-        [dispatch, state.columns, state.tasks],
+        [moveTaskAction, state.columns, state.tasks],
     );
 
     const handleDragStart = useCallback(
@@ -112,14 +111,12 @@ export default function KanbanBoard() {
 
                         if (targetColumn) {
                             const activeTask = state.tasks.find((t) => t.id === active.id);
-                            dispatch({
-                                type: KanbanActionType.MoveTask,
-                                payload: {
-                                    targetColumnId: targetColumn.id,
-                                    targetIndex: over.data.current?.sortable.index,
-                                    taskId: active.id.toString(),
-                                    sourceColumnId: activeTask ? activeTask.columnId : targetColumn.id,
-                                },
+
+                            moveTaskAction({
+                                targetColumnId: targetColumn.id,
+                                targetIndex: over.data.current?.sortable.index,
+                                taskId: active.id.toString(),
+                                sourceColumnId: activeTask ? activeTask.columnId : targetColumn.id,
                             });
                         }
                     }
@@ -128,14 +125,12 @@ export default function KanbanBoard() {
                 }
                 case "column": {
                     const activeTask = state.tasks.find((t) => t.id === active.id);
-                    dispatch({
-                        type: KanbanActionType.MoveTask,
-                        payload: {
-                            targetColumnId: over.id.toString(),
-                            targetIndex: -1,
-                            taskId: active.id.toString(),
-                            sourceColumnId: activeTask ? activeTask.columnId : over.id.toString(),
-                        },
+
+                    moveTaskAction({
+                        targetColumnId: over.id.toString(),
+                        targetIndex: -1,
+                        taskId: active.id.toString(),
+                        sourceColumnId: activeTask ? activeTask.columnId : over.id.toString(),
                     });
 
                     break;
@@ -145,12 +140,12 @@ export default function KanbanBoard() {
                 }
             }
         },
-        [dispatch, state.columns, state.tasks],
+        [moveTaskAction, state.columns, state.tasks],
     );
 
     const handleDragEnd = useCallback(
         ({ active, over }: DragEndEvent) => {
-            dispatch({ type: KanbanActionType.SetActive, payload: { active: null } });
+            setActive(null);
 
             if (over) {
                 if (active.data.current?.type === "column" && over.data.current?.type === "column") {
@@ -160,14 +155,14 @@ export default function KanbanBoard() {
                 }
             }
         },
-        [dispatch, moveColumn, moveTask],
+        [setActive, moveColumn, moveTask],
     );
 
     return (
         <DndContext
             sensors={sensors}
             collisionDetection={rectIntersection}
-            onDragCancel={() => dispatch({ type: KanbanActionType.SetState, payload: { state: clonedKanbanState } })}
+            onDragCancel={() => setState(clonedKanbanState)}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
