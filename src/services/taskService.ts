@@ -3,6 +3,8 @@ import { v4 as uuid } from "uuid";
 import { db } from "@/db/db";
 import type { Task } from "@/db/types";
 
+export const TASK_POSITION_OFFSET = 100;
+
 export const createTask = async (columnId: string, title: string, position: number) => {
     const task: Task = {
         id: uuid(),
@@ -50,7 +52,7 @@ export const normalizeTaskPositions = async (columnId: string) => {
     const tasks = await db.tasks.where("columnId").equals(columnId).sortBy("position");
 
     for (let i = 0; i < tasks.length; i++) {
-        await updateTask(tasks[i].id, { position: i * 100 });
+        await updateTask(tasks[i].id, { position: i * TASK_POSITION_OFFSET });
     }
 };
 
@@ -83,18 +85,18 @@ export const moveTask = async ({
 
         if (!before) throw new Error("Reference task not found");
 
-        newPosition = before.position + 100;
+        newPosition = before.position + TASK_POSITION_OFFSET;
     } else if (afterTaskId) {
         const after = await db.tasks.get(afterTaskId);
 
         if (!after) throw new Error("Reference task not found");
 
-        newPosition = after.position - 100;
+        newPosition = after.position - TASK_POSITION_OFFSET;
     } else {
         // insert at end
         const tasks = await db.tasks.where("columnId").equals(newColumnId).sortBy("position");
 
-        newPosition = tasks.length ? tasks[tasks.length - 1].position + 100 : 100;
+        newPosition = tasks.length ? tasks[tasks.length - 1].position + TASK_POSITION_OFFSET : TASK_POSITION_OFFSET;
     }
 
     await db.tasks.update(taskId, {

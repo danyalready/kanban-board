@@ -5,6 +5,8 @@ import type { Column } from "@/db/types";
 
 import { deleteTask } from "./taskService";
 
+export const COLUMN_POSITION_OFFSET = 10;
+
 export const createColumn = async (boardId: string, name: string, position: number) => {
     const column = { id: uuid(), boardId, name, position };
 

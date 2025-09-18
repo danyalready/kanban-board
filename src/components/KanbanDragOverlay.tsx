@@ -1,9 +1,9 @@
 import { defaultDropAnimationSideEffects, DragOverlay } from "@dnd-kit/core";
 import { createPortal } from "react-dom";
 
-import { isColumn, isTask } from "@/store/types";
+import { isColumn, isTask } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
-import type { UniqueIdentifier } from "@/db/types";
+import type { Column, Task } from "@/db/types";
 
 import KanbanColumn from "./KanbanColumn";
 import KanbanTask from "./KanbanTask";
@@ -11,9 +11,7 @@ import KanbanTask from "./KanbanTask";
 export default function KanbanDragOverlay() {
     const { state } = useKanbanContext();
 
-    const getColumnTasks = (columnId: UniqueIdentifier) => {
-        return state.tasks.filter((task) => task.columnId === columnId);
-    };
+    const getColumnTasks = (columnId: Column["id"]) => state.tasks.filter((task) => task.columnId === columnId);
 
     const renderOverlayComponent = () => {
         if (isColumn(state.active)) {

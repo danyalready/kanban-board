@@ -13,21 +13,13 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import { KanbanActionType, type KanbanState } from "@/store/types";
+import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 
 import KanbanColumn from "./KanbanColumn";
 import KanbanDragOverlay from "./KanbanDragOverlay";
 
-export interface Props {
-    onAddTask: (task: unknown) => void;
-    onDeleteColumn: (columnId: unknown) => void;
-    onMoveColumn: (column: unknown) => void;
-    onMoveTask: (task: unknown) => void;
-    onClickTask: (task: unknown) => void;
-}
-
-export default function KanbanBoard(props: Props) {
+export default function KanbanBoard() {
     const { state, dispatch } = useKanbanContext();
     const [clonedKanbanState, setClonedKanbanState] = useState<KanbanState>(state);
     const sensors = useSensors(
@@ -66,22 +58,36 @@ export default function KanbanBoard(props: Props) {
 
     const moveTask = useCallback(
         (activeId: string, overId: string) => {
-            const targetColumn = state.columns.find((column) => column.id === overId || column.tasks.includes(overId));
+            // Determine the target column and target index within that column
+            const overTask = state.tasks.find((task) => task.id === overId);
+            const targetColumn =
+                state.columns.find((column) => column.id === overId) ||
+                (overTask ? state.columns.find((column) => column.id === overTask.columnId) : undefined);
 
             if (targetColumn) {
-                const targetTaskIndex = targetColumn.tasks.findIndex((taskId) => taskId === overId);
+                const tasksInTargetColumn = state.tasks
+                    .filter((task) => task.columnId === targetColumn.id)
+                    .sort((a, b) => a.position - b.position);
+
+                const targetTaskIndex = overTask
+                    ? tasksInTargetColumn.findIndex((task) => task.id === overTask.id)
+                    : -1;
+
+                const activeTask = state.tasks.find((task) => task.id === activeId);
+                const sourceColumnId = activeTask ? activeTask.columnId : targetColumn.id;
 
                 dispatch({
-                    type: "MOVE_TASK",
+                    type: KanbanActionType.MoveTask,
                     payload: {
                         targetIndex: targetTaskIndex,
                         targetColumnId: targetColumn.id,
                         taskId: activeId,
+                        sourceColumnId,
                     },
                 });
             }
         },
-        [dispatch, state.columns],
+        [dispatch, state.columns, state.tasks],
     );
 
     const handleDragStart = useCallback(
@@ -99,15 +105,20 @@ export default function KanbanBoard(props: Props) {
             switch (over.data.current?.type) {
                 case "task": {
                     if (active.data.current?.sortable.containerId !== over.data.current?.sortable.containerId) {
-                        const targetColumn = state.columns.find((column) => column.tasks.includes(over.id));
+                        const overTask = state.tasks.find((task) => task.id === over.id);
+                        const targetColumn = overTask
+                            ? state.columns.find((column) => column.id === overTask.columnId)
+                            : state.columns.find((column) => column.id === over.id);
 
                         if (targetColumn) {
+                            const activeTask = state.tasks.find((t) => t.id === active.id);
                             dispatch({
-                                type: "MOVE_TASK",
+                                type: KanbanActionType.MoveTask,
                                 payload: {
                                     targetColumnId: targetColumn.id,
                                     targetIndex: over.data.current?.sortable.index,
-                                    taskId: active.id,
+                                    taskId: active.id.toString(),
+                                    sourceColumnId: activeTask ? activeTask.columnId : targetColumn.id,
                                 },
                             });
                         }
@@ -116,9 +127,15 @@ export default function KanbanBoard(props: Props) {
                     break;
                 }
                 case "column": {
+                    const activeTask = state.tasks.find((t) => t.id === active.id);
                     dispatch({
-                        type: "MOVE_TASK",
-                        payload: { targetColumnId: over.id, targetIndex: -1, taskId: active.id },
+                        type: KanbanActionType.MoveTask,
+                        payload: {
+                            targetColumnId: over.id.toString(),
+                            targetIndex: -1,
+                            taskId: active.id.toString(),
+                            sourceColumnId: activeTask ? activeTask.columnId : over.id.toString(),
+                        },
                     });
 
                     break;
@@ -128,7 +145,7 @@ export default function KanbanBoard(props: Props) {
                 }
             }
         },
-        [dispatch, state.columns],
+        [dispatch, state.columns, state.tasks],
     );
 
     const handleDragEnd = useCallback(

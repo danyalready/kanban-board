@@ -1,5 +1,3 @@
-import { UniqueIdentifier } from "@dnd-kit/core";
-
 import type { Board, Column, Comment, Task } from "@/db/types";
 
 export interface KanbanState {
@@ -26,16 +24,16 @@ export enum KanbanActionType {
 export type KanbanAction =
     | { type: KanbanActionType.SetState; payload: { state: KanbanState } }
     | { type: KanbanActionType.SetActive; payload: { active: null | Task | Column } }
-    | { type: KanbanActionType.AddColumn; payload: { title: string } }
-    | { type: KanbanActionType.UpdateColumn; payload: { columnId: UniqueIdentifier; data: Partial<Column> } }
-    | { type: KanbanActionType.DeleteColumn; payload: { columnId: UniqueIdentifier } }
-    | { type: KanbanActionType.MoveColumn; payload: { columnId: UniqueIdentifier; targetIndex: number } }
-    | { type: KanbanActionType.AddTask; payload: { columnId: UniqueIdentifier; data: Omit<Task, "id" | "comments"> } }
-    | { type: KanbanActionType.UpdateTask; payload: { taskId: UniqueIdentifier; data: Partial<Task> } }
-    | { type: KanbanActionType.DeleteTask; payload: { taskId: UniqueIdentifier } }
+    | { type: KanbanActionType.AddColumn; payload: { name: string; boardId: string } }
+    | { type: KanbanActionType.UpdateColumn; payload: { columnId: string; data: Partial<Column> } }
+    | { type: KanbanActionType.DeleteColumn; payload: { columnId: string } }
+    | { type: KanbanActionType.MoveColumn; payload: { columnId: string; targetIndex: number } }
+    | { type: KanbanActionType.AddTask; payload: { columnId: string; data: Omit<Task, "id"> } }
+    | { type: KanbanActionType.UpdateTask; payload: { taskId: string; data: Partial<Task> } }
+    | { type: KanbanActionType.DeleteTask; payload: { taskId: string } }
     | {
-          type: "MOVE_TASK";
-          payload: { taskId: UniqueIdentifier; targetIndex: number; targetColumnId: UniqueIdentifier };
+          type: KanbanActionType.MoveTask;
+          payload: { taskId: string; targetIndex: number; sourceColumnId: string; targetColumnId: string };
       };
 
 export function isTask(active: null | Task | Column): active is Task {

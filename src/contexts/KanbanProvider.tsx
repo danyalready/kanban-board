@@ -1,7 +1,7 @@
 import { PropsWithChildren, useReducer } from "react";
 
-import { kanbanReducer } from "@/store/kanbanReducer";
-import type { Column, Task } from "@/db/types";
+import { kanbanReducer } from "@/reducers/kanbanReducer";
+import type { Board, Column, Comment, Task } from "@/db/types";
 
 import { KanbanContext } from "./kanbanContext";
 
@@ -56,15 +56,19 @@ import { KanbanContext } from "./kanbanContext";
 // };
 
 export interface Props {
+    boards: Board[];
     columns: Column[];
     tasks: Task[];
+    comments: Comment[];
 }
 
 export default function KanbanProvider(props: PropsWithChildren<Props>) {
     const [state, dispatch] = useReducer(kanbanReducer, {
         active: null,
+        boards: props.boards,
         columns: props.columns,
         tasks: props.tasks,
+        comments: props.comments,
     });
 
     return <KanbanContext.Provider value={{ state, dispatch }}>{props.children}</KanbanContext.Provider>;

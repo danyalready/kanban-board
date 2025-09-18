@@ -11,6 +11,7 @@ export interface Column {
     boardId: string;
     name: string;
     position: number;
+    createdAt: number;
 }
 
 export interface Task {
@@ -19,8 +20,8 @@ export interface Task {
     title: string;
     description: string;
     priority: Priority;
-    createdAt: number;
     position: number;
+    createdAt: number;
 }
 
 export interface Comment {
