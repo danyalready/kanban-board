@@ -1,6 +1,6 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Ellipsis, SquarePlus, Trash2 } from "lucide-react";
+import { Ellipsis, SquarePlus, Trash2, Pencil } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import type { Column, Task } from "@/db/types";
@@ -15,6 +15,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Badge } from "./ui/badge";
 import KanbanTask from "./KanbanTask";
+import { useKanbanActions } from "@/contexts/useKanbanActions";
 
 interface Props {
     column: Column;
@@ -24,6 +25,19 @@ interface Props {
 }
 
 export default function KanbanColumn(props: Props) {
+    const { updateColumn, deleteColumn } = useKanbanActions();
+    const handleRename = async () => {
+        const next = prompt("Rename column", props.column.name);
+        if (next && next.trim() && next !== props.column.name) {
+            await updateColumn(props.column.id, { name: next.trim() });
+        }
+    };
+
+    const handleDelete = async () => {
+        if (confirm("Delete this column and its tasks?")) {
+            await deleteColumn(props.column.id);
+        }
+    };
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.column.id,
         data: {
@@ -64,13 +78,17 @@ export default function KanbanColumn(props: Props) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={handleRename}>
+                                <Pencil />
+                                Rename
+                            </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <SquarePlus />
                                 Add task
                             </DropdownMenuItem>
 
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
                                 <Trash2 />
                                 Delete
                             </DropdownMenuItem>

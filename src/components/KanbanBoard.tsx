@@ -18,11 +18,21 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 
 import KanbanColumn from "./KanbanColumn";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import KanbanDragOverlay from "./KanbanDragOverlay";
 
-export default function KanbanBoard() {
+export default function KanbanBoard(props: { boardId?: string }) {
     const { state } = useKanbanContext();
-    const { moveColumn: moveColumnAction, moveTask: moveTaskAction, setActive, setState } = useKanbanActions();
+    const {
+        moveColumn: moveColumnAction,
+        moveTask: moveTaskAction,
+        setActive,
+        setState,
+        addColumn,
+    } = useKanbanActions();
+    const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
+    const [newColumnName, setNewColumnName] = useState("");
     const [clonedKanbanState, setClonedKanbanState] = useState<KanbanState>(state);
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
@@ -52,10 +62,11 @@ export default function KanbanBoard() {
 
     const moveColumn = useCallback(
         (activeId: string, overId: string) => {
-            const targetIndex = state.columns.findIndex((column) => column.id === overId);
+            const inBoard = state.columns.filter((c) => !props.boardId || c.boardId === props.boardId);
+            const targetIndex = inBoard.findIndex((column) => column.id === overId);
             moveColumnAction(activeId, targetIndex);
         },
-        [moveColumnAction, state.columns],
+        [moveColumnAction, state.columns, props.boardId],
     );
 
     const moveTask = useCallback(
@@ -168,15 +179,54 @@ export default function KanbanBoard() {
             onDragEnd={handleDragEnd}
         >
             <div className="flex min-h-screen gap-2 overflow-x-auto overflow-y-hidden bg-background p-6">
-                <SortableContext items={state.columns.map((item) => item.id)} strategy={horizontalListSortingStrategy}>
-                    {state.columns.map((column) => (
-                        <KanbanColumn
-                            key={column.id}
-                            column={column}
-                            tasks={state.tasks.filter((task) => task.columnId === column.id)}
-                        />
-                    ))}
+                <SortableContext
+                    items={state.columns
+                        .filter((c) => !props.boardId || c.boardId === props.boardId)
+                        .map((item) => item.id)}
+                    strategy={horizontalListSortingStrategy}
+                >
+                    {state.columns
+                        .filter((c) => !props.boardId || c.boardId === props.boardId)
+                        .map((column) => (
+                            <KanbanColumn
+                                key={column.id}
+                                column={column}
+                                tasks={state.tasks.filter((task) => task.columnId === column.id)}
+                            />
+                        ))}
                 </SortableContext>
+                <Dialog open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline">Add column</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>New column</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2">
+                            <label className="text-sm">Name</label>
+                            <input
+                                className="w-full rounded-md border px-3 py-2 text-sm outline-none ring-1 ring-inset ring-border focus:ring-2"
+                                placeholder="e.g. To do"
+                                value={newColumnName}
+                                onChange={(e) => setNewColumnName(e.target.value)}
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                disabled={!props.boardId || !newColumnName.trim()}
+                                onClick={async () => {
+                                    if (!props.boardId) return;
+                                    await addColumn(props.boardId, newColumnName.trim());
+                                    setNewColumnName("");
+                                    setIsAddColumnOpen(false);
+                                }}
+                            >
+                                Create
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <KanbanDragOverlay />
