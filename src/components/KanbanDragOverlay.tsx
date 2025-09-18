@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 
 import { isColumn, isTask } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
-import type { Column, Task } from "@/db/types";
+import type { Column } from "@/db/types";
 
 import KanbanColumn from "./KanbanColumn";
 import KanbanTask from "./KanbanTask";
@@ -18,16 +18,10 @@ export default function KanbanDragOverlay() {
             return (
                 <KanbanColumn
                     column={state.active}
-                    tasksCount={0}
+                    tasks={getColumnTasks(state.active.id)}
                     className="rotate-2 shadow-xl"
                     headerClassName="cursor-grabbing"
-                >
-                    <div className="flex min-h-12 flex-col gap-1 px-1">
-                        {getColumnTasks(state.active.id).map((item) => (
-                            <KanbanTask key={item.id} isOverlay task={item} />
-                        ))}
-                    </div>
-                </KanbanColumn>
+                />
             );
         }
 

@@ -8,7 +8,7 @@ import { deleteTask } from "./taskService";
 export const COLUMN_POSITION_OFFSET = 10;
 
 export const createColumn = async (boardId: string, name: string, position: number) => {
-    const column = { id: uuid(), boardId, name, position };
+    const column: Column = { id: uuid(), boardId, name, position, createdAt: Date.now() };
 
     await db.columns.add(column);
 
