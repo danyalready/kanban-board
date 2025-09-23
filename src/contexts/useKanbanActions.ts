@@ -45,9 +45,18 @@ export function useKanbanActions() {
             const last = boardColumns[boardColumns.length - 1];
             newPosition = last ? last.position + COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
         } else {
-            // Move between two columns
-            const before = boardColumns[targetIndex - 1];
-            const after = boardColumns[targetIndex];
+            // Move between two columns (fix for left-to-right move)
+            let before, after;
+            if (targetIndex > currentIndex) {
+                // Moving right: after dropping, the column will be at targetIndex,
+                // so before = boardColumns[targetIndex], after = boardColumns[targetIndex + 1]
+                before = boardColumns[targetIndex];
+                after = boardColumns[targetIndex + 1];
+            } else {
+                // Moving left or to same: before = boardColumns[targetIndex - 1], after = boardColumns[targetIndex]
+                before = boardColumns[targetIndex - 1];
+                after = boardColumns[targetIndex];
+            }
 
             if (before && after) {
                 newPosition = (before.position + after.position) / 2;
