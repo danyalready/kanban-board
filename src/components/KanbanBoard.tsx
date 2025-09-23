@@ -62,8 +62,9 @@ export default function KanbanBoard(props: { boardId?: string }) {
 
     const moveColumn = useCallback(
         (activeId: string, overId: string) => {
-            const inBoard = state.columns.filter((c) => !props.boardId || c.boardId === props.boardId);
-            const targetIndex = inBoard.findIndex((column) => column.id === overId);
+            const boardColumns = state.columns.filter((c) => !props.boardId || c.boardId === props.boardId);
+            const targetIndex = boardColumns.findIndex((column) => column.id === overId);
+
             moveColumnAction(activeId, targetIndex);
         },
         [moveColumnAction, state.columns, props.boardId],
@@ -196,7 +197,6 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 >
                     {state.columns
                         .filter((c) => !props.boardId || c.boardId === props.boardId)
-                        .sort((a, b) => a.position - b.position)
                         .map((column) => (
                             <KanbanColumn
                                 key={column.id}

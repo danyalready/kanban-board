@@ -29,7 +29,15 @@ export default function KanbanProvider(props: PropsWithChildren) {
         }).subscribe(({ boards, columns, tasks, comments }) => {
             dispatch({
                 type: KanbanActionType.SetState,
-                payload: { state: { active: null, boards, columns, tasks, comments } },
+                payload: {
+                    state: {
+                        active: null,
+                        boards,
+                        columns: columns.sort((a, b) => a.position - b.position),
+                        tasks: tasks.sort((a, b) => a.position - b.position),
+                        comments,
+                    },
+                },
             });
         });
 

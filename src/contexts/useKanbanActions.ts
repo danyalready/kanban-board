@@ -36,13 +36,11 @@ export function useKanbanActions() {
 
         let newPosition: number;
 
-        console.log(targetIndex, boardColumns.length);
-
         if (targetIndex === 0) {
             // Move to start: place before the first column
             const first = boardColumns[0];
             newPosition = first ? first.position - COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
-        } else if (targetIndex >= boardColumns.length) {
+        } else if (targetIndex >= boardColumns.length - 1) {
             // Move to end: place after the last column
             const last = boardColumns[boardColumns.length - 1];
             newPosition = last ? last.position + COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
