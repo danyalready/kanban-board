@@ -169,6 +169,15 @@ export default function KanbanBoard(props: { boardId?: string }) {
         [setActive, moveColumn, moveTask],
     );
 
+    const handleAddColumn = async () => {
+        if (!props.boardId) return;
+
+        await addColumn(props.boardId, newColumnName.trim());
+
+        setNewColumnName("");
+        setIsAddColumnOpen(false);
+    };
+
     return (
         <DndContext
             sensors={sensors}
@@ -187,6 +196,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 >
                     {state.columns
                         .filter((c) => !props.boardId || c.boardId === props.boardId)
+                        .sort((a, b) => a.position - b.position)
                         .map((column) => (
                             <KanbanColumn
                                 key={column.id}
@@ -213,15 +223,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                             />
                         </div>
                         <DialogFooter>
-                            <Button
-                                disabled={!props.boardId || !newColumnName.trim()}
-                                onClick={async () => {
-                                    if (!props.boardId) return;
-                                    await addColumn(props.boardId, newColumnName.trim());
-                                    setNewColumnName("");
-                                    setIsAddColumnOpen(false);
-                                }}
-                            >
+                            <Button disabled={!props.boardId || !newColumnName.trim()} onClick={handleAddColumn}>
                                 Create
                             </Button>
                         </DialogFooter>

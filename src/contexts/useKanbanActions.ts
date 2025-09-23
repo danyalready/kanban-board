@@ -1,4 +1,3 @@
-import { useKanbanContext } from "./kanbanContext";
 import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
 import {
     createColumn,
@@ -6,6 +5,8 @@ import {
     deleteColumn as svcDeleteColumn,
 } from "@/services/columnService";
 import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
+
+import { useKanbanContext } from "./kanbanContext";
 
 export function useKanbanActions() {
     const { dispatch, state } = useKanbanContext();
@@ -26,25 +27,39 @@ export function useKanbanActions() {
         const moving = state.columns.find((c) => c.id === columnId);
         if (!moving) return;
 
-        const inBoard = state.columns
+        const boardColumns = state.columns
             .filter((c) => c.boardId === moving.boardId)
             .sort((a, b) => a.position - b.position);
 
-        const currentIndex = inBoard.findIndex((c) => c.id === columnId);
+        const currentIndex = boardColumns.findIndex((c) => c.id === columnId);
         if (currentIndex === -1 || targetIndex === -1) return;
 
-        const before = inBoard[targetIndex - 1];
-        const after = inBoard[targetIndex];
-
         let newPosition: number;
-        if (before && after) {
-            newPosition = (before.position + after.position) / 2;
-        } else if (before) {
-            newPosition = before.position + COLUMN_POSITION_OFFSET;
-        } else if (after) {
-            newPosition = Math.max(0, after.position - COLUMN_POSITION_OFFSET);
+
+        console.log(targetIndex, boardColumns.length);
+
+        if (targetIndex === 0) {
+            // Move to start: place before the first column
+            const first = boardColumns[0];
+            newPosition = first ? first.position - COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
+        } else if (targetIndex >= boardColumns.length) {
+            // Move to end: place after the last column
+            const last = boardColumns[boardColumns.length - 1];
+            newPosition = last ? last.position + COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
         } else {
-            newPosition = COLUMN_POSITION_OFFSET;
+            // Move between two columns
+            const before = boardColumns[targetIndex - 1];
+            const after = boardColumns[targetIndex];
+
+            if (before && after) {
+                newPosition = (before.position + after.position) / 2;
+            } else if (before) {
+                newPosition = before.position + COLUMN_POSITION_OFFSET;
+            } else if (after) {
+                newPosition = Math.max(0, after.position - COLUMN_POSITION_OFFSET);
+            } else {
+                newPosition = COLUMN_POSITION_OFFSET;
+            }
         }
 
         await svcUpdateColumn(columnId, { position: newPosition });
@@ -63,17 +78,19 @@ export function useKanbanActions() {
         const columnsInBoard = state.columns.filter((c) => c.boardId === boardId);
         const maxPosition = columnsInBoard.length ? Math.max(...columnsInBoard.map((c) => c.position)) : 0;
         const position = maxPosition + COLUMN_POSITION_OFFSET;
-        const created = await createColumn(boardId, name, position);
-        dispatch({ type: KanbanActionType.AddColumn, payload: { name: created.name, boardId } });
+
+        await createColumn(boardId, name, position);
     };
 
     const updateColumn = async (columnId: string, data: Partial<{ name: string; position: number }>) => {
         await svcUpdateColumn(columnId, data);
+
         dispatch({ type: KanbanActionType.UpdateColumn, payload: { columnId, data } });
     };
 
     const deleteColumn = async (columnId: string) => {
         await svcDeleteColumn(columnId);
+
         dispatch({ type: KanbanActionType.DeleteColumn, payload: { columnId } });
     };
 

@@ -4,6 +4,7 @@ import { Ellipsis, SquarePlus, Trash2, Pencil } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import type { Column, Task } from "@/db/types";
+import { useKanbanActions } from "@/contexts/useKanbanActions";
 
 import { Button } from "./ui/button";
 import {
@@ -15,7 +16,6 @@ import {
 } from "./ui/dropdown-menu";
 import { Badge } from "./ui/badge";
 import KanbanTask from "./KanbanTask";
-import { useKanbanActions } from "@/contexts/useKanbanActions";
 
 interface Props {
     column: Column;
@@ -26,6 +26,7 @@ interface Props {
 
 export default function KanbanColumn(props: Props) {
     const { updateColumn, deleteColumn } = useKanbanActions();
+
     const handleRename = async () => {
         const next = prompt("Rename column", props.column.name);
         if (next && next.trim() && next !== props.column.name) {
@@ -38,6 +39,7 @@ export default function KanbanColumn(props: Props) {
             await deleteColumn(props.column.id);
         }
     };
+
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.column.id,
         data: {
