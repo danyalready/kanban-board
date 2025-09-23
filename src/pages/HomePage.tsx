@@ -1,25 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { liveQuery } from "dexie";
 
-import { db } from "@/db/db";
 import type { Board } from "@/db/types";
 import { createBoard, updateBoard } from "@/services/boardService";
-
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { useKanbanContext } from "@/contexts/kanbanContext";
 
 export default function HomePage() {
-    const [boards, setBoards] = useState<Board[]>([]);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [nameInput, setNameInput] = useState("");
     const [editingBoard, setEditingBoard] = useState<Board | null>(null);
 
-    useEffect(() => {
-        const sub = liveQuery(() => db.boards.toArray()).subscribe((rows) => setBoards(rows));
-        return () => sub.unsubscribe();
-    }, []);
+    const { state } = useKanbanContext();
 
     const canSubmit = useMemo(() => nameInput.trim().length > 0, [nameInput]);
 
@@ -75,7 +69,7 @@ export default function HomePage() {
             </div>
 
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {boards.map((b) => (
+                {state.boards.map((b) => (
                     <li key={b.id} className="flex items-center justify-between rounded-lg border p-4">
                         <div className="min-w-0">
                             <Link className="font-medium hover:underline" to={`/${b.id}`}>

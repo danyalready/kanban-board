@@ -9,12 +9,10 @@ export default function BoardPage() {
     const { loadBoardData, clearBoardData } = useKanbanActions();
 
     useEffect(() => {
-        if (boardId) {
-            loadBoardData(boardId);
-        }
+        if (boardId) loadBoardData(boardId);
 
         return () => clearBoardData();
-    }, [boardId]);
+    }, [boardId, loadBoardData, clearBoardData]);
 
     return <KanbanBoard boardId={boardId ?? ""} />;
 }

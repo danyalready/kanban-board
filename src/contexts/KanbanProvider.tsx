@@ -1,4 +1,4 @@
-import { useEffect, PropsWithChildren, useReducer } from "react";
+import { type PropsWithChildren, useEffect, useReducer } from "react";
 import { liveQuery } from "dexie";
 
 import { db } from "@/db/db";
@@ -16,17 +16,12 @@ export default function KanbanProvider(props: PropsWithChildren) {
         comments: [],
     });
 
-    // Live-sync only boards; other entities are loaded on demand
     useEffect(() => {
-        const subscription = liveQuery(async () => {
-            const boards = await db.boards.toArray();
+        const sub = liveQuery(() => db.boards.toArray()).subscribe((rows) =>
+            dispatch({ type: KanbanActionType.SetBoards, payload: { boards: rows } }),
+        );
 
-            return { boards };
-        }).subscribe(({ boards }) => {
-            dispatch({ type: KanbanActionType.SetBoards, payload: { boards } });
-        });
-
-        return () => subscription.unsubscribe();
+        return () => sub.unsubscribe();
     }, []);
 
     return <KanbanContext.Provider value={{ state, dispatch }}>{props.children}</KanbanContext.Provider>;
