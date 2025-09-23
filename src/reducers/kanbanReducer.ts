@@ -12,6 +12,21 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
         case KanbanActionType.SetState: {
             return action.payload.state;
         }
+        case KanbanActionType.SetBoards: {
+            return { ...state, boards: action.payload.boards };
+        }
+        case KanbanActionType.SetColumns: {
+            return { ...state, columns: action.payload.columns };
+        }
+        case KanbanActionType.SetTasks: {
+            return { ...state, tasks: action.payload.tasks };
+        }
+        case KanbanActionType.SetComments: {
+            return { ...state, comments: action.payload.comments };
+        }
+        case KanbanActionType.ClearBoardData: {
+            return { ...state, columns: [], tasks: [], comments: [] };
+        }
         case KanbanActionType.SetActive: {
             return { ...state, active: action.payload.active };
         }

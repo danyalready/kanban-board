@@ -5,6 +5,9 @@ import {
     deleteColumn as svcDeleteColumn,
 } from "@/services/columnService";
 import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
+import { getColumnsByBoard } from "@/services/columnService";
+import { getTasksByColumn } from "@/services/taskService";
+import { getCommentsByTask } from "@/services/commentService";
 
 import { useKanbanContext } from "./kanbanContext";
 
@@ -17,6 +20,24 @@ export function useKanbanActions() {
 
     const setState = (state: KanbanState) => {
         dispatch({ type: KanbanActionType.SetState, payload: { state } });
+    };
+
+    // On-demand loaders
+    const loadBoardData = async (boardId: string) => {
+        const columns = await getColumnsByBoard(boardId);
+        dispatch({ type: KanbanActionType.SetColumns, payload: { columns } });
+
+        // Load tasks for those columns
+        const allTasks = (await Promise.all(columns.map((c) => getTasksByColumn(c.id)))).flat();
+        dispatch({ type: KanbanActionType.SetTasks, payload: { tasks: allTasks } });
+
+        // Load comments for those tasks
+        const allComments = (await Promise.all(allTasks.map((t) => getCommentsByTask(t.id)))).flat();
+        dispatch({ type: KanbanActionType.SetComments, payload: { comments: allComments } });
+    };
+
+    const clearBoardData = () => {
+        dispatch({ type: KanbanActionType.ClearBoardData });
     };
 
     const moveColumn = async (columnId: string, targetIndex: number) => {
@@ -101,5 +122,15 @@ export function useKanbanActions() {
         dispatch({ type: KanbanActionType.DeleteColumn, payload: { columnId } });
     };
 
-    return { setActive, setState, moveColumn, moveTask, addColumn, updateColumn, deleteColumn };
+    return {
+        setActive,
+        setState,
+        loadBoardData,
+        clearBoardData,
+        moveColumn,
+        moveTask,
+        addColumn,
+        updateColumn,
+        deleteColumn,
+    };
 }

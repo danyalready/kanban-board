@@ -179,6 +179,10 @@ export default function KanbanBoard(props: { boardId?: string }) {
         setIsAddColumnOpen(false);
     };
 
+    const isBoardLoaded = props.boardId
+        ? state.columns.some((c) => c.boardId === props.boardId) || state.columns.length === 0
+        : true;
+
     return (
         <DndContext
             sensors={sensors}
@@ -195,15 +199,19 @@ export default function KanbanBoard(props: { boardId?: string }) {
                         .map((item) => item.id)}
                     strategy={horizontalListSortingStrategy}
                 >
-                    {state.columns
-                        .filter((c) => !props.boardId || c.boardId === props.boardId)
-                        .map((column) => (
-                            <KanbanColumn
-                                key={column.id}
-                                column={column}
-                                tasks={state.tasks.filter((task) => task.columnId === column.id)}
-                            />
-                        ))}
+                    {!isBoardLoaded ? (
+                        <div className="px-4 py-2 text-muted-foreground">Loading…</div>
+                    ) : (
+                        state.columns
+                            .filter((c) => !props.boardId || c.boardId === props.boardId)
+                            .map((column) => (
+                                <KanbanColumn
+                                    key={column.id}
+                                    column={column}
+                                    tasks={state.tasks.filter((task) => task.columnId === column.id)}
+                                />
+                            ))
+                    )}
                 </SortableContext>
                 <Dialog open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
                     <DialogTrigger asChild>

@@ -16,29 +16,14 @@ export default function KanbanProvider(props: PropsWithChildren) {
         comments: [],
     });
 
+    // Live-sync only boards; other entities are loaded on demand
     useEffect(() => {
         const subscription = liveQuery(async () => {
-            const [boards, columns, tasks, comments] = await Promise.all([
-                db.boards.toArray(),
-                db.columns.toArray(),
-                db.tasks.toArray(),
-                db.comments.toArray(),
-            ]);
+            const boards = await db.boards.toArray();
 
-            return { boards, columns, tasks, comments };
-        }).subscribe(({ boards, columns, tasks, comments }) => {
-            dispatch({
-                type: KanbanActionType.SetState,
-                payload: {
-                    state: {
-                        active: null,
-                        boards,
-                        columns: columns.sort((a, b) => a.position - b.position),
-                        tasks: tasks.sort((a, b) => a.position - b.position),
-                        comments,
-                    },
-                },
-            });
+            return { boards };
+        }).subscribe(({ boards }) => {
+            dispatch({ type: KanbanActionType.SetBoards, payload: { boards } });
         });
 
         return () => subscription.unsubscribe();

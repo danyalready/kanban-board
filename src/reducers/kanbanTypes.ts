@@ -11,6 +11,11 @@ export interface KanbanState {
 export enum KanbanActionType {
     SetState = "SET_STATE",
     SetActive = "SET_ACTIVE",
+    SetBoards = "SET_BOARDS",
+    SetColumns = "SET_COLUMNS",
+    SetTasks = "SET_TASKS",
+    SetComments = "SET_COMMENTS",
+    ClearBoardData = "CLEAR_BOARD_DATA",
     AddColumn = "ADD_COLUMN",
     UpdateColumn = "UPDATE_COLUMN",
     DeleteColumn = "DELETE_COLUMN",
@@ -24,6 +29,11 @@ export enum KanbanActionType {
 export type KanbanAction =
     | { type: KanbanActionType.SetState; payload: { state: KanbanState } }
     | { type: KanbanActionType.SetActive; payload: { active: null | Task | Column } }
+    | { type: KanbanActionType.SetBoards; payload: { boards: Board[] } }
+    | { type: KanbanActionType.SetColumns; payload: { columns: Column[] } }
+    | { type: KanbanActionType.SetTasks; payload: { tasks: Task[] } }
+    | { type: KanbanActionType.SetComments; payload: { comments: Comment[] } }
+    | { type: KanbanActionType.ClearBoardData }
     | { type: KanbanActionType.AddColumn; payload: { name: string; boardId: string } }
     | { type: KanbanActionType.UpdateColumn; payload: { columnId: string; data: Partial<Column> } }
     | { type: KanbanActionType.DeleteColumn; payload: { columnId: string } }

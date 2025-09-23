@@ -59,7 +59,7 @@ export default function KanbanColumn(props: Props) {
             <div
                 style={style}
                 className={cn(
-                    "flex select-none flex-col gap-3 rounded-xl bg-secondary pb-1 pt-3 shadow-sm ring-1 ring-inset ring-border",
+                    "flex select-none flex-col gap-3 rounded-xl bg-secondary py-1 shadow-sm ring-1 ring-inset ring-border",
                     props.className,
                 )}
             >
