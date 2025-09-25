@@ -34,7 +34,7 @@ export function useKanbanActions() {
     // On-demand loaders
     const loadBoardData = useCallback(
         async (boardId: string) => {
-            const columns = (await getColumnsByBoard(boardId)).sort((a, b) => a.position - b.position);
+            const columns = await getColumnsByBoard(boardId);
             dispatch({ type: KanbanActionType.SetColumns, payload: { columns } });
 
             // Load tasks for those columns
@@ -61,7 +61,7 @@ export function useKanbanActions() {
             const moving = state.columns.find((c) => c.id === columnId);
             if (!moving) return;
 
-            await svcMoveColumn(columnId, targetIndex, state.columns);
+            await svcMoveColumn(columnId, targetIndex);
         },
         [dispatch, state.columns],
     );

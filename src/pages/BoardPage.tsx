@@ -14,5 +14,5 @@ export default function BoardPage() {
         return () => clearBoardData();
     }, [boardId, loadBoardData, clearBoardData]);
 
-    return <KanbanBoard boardId={boardId ?? ""} />;
+    return <KanbanBoard boardId={boardId} />;
 }

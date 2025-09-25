@@ -23,43 +23,36 @@ export const updateColumn = async (id: string, updates: Partial<Column>) => {
     return await db.columns.update(id, updates);
 };
 
-export const moveColumn = async (columnId: string, targetIndex: number, columns: Column[]) => {
-    const currentIndex = columns.findIndex((c) => c.id === columnId);
-    if (currentIndex === -1 || targetIndex === -1) return;
+export const moveColumn = async (columnId: string, targetIndex: number) => {
+    if (targetIndex === -1) return;
+
+    const moving = await db.columns.get(columnId);
+    if (!moving) return;
+
+    // Work only within the same board and use sorted-by-position source of truth
+    const boardColumns = await db.columns.where("boardId").equals(moving.boardId).sortBy("position");
+    const withoutMoving = boardColumns.filter((c) => c.id !== columnId);
+
+    // Clamp target index to valid range within simulated array
+    const clampedIndex = Math.max(0, Math.min(targetIndex, withoutMoving.length));
+
+    // Simulate the new order by inserting moving at clampedIndex
+    const simulated = [...withoutMoving.slice(0, clampedIndex), moving, ...withoutMoving.slice(clampedIndex)];
+    const newIndex = simulated.findIndex((c) => c.id === columnId);
+
+    const before = simulated[newIndex - 1];
+    const after = simulated[newIndex + 1];
 
     let newPosition: number;
-
-    if (targetIndex === 0) {
-        // Move to start: place before the first column
-        const first = columns[0];
-        newPosition = first ? first.position - COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
-    } else if (targetIndex >= columns.length - 1) {
-        // Move to end: place after the last column
-        const last = columns[columns.length - 1];
-        newPosition = last ? last.position + COLUMN_POSITION_OFFSET : COLUMN_POSITION_OFFSET;
+    if (before && after) {
+        newPosition = (before.position + after.position) / 2;
+    } else if (before) {
+        newPosition = before.position + COLUMN_POSITION_OFFSET;
+    } else if (after) {
+        newPosition = Math.max(0, after.position - COLUMN_POSITION_OFFSET);
     } else {
-        // Move between two columns (fix for left-to-right move)
-        let before, after;
-        if (targetIndex > currentIndex) {
-            // Moving right: after dropping, the column will be at targetIndex,
-            // so before = columns[targetIndex], after = columns[targetIndex + 1]
-            before = columns[targetIndex];
-            after = columns[targetIndex + 1];
-        } else {
-            // Moving left or to same: before = columns[targetIndex - 1], after = columns[targetIndex]
-            before = columns[targetIndex - 1];
-            after = columns[targetIndex];
-        }
-
-        if (before && after) {
-            newPosition = (before.position + after.position) / 2;
-        } else if (before) {
-            newPosition = before.position + COLUMN_POSITION_OFFSET;
-        } else if (after) {
-            newPosition = Math.max(0, after.position - COLUMN_POSITION_OFFSET);
-        } else {
-            newPosition = COLUMN_POSITION_OFFSET;
-        }
+        // Only column in board
+        newPosition = COLUMN_POSITION_OFFSET;
     }
 
     await updateColumn(columnId, { position: newPosition });
