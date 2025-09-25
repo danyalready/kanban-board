@@ -9,10 +9,18 @@ import {
 } from "@/services/columnService";
 import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
 import { getColumnsByBoard } from "@/services/columnService";
-import { getTasksByColumn } from "@/services/taskService";
+import {
+    createTask as svcCreateTask,
+    deleteTask as svcDeleteTask,
+    getTasksByColumn,
+    moveTask as svcMoveTask,
+    updateTask as svcUpdateTask,
+    TASK_POSITION_OFFSET,
+} from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
 
 import { useKanbanContext } from "./kanbanContext";
+import { Task } from "@/db/types";
 
 export function useKanbanActions() {
     const { dispatch, state } = useKanbanContext();
@@ -69,6 +77,62 @@ export function useKanbanActions() {
     const moveTask = useCallback(
         (args: { taskId: string; targetIndex: number; sourceColumnId: string; targetColumnId: string }) => {
             dispatch({ type: KanbanActionType.MoveTask, payload: args });
+
+            // Persist move using simulated neighbors based on current state (pre-reducer change)
+            const tasksInTarget = state.tasks
+                .filter((t) => t.columnId === args.targetColumnId && t.id !== args.taskId)
+                .sort((a, b) => a.position - b.position);
+
+            const clampedIndex = Math.max(
+                0,
+                Math.min(args.targetIndex === -1 ? tasksInTarget.length : args.targetIndex, tasksInTarget.length),
+            );
+            const reordered = [
+                ...tasksInTarget.slice(0, clampedIndex),
+                state.tasks.find((t) => t.id === args.taskId)!,
+                ...tasksInTarget.slice(clampedIndex),
+            ];
+            const newIndex = reordered.findIndex((t) => t.id === args.taskId);
+            const before = reordered[newIndex - 1];
+            const after = reordered[newIndex + 1];
+
+            void svcMoveTask({
+                taskId: args.taskId,
+                newColumnId: args.targetColumnId,
+                beforeTaskId: before?.id,
+                afterTaskId: after?.id,
+            });
+        },
+        [dispatch, state.tasks],
+    );
+
+    const addTask = useCallback(
+        async (columnId: string, title: string) => {
+            const tasksInColumn = state.tasks.filter((t) => t.columnId === columnId);
+            const maxPosition = tasksInColumn.length ? Math.max(...tasksInColumn.map((t) => t.position)) : 0;
+            const position = maxPosition + TASK_POSITION_OFFSET;
+
+            const task = await svcCreateTask(columnId, title, position);
+
+            dispatch({ type: KanbanActionType.SetTasks, payload: { tasks: [...state.tasks, task] } });
+        },
+        [state.tasks, dispatch],
+    );
+
+    const updateTask = useCallback(
+        async (taskId: string, data: Partial<{ title: string; description: string; priority: Task["priority"] }>) => {
+            await svcUpdateTask(taskId, data);
+
+            dispatch({ type: KanbanActionType.UpdateTask, payload: { taskId, data: data } });
+        },
+        [dispatch],
+    );
+
+    const deleteTask = useCallback(
+        async (taskId: string) => {
+            await svcDeleteTask(taskId);
+
+            dispatch({ type: KanbanActionType.DeleteTask, payload: { taskId } });
         },
         [dispatch],
     );
@@ -109,6 +173,9 @@ export function useKanbanActions() {
         clearBoardData,
         moveColumn,
         moveTask,
+        addTask,
+        updateTask,
+        deleteTask,
         addColumn,
         updateColumn,
         deleteColumn,
