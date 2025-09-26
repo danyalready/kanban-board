@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function KanbanColumn(props: Props) {
-    const { updateColumn, deleteColumn } = useKanbanActions();
+    const { updateColumn, deleteColumn, addTask } = useKanbanActions();
 
     const handleRename = async () => {
         const next = prompt("Rename column", props.column.name);
@@ -37,6 +37,13 @@ export default function KanbanColumn(props: Props) {
     const handleDelete = async () => {
         if (confirm("Delete this column and its tasks?")) {
             await deleteColumn(props.column.id);
+        }
+    };
+
+    const handleAddTask = async () => {
+        const title = prompt("New task title");
+        if (title && title.trim()) {
+            await addTask(props.column.id, title.trim());
         }
     };
 
@@ -84,7 +91,7 @@ export default function KanbanColumn(props: Props) {
                                 <Pencil />
                                 Rename
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleAddTask}>
                                 <SquarePlus />
                                 Add task
                             </DropdownMenuItem>
