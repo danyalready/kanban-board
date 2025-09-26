@@ -1,5 +1,5 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { Ellipsis, SquarePlus, Trash2, Pencil } from "lucide-react";
 
@@ -32,6 +32,8 @@ export default function KanbanColumn(props: Props) {
     const [renameValue, setRenameValue] = useState(props.column.name);
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [taskTitle, setTaskTitle] = useState("");
+
+    const items = useMemo(() => props.tasks.map((task) => task.id), [props.tasks]);
 
     const openRename = () => {
         setRenameValue(props.column.name);
@@ -124,7 +126,7 @@ export default function KanbanColumn(props: Props) {
                         </DropdownMenu>
                     </div>
 
-                    <SortableContext items={props.tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
+                    <SortableContext items={items} strategy={verticalListSortingStrategy}>
                         <div className="flex min-h-12 flex-col gap-1 px-1">
                             {props.tasks.map((task) => (
                                 <KanbanTask key={task.id} task={task} />

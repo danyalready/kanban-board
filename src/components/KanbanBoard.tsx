@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     rectIntersection,
     DndContext,
@@ -47,6 +47,8 @@ export default function KanbanBoard(props: { boardId?: string }) {
         useSensor(TouchSensor),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
     );
+
+    const items = useMemo(() => state.columns.map((item) => item.id), [state.columns]);
 
     const setActiveItem = useCallback(
         (event: DragStartEvent) => {
@@ -225,12 +227,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
             onDragEnd={handleDragEnd}
         >
             <div className="flex min-h-screen gap-2 overflow-x-auto overflow-y-hidden bg-background p-6">
-                <SortableContext
-                    items={state.columns
-                        .filter((c) => !props.boardId || c.boardId === props.boardId)
-                        .map((item) => item.id)}
-                    strategy={horizontalListSortingStrategy}
-                >
+                <SortableContext items={items} strategy={horizontalListSortingStrategy}>
                     {!isBoardLoaded ? (
                         <div className="px-4 py-2 text-muted-foreground">Loading…</div>
                     ) : (
