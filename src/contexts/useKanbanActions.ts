@@ -75,8 +75,15 @@ export function useKanbanActions() {
     );
 
     const moveTask = useCallback(
-        (args: { taskId: string; targetIndex: number; sourceColumnId: string; targetColumnId: string }) => {
+        (
+            args: { taskId: string; targetIndex: number; sourceColumnId: string; targetColumnId: string },
+            options?: { persist?: boolean },
+        ) => {
+            // Always optimistically reorder in UI
             dispatch({ type: KanbanActionType.MoveTask, payload: args });
+
+            // Skip persistence during drag-over
+            if (options?.persist === false) return;
 
             // Persist move using simulated neighbors based on current state (pre-reducer change)
             const tasksInTarget = state.tasks

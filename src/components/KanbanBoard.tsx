@@ -83,12 +83,19 @@ export default function KanbanBoard(props: { boardId?: string }) {
                     .filter((task) => task.columnId === targetColumn.id)
                     .sort((a, b) => a.position - b.position);
 
-                const targetTaskIndex = overTask
-                    ? tasksInTargetColumn.findIndex((task) => task.id === overTask.id)
-                    : -1;
-
                 const activeTask = state.tasks.find((task) => task.id === activeId);
                 const sourceColumnId = activeTask ? activeTask.columnId : targetColumn.id;
+
+                let targetTaskIndex = overTask ? tasksInTargetColumn.findIndex((task) => task.id === overTask.id) : -1;
+
+                // If moving down within same column, insert after the hovered task
+                if (overTask && activeTask && sourceColumnId === targetColumn.id) {
+                    const activeIndex = tasksInTargetColumn.findIndex((t) => t.id === activeTask.id);
+                    const overIndex = tasksInTargetColumn.findIndex((t) => t.id === overTask.id);
+                    if (activeIndex < overIndex) {
+                        targetTaskIndex = overIndex + 1;
+                    }
+                }
 
                 moveTaskAction({
                     targetIndex: targetTaskIndex,
@@ -123,13 +130,26 @@ export default function KanbanBoard(props: { boardId?: string }) {
 
                         if (targetColumn) {
                             const activeTask = state.tasks.find((t) => t.id === active.id);
+                            const tasksInTargetColumn = state.tasks
+                                .filter((task) => task.columnId === targetColumn.id)
+                                .sort((a, b) => a.position - b.position);
 
-                            moveTaskAction({
-                                targetColumnId: targetColumn.id,
-                                targetIndex: over.data.current?.sortable.index,
-                                taskId: active.id.toString(),
-                                sourceColumnId: activeTask ? activeTask.columnId : targetColumn.id,
-                            });
+                            let targetIndex = over.data.current?.sortable.index ?? 0;
+                            if (activeTask && overTask && activeTask.columnId === targetColumn.id) {
+                                const activeIndex = tasksInTargetColumn.findIndex((t) => t.id === activeTask.id);
+                                const overIndex = tasksInTargetColumn.findIndex((t) => t.id === overTask.id);
+                                if (activeIndex < overIndex) targetIndex = overIndex + 1;
+                            }
+
+                            moveTaskAction(
+                                {
+                                    targetColumnId: targetColumn.id,
+                                    targetIndex,
+                                    taskId: active.id.toString(),
+                                    sourceColumnId: activeTask ? activeTask.columnId : targetColumn.id,
+                                },
+                                { persist: false },
+                            );
                         }
                     }
 
@@ -138,12 +158,15 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 case "column": {
                     const activeTask = state.tasks.find((t) => t.id === active.id);
 
-                    moveTaskAction({
-                        targetColumnId: over.id.toString(),
-                        targetIndex: -1,
-                        taskId: active.id.toString(),
-                        sourceColumnId: activeTask ? activeTask.columnId : over.id.toString(),
-                    });
+                    moveTaskAction(
+                        {
+                            targetColumnId: over.id.toString(),
+                            targetIndex: -1,
+                            taskId: active.id.toString(),
+                            sourceColumnId: activeTask ? activeTask.columnId : over.id.toString(),
+                        },
+                        { persist: false },
+                    );
 
                     break;
                 }
@@ -163,6 +186,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 if (active.data.current?.type === "column" && over.data.current?.type === "column") {
                     moveColumn(active.id.toString(), over.id.toString());
                 } else if (active.data.current?.type === "task") {
+                    // Persist final position on drop
                     moveTask(active.id.toString(), over.id.toString());
                 }
             }
