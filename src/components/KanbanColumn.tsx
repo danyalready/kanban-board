@@ -28,15 +28,19 @@ interface Props {
 
 export default function KanbanColumn(props: Props) {
     const { updateColumn, deleteColumn, addTask } = useKanbanActions();
-    const [isRenameOpen, setIsRenameOpen] = useState(false);
+
     const [renameValue, setRenameValue] = useState(props.column.name);
-    const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [taskTitle, setTaskTitle] = useState("");
+
+    const [isOpenMenu, setIsOpenMenu] = useState(false);
+    const [isRenameOpen, setIsRenameOpen] = useState(false);
+    const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
 
     const items = useMemo(() => props.tasks.map((task) => task.id), [props.tasks]);
 
     const openRename = () => {
         setRenameValue(props.column.name);
+        setIsOpenMenu(false);
         setIsRenameOpen(true);
     };
 
@@ -56,6 +60,7 @@ export default function KanbanColumn(props: Props) {
 
     const openAddTask = () => {
         setTaskTitle("");
+        setIsOpenMenu(false);
         setIsAddTaskOpen(true);
     };
 
@@ -101,7 +106,7 @@ export default function KanbanColumn(props: Props) {
                             <Badge variant="outline">{props.tasks.length}</Badge>
                         </div>
 
-                        <DropdownMenu>
+                        <DropdownMenu open={isOpenMenu} onOpenChange={setIsOpenMenu}>
                             <DropdownMenuTrigger asChild>
                                 <Button size="icon" variant="link">
                                     <Ellipsis />

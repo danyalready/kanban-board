@@ -18,9 +18,9 @@ import {
     TASK_POSITION_OFFSET,
 } from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
+import type { Task } from "@/db/types";
 
 import { useKanbanContext } from "./kanbanContext";
-import { Task } from "@/db/types";
 
 export function useKanbanActions() {
     const { dispatch, state } = useKanbanContext();
