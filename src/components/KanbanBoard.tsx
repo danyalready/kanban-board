@@ -19,7 +19,15 @@ import { useKanbanActions } from "@/contexts/useKanbanActions";
 
 import KanbanColumn from "./KanbanColumn";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "./ui/dialog";
 import KanbanDragOverlay from "./KanbanDragOverlay";
 
 export default function KanbanBoard(props: { boardId?: string }) {
@@ -247,6 +255,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                         <DialogHeader>
                             <DialogTitle>New column</DialogTitle>
                         </DialogHeader>
+                        <DialogDescription></DialogDescription>
                         <div className="space-y-2">
                             <label className="text-sm">Name</label>
                             <input
