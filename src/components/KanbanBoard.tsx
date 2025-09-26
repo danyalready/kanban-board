@@ -208,7 +208,9 @@ export default function KanbanBoard(props: { boardId?: string }) {
                                 <KanbanColumn
                                     key={column.id}
                                     column={column}
-                                    tasks={state.tasks.filter((task) => task.columnId === column.id)}
+                                    tasks={state.tasks
+                                        .filter((task) => task.columnId === column.id)
+                                        .sort((a, b) => a.position - b.position)}
                                 />
                             ))
                     )}
