@@ -231,17 +231,15 @@ export default function KanbanBoard(props: { boardId?: string }) {
                     {!isBoardLoaded ? (
                         <div className="px-4 py-2 text-muted-foreground">Loading…</div>
                     ) : (
-                        state.columns
-                            .filter((c) => !props.boardId || c.boardId === props.boardId)
-                            .map((column) => (
-                                <KanbanColumn
-                                    key={column.id}
-                                    column={column}
-                                    tasks={state.tasks
-                                        .filter((task) => task.columnId === column.id)
-                                        .sort((a, b) => a.position - b.position)}
-                                />
-                            ))
+                        state.columns.map((column) => (
+                            <KanbanColumn
+                                key={column.id}
+                                column={column}
+                                tasks={state.tasks
+                                    .filter((task) => task.columnId === column.id)
+                                    .sort((a, b) => a.position - b.position)}
+                            />
+                        ))
                     )}
                 </SortableContext>
                 <Dialog open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
