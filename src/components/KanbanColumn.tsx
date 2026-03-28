@@ -88,7 +88,7 @@ export default function KanbanColumn(props: Props) {
 
     return (
         <>
-            <div className="min-h-full min-w-80" ref={setNodeRef}>
+            <div className="min-h-full w-80 flex-shrink-0" ref={setNodeRef}>
                 <div
                     style={style}
                     className={cn(
