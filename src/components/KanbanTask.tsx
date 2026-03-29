@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
@@ -33,13 +34,13 @@ export default function KanbanTask(props: Props) {
         transition,
     };
 
-    const Element = props.isOverlay ? "div" : "a";
+    const Element = props.isOverlay ? "div" : Link;
 
     return (
         <Element
             ref={setNodeRef}
             style={style}
-            href={`?task=${props.task.id}`}
+            to={`?task=${props.task.id}`}
             className={cn(
                 "flex min-w-72 select-none flex-col gap-3 rounded-lg bg-card p-3 shadow-sm ring-1 ring-inset ring-border",
                 props.className,
