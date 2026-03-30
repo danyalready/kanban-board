@@ -50,7 +50,9 @@ export function useKanbanActions() {
             dispatch({ type: KanbanActionType.SetTasks, payload: { tasks: allTasks } });
 
             // Load comments for those tasks
-            const allComments = (await Promise.all(allTasks.map((t) => getCommentsByTask(t.id)))).flat();
+            const allComments = (
+                await Promise.all(allTasks.map((t) => getCommentsByTask(t.id)))
+            ).flat();
             dispatch({ type: KanbanActionType.SetComments, payload: { comments: allComments } });
         },
         [dispatch],
@@ -75,59 +77,56 @@ export function useKanbanActions() {
     );
 
     const moveTask = useCallback(
-        (
-            args: { taskId: string; targetIndex: number; sourceColumnId: string; targetColumnId: string },
+        async (
+            params: {
+                taskId: string;
+                targetIndex: number;
+                sourceColumnId: string;
+                targetColumnId: string;
+            },
             options?: { persist?: boolean },
         ) => {
             // Always optimistically reorder in UI
-            dispatch({ type: KanbanActionType.MoveTask, payload: args });
+            dispatch({ type: KanbanActionType.MoveTask, payload: params });
 
             // Skip persistence during drag-over
             if (options?.persist === false) return;
 
-            // Persist move using simulated neighbors based on current state (pre-reducer change)
-            const tasksInTarget = state.tasks
-                .filter((t) => t.columnId === args.targetColumnId && t.id !== args.taskId)
-                .sort((a, b) => a.position - b.position);
+            const prevState = structuredClone(state);
 
-            const clampedIndex = Math.max(
-                0,
-                Math.min(args.targetIndex === -1 ? tasksInTarget.length : args.targetIndex, tasksInTarget.length),
-            );
-            const reordered = [
-                ...tasksInTarget.slice(0, clampedIndex),
-                state.tasks.find((t) => t.id === args.taskId)!,
-                ...tasksInTarget.slice(clampedIndex),
-            ];
-            const newIndex = reordered.findIndex((t) => t.id === args.taskId);
-            const before = reordered[newIndex - 1];
-            const after = reordered[newIndex + 1];
-
-            void svcMoveTask({
-                taskId: args.taskId,
-                newColumnId: args.targetColumnId,
-                beforeTaskId: before?.id,
-                afterTaskId: after?.id,
-            });
+            try {
+                await svcMoveTask(params);
+            } catch (error) {
+                dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
+                console.error("error", error);
+            }
         },
-        [dispatch, state.tasks],
+        [dispatch, state],
     );
 
     const addTask = useCallback(
         async (columnId: string, title: string) => {
             const tasksInColumn = state.tasks.filter((t) => t.columnId === columnId);
-            const maxPosition = tasksInColumn.length ? Math.max(...tasksInColumn.map((t) => t.position)) : 0;
+            const maxPosition = tasksInColumn.length
+                ? Math.max(...tasksInColumn.map((t) => t.position))
+                : 0;
             const position = maxPosition + TASK_POSITION_OFFSET;
 
             const task = await svcCreateTask(columnId, title, position);
 
-            dispatch({ type: KanbanActionType.SetTasks, payload: { tasks: [...state.tasks, task] } });
+            dispatch({
+                type: KanbanActionType.SetTasks,
+                payload: { tasks: [...state.tasks, task] },
+            });
         },
         [state.tasks, dispatch],
     );
 
     const updateTask = useCallback(
-        async (taskId: string, data: Partial<{ title: string; description: string; priority: Task["priority"] }>) => {
+        async (
+            taskId: string,
+            data: Partial<{ title: string; description: string; priority: Task["priority"] }>,
+        ) => {
             await svcUpdateTask(taskId, data);
 
             dispatch({ type: KanbanActionType.UpdateTask, payload: { taskId, data: data } });
@@ -147,7 +146,9 @@ export function useKanbanActions() {
     const addColumn = useCallback(
         async (boardId: string, name: string) => {
             const columnsInBoard = state.columns.filter((c) => c.boardId === boardId);
-            const maxPosition = columnsInBoard.length ? Math.max(...columnsInBoard.map((c) => c.position)) : 0;
+            const maxPosition = columnsInBoard.length
+                ? Math.max(...columnsInBoard.map((c) => c.position))
+                : 0;
             const position = maxPosition + COLUMN_POSITION_OFFSET;
 
             await svcCreateColumn(boardId, name, position);

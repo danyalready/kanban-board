@@ -20,7 +20,7 @@ export function calculatePosition(tasks: Task[], targetIndex: number): number {
     return TASK_POSITION_OFFSET;
 }
 
-export function getTasksByColumn(tasks: Task[], columnId: string) {
+export function filterTasksByColumn(tasks: Task[], columnId: string) {
     return tasks.filter((t) => t.columnId === columnId).sort((a, b) => a.position - b.position);
 }
 

@@ -3,7 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import type { Column, Task } from "@/db/types";
 import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
-import { calculatePosition, getTasksByColumn, needsReindex, reindex } from "@/model/task-ordering";
+import {
+    calculatePosition,
+    filterTasksByColumn,
+    needsReindex,
+    reindex,
+} from "@/model/task-ordering";
 
 import { KanbanActionType, type KanbanAction, type KanbanState } from "./kanbanTypes";
 
@@ -105,11 +110,11 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
         case KanbanActionType.MoveTask: {
             const { taskId, sourceColumnId, targetColumnId, targetIndex } = action.payload;
 
-            const sourceTasks = getTasksByColumn(state.tasks, sourceColumnId);
+            const sourceTasks = filterTasksByColumn(state.tasks, sourceColumnId);
             const targetTasks =
                 sourceColumnId === targetColumnId
                     ? sourceTasks
-                    : getTasksByColumn(state.tasks, targetColumnId);
+                    : filterTasksByColumn(state.tasks, targetColumnId);
 
             const index = targetIndex === -1 ? targetTasks.length : targetIndex;
 
@@ -125,7 +130,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                     : task,
             );
 
-            const updatedColumnTasks = getTasksByColumn(nextTasks, targetColumnId);
+            const updatedColumnTasks = filterTasksByColumn(nextTasks, targetColumnId);
 
             if (needsReindex(updatedColumnTasks)) {
                 const reindexed = reindex(updatedColumnTasks);

@@ -2,9 +2,11 @@ import { v4 as uuid } from "uuid";
 
 import { db } from "@/db/db";
 import type { Task } from "@/db/types";
+import { calculatePosition } from "@/model/task-ordering";
 
 export const TASK_POSITION_OFFSET = 1e4;
 export const TASK_MIN_GAP = 1e-4;
+export const TASK_POSITION_LIFETIME = 10;
 
 export const createTask = async (columnId: string, title: string, position: number) => {
     const task: Task = {
@@ -36,6 +38,7 @@ export const deleteTask = async (taskId: string) => {
     return await db.tasks.delete(taskId);
 };
 
+// TODO: store in local-storage
 const moveCountMap = new Map<string, number>();
 
 const trackMoves = async (columnId: string) => {
@@ -43,7 +46,7 @@ const trackMoves = async (columnId: string) => {
 
     moveCountMap.set(columnId, count + 1);
 
-    if (count + 1 >= 10) {
+    if (count + 1 >= TASK_POSITION_LIFETIME) {
         await normalizeTaskPositions(columnId);
         moveCountMap.set(columnId, 0);
     }
@@ -59,53 +62,26 @@ export const normalizeTaskPositions = async (columnId: string) => {
 
 export const moveTask = async ({
     taskId,
-    newColumnId,
-    beforeTaskId,
-    afterTaskId,
+    targetIndex,
+    sourceColumnId,
+    targetColumnId,
 }: {
     taskId: string;
-    newColumnId: string;
-    beforeTaskId?: string;
-    afterTaskId?: string;
+    targetIndex: number;
+    sourceColumnId: string;
+    targetColumnId: string;
 }) => {
-    const task = await db.tasks.get(taskId);
+    const sourceTasks = await getTasksByColumn(sourceColumnId);
+    const targetTasks =
+        sourceColumnId === targetColumnId ? sourceTasks : await getTasksByColumn(targetColumnId);
 
-    if (!task) throw new Error("Task not found");
-
-    let newPosition: number;
-
-    if (beforeTaskId && afterTaskId) {
-        const before = await db.tasks.get(beforeTaskId);
-        const after = await db.tasks.get(afterTaskId);
-
-        if (!before || !after) throw new Error("Reference task not found");
-
-        newPosition = (before.position + after.position) / 2;
-    } else if (beforeTaskId) {
-        const before = await db.tasks.get(beforeTaskId);
-
-        if (!before) throw new Error("Reference task not found");
-
-        newPosition = before.position + TASK_POSITION_OFFSET;
-    } else if (afterTaskId) {
-        const after = await db.tasks.get(afterTaskId);
-
-        if (!after) throw new Error("Reference task not found");
-
-        newPosition = after.position - TASK_POSITION_OFFSET;
-    } else {
-        // insert at end
-        const tasks = await db.tasks.where("columnId").equals(newColumnId).sortBy("position");
-
-        newPosition = tasks.length
-            ? tasks[tasks.length - 1].position + TASK_POSITION_OFFSET
-            : TASK_POSITION_OFFSET;
-    }
+    const index = targetIndex === -1 ? targetTasks.length : targetIndex;
+    const newPosition = calculatePosition(targetTasks, index);
 
     await db.tasks.update(taskId, {
-        columnId: newColumnId,
+        columnId: targetColumnId,
         position: newPosition,
     });
 
-    await trackMoves(newColumnId);
+    await trackMoves(targetColumnId);
 };
