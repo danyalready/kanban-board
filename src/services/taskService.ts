@@ -3,7 +3,8 @@ import { v4 as uuid } from "uuid";
 import { db } from "@/db/db";
 import type { Task } from "@/db/types";
 
-export const TASK_POSITION_OFFSET = 100;
+export const TASK_POSITION_OFFSET = 1e4;
+export const TASK_MIN_GAP = 1e-4;
 
 export const createTask = async (columnId: string, title: string, position: number) => {
     const task: Task = {
@@ -96,7 +97,9 @@ export const moveTask = async ({
         // insert at end
         const tasks = await db.tasks.where("columnId").equals(newColumnId).sortBy("position");
 
-        newPosition = tasks.length ? tasks[tasks.length - 1].position + TASK_POSITION_OFFSET : TASK_POSITION_OFFSET;
+        newPosition = tasks.length
+            ? tasks[tasks.length - 1].position + TASK_POSITION_OFFSET
+            : TASK_POSITION_OFFSET;
     }
 
     await db.tasks.update(taskId, {

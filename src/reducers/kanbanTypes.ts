@@ -43,7 +43,12 @@ export type KanbanAction =
     | { type: KanbanActionType.DeleteTask; payload: { taskId: string } }
     | {
           type: KanbanActionType.MoveTask;
-          payload: { taskId: string; targetIndex: number; sourceColumnId: string; targetColumnId: string };
+          payload: {
+              taskId: string;
+              targetIndex: number;
+              sourceColumnId: string;
+              targetColumnId: string;
+          };
       };
 
 export function isTask(active: null | Task | Column): active is Task {
