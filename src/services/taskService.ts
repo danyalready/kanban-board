@@ -2,11 +2,11 @@ import { v4 as uuid } from "uuid";
 
 import { db } from "@/db/db";
 import type { Task } from "@/db/types";
-import { calculatePosition } from "@/model/task-ordering";
+import { calculateTaskPosition } from "@/model/task-ordering";
 
 export const TASK_POSITION_OFFSET = 1e4;
 export const TASK_MIN_GAP = 1e-4;
-export const TASK_POSITION_LIFETIME = 10;
+export const TASK_MOVE_THRESHOLD = 10;
 
 export const createTask = async (columnId: string, title: string, position: number) => {
     const task: Task = {
@@ -46,7 +46,7 @@ const trackMoves = async (columnId: string) => {
 
     moveCountMap.set(columnId, count + 1);
 
-    if (count + 1 >= TASK_POSITION_LIFETIME) {
+    if (count + 1 >= TASK_MOVE_THRESHOLD) {
         await normalizeTaskPositions(columnId);
         moveCountMap.set(columnId, 0);
     }
@@ -76,9 +76,9 @@ export const moveTask = async ({
         sourceColumnId === targetColumnId ? sourceTasks : await getTasksByColumn(targetColumnId);
 
     const index = targetIndex === -1 ? targetTasks.length : targetIndex;
-    const newPosition = calculatePosition(targetTasks, index);
+    const newPosition = calculateTaskPosition(targetTasks, index);
 
-    await db.tasks.update(taskId, {
+    await updateTask(taskId, {
         columnId: targetColumnId,
         position: newPosition,
     });

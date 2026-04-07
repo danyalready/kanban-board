@@ -1,7 +1,7 @@
 import type { Task } from "@/db/types";
 import { TASK_MIN_GAP, TASK_POSITION_OFFSET } from "@/services/taskService";
 
-export function calculatePosition(tasks: Task[], targetIndex: number): number {
+export function calculateTaskPosition(tasks: Task[], targetIndex: number): number {
     const before = tasks[targetIndex - 1];
     const after = tasks[targetIndex];
 

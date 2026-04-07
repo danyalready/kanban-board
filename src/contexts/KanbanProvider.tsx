@@ -24,5 +24,9 @@ export default function KanbanProvider(props: PropsWithChildren) {
         return () => sub.unsubscribe();
     }, []);
 
-    return <KanbanContext.Provider value={{ state, dispatch }}>{props.children}</KanbanContext.Provider>;
+    return (
+        <KanbanContext.Provider value={{ state, dispatch }}>
+            {props.children}
+        </KanbanContext.Provider>
+    );
 }

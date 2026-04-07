@@ -11,7 +11,11 @@ import {
     type DragEndEvent,
     type DragOverEvent,
 } from "@dnd-kit/core";
-import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import {
+    horizontalListSortingStrategy,
+    SortableContext,
+    sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
 
 import { type KanbanState } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
@@ -32,16 +36,10 @@ import KanbanDragOverlay from "./KanbanDragOverlay";
 
 export default function KanbanBoard(props: { boardId?: string }) {
     const { state } = useKanbanContext();
-    const {
-        moveColumn: moveColumnAction,
-        moveTask: moveTaskAction,
-        setActive,
-        setState,
-        addColumn,
-    } = useKanbanActions();
+    const { moveColumn, moveTask, setActive, setState, addColumn } = useKanbanActions();
     const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
     const [newColumnName, setNewColumnName] = useState("");
-    const [clonedKanbanState, setClonedKanbanState] = useState<KanbanState>(state);
+    const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
         useSensor(TouchSensor),
@@ -55,38 +53,31 @@ export default function KanbanBoard(props: { boardId?: string }) {
             const { current } = event.active.data;
 
             if (current) {
-                switch (current.type) {
-                    case "column":
-                        setActive(current.column);
-                        break;
-                    case "task":
-                        setActive(current.task);
-                        break;
-                    default:
-                        console.warn(`Type ${current.type} is not defined.`);
-                }
+                if (current.type === "column") setActive(current.column);
+                if (current.type === "task") setActive(current.task);
             }
         },
         [setActive],
     );
 
-    const moveColumn = useCallback(
+    const handleColumnMove = useCallback(
         (activeId: string, overId: string) => {
-            const boardColumns = state.columns.filter((c) => !props.boardId || c.boardId === props.boardId);
-            const targetIndex = boardColumns.findIndex((column) => column.id === overId);
+            const targetIndex = state.columns.findIndex((column) => column.id === overId);
 
-            moveColumnAction(activeId, targetIndex);
+            moveColumn(activeId, targetIndex);
         },
-        [moveColumnAction, state.columns, props.boardId],
+        [moveColumn, state.columns],
     );
 
-    const moveTask = useCallback(
+    const handleTaskMove = useCallback(
         (activeId: string, overId: string) => {
             // Determine the target column and target index within that column
             const overTask = state.tasks.find((task) => task.id === overId);
             const targetColumn =
                 state.columns.find((column) => column.id === overId) ||
-                (overTask ? state.columns.find((column) => column.id === overTask.columnId) : undefined);
+                (overTask
+                    ? state.columns.find((column) => column.id === overTask.columnId)
+                    : undefined);
 
             if (targetColumn) {
                 const tasksInTargetColumn = state.tasks
@@ -96,18 +87,22 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 const activeTask = state.tasks.find((task) => task.id === activeId);
                 const sourceColumnId = activeTask ? activeTask.columnId : targetColumn.id;
 
-                let targetTaskIndex = overTask ? tasksInTargetColumn.findIndex((task) => task.id === overTask.id) : -1;
+                let targetTaskIndex = overTask
+                    ? tasksInTargetColumn.findIndex((task) => task.id === overTask.id)
+                    : -1;
 
                 // If moving down within same column, insert after the hovered task
                 if (overTask && activeTask && sourceColumnId === targetColumn.id) {
-                    const activeIndex = tasksInTargetColumn.findIndex((t) => t.id === activeTask.id);
+                    const activeIndex = tasksInTargetColumn.findIndex(
+                        (t) => t.id === activeTask.id,
+                    );
                     const overIndex = tasksInTargetColumn.findIndex((t) => t.id === overTask.id);
                     if (activeIndex < overIndex) {
                         targetTaskIndex = overIndex + 1;
                     }
                 }
 
-                moveTaskAction({
+                moveTask({
                     targetIndex: targetTaskIndex,
                     targetColumnId: targetColumn.id,
                     taskId: activeId,
@@ -115,24 +110,28 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 });
             }
         },
-        [moveTaskAction, state.columns, state.tasks],
+        [moveTask, state.columns, state.tasks],
     );
 
     const handleDragStart = useCallback(
         (event: DragStartEvent) => {
-            setClonedKanbanState(state);
+            setPrevKanbanState(state);
             setActiveItem(event);
         },
         [setActiveItem, state],
     );
 
+    // NOTE: used only for tasks while moving them between columns
     const handleDragOver = useCallback(
         ({ active, over }: DragOverEvent) => {
             if (active.data.current?.type !== "task" || !over) return;
 
             switch (over.data.current?.type) {
                 case "task": {
-                    if (active.data.current?.sortable.containerId !== over.data.current?.sortable.containerId) {
+                    if (
+                        active.data.current?.sortable.containerId !==
+                        over.data.current?.sortable.containerId
+                    ) {
                         const overTask = state.tasks.find((task) => task.id === over.id);
                         const targetColumn = overTask
                             ? state.columns.find((column) => column.id === overTask.columnId)
@@ -146,17 +145,23 @@ export default function KanbanBoard(props: { boardId?: string }) {
 
                             let targetIndex = over.data.current?.sortable.index ?? 0;
                             if (activeTask && overTask && activeTask.columnId === targetColumn.id) {
-                                const activeIndex = tasksInTargetColumn.findIndex((t) => t.id === activeTask.id);
-                                const overIndex = tasksInTargetColumn.findIndex((t) => t.id === overTask.id);
+                                const activeIndex = tasksInTargetColumn.findIndex(
+                                    (t) => t.id === activeTask.id,
+                                );
+                                const overIndex = tasksInTargetColumn.findIndex(
+                                    (t) => t.id === overTask.id,
+                                );
                                 if (activeIndex < overIndex) targetIndex = overIndex + 1;
                             }
 
-                            moveTaskAction(
+                            moveTask(
                                 {
                                     targetColumnId: targetColumn.id,
                                     targetIndex,
                                     taskId: active.id.toString(),
-                                    sourceColumnId: activeTask ? activeTask.columnId : targetColumn.id,
+                                    sourceColumnId: activeTask
+                                        ? activeTask.columnId
+                                        : targetColumn.id,
                                 },
                                 { persist: false },
                             );
@@ -168,7 +173,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 case "column": {
                     const activeTask = state.tasks.find((t) => t.id === active.id);
 
-                    moveTaskAction(
+                    moveTask(
                         {
                             targetColumnId: over.id.toString(),
                             targetIndex: -1,
@@ -185,23 +190,25 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 }
             }
         },
-        [moveTaskAction, state.columns, state.tasks],
+        [moveTask, state.columns, state.tasks],
     );
 
     const handleDragEnd = useCallback(
         ({ active, over }: DragEndEvent) => {
             setActive(null);
 
-            if (over) {
-                if (active.data.current?.type === "column" && over.data.current?.type === "column") {
-                    moveColumn(active.id.toString(), over.id.toString());
-                } else if (active.data.current?.type === "task") {
-                    // Persist final position on drop
-                    moveTask(active.id.toString(), over.id.toString());
-                }
-            }
+            if (!over) return;
+
+            const activeCurrent = active.data.current;
+            const overCurrent = over.data.current;
+
+            const isColumn = activeCurrent?.type === "column" && overCurrent?.type === "column";
+            const isTask = activeCurrent?.type === "task";
+
+            if (isColumn) handleColumnMove(active.id.toString(), over.id.toString());
+            else if (isTask) handleTaskMove(active.id.toString(), over.id.toString());
         },
-        [setActive, moveColumn, moveTask],
+        [setActive, handleColumnMove, handleTaskMove],
     );
 
     const handleAddColumn = async () => {
@@ -221,7 +228,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
         <DndContext
             sensors={sensors}
             collisionDetection={rectIntersection}
-            onDragCancel={() => setState(clonedKanbanState)}
+            onDragCancel={() => setState(prevKanbanState)}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
@@ -231,15 +238,17 @@ export default function KanbanBoard(props: { boardId?: string }) {
                     {!isBoardLoaded ? (
                         <div className="px-4 py-2 text-muted-foreground">Loading…</div>
                     ) : (
-                        state.columns.map((column) => (
-                            <KanbanColumn
-                                key={column.id}
-                                column={column}
-                                tasks={state.tasks
-                                    .filter((task) => task.columnId === column.id)
-                                    .sort((a, b) => a.position - b.position)}
-                            />
-                        ))
+                        state.columns
+                            .sort((a, b) => a.position - b.position)
+                            .map((column) => (
+                                <KanbanColumn
+                                    key={column.id}
+                                    column={column}
+                                    tasks={state.tasks
+                                        .filter((task) => task.columnId === column.id)
+                                        .sort((a, b) => a.position - b.position)}
+                                />
+                            ))
                     )}
                 </SortableContext>
                 <Dialog open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
@@ -261,7 +270,10 @@ export default function KanbanBoard(props: { boardId?: string }) {
                             />
                         </div>
                         <DialogFooter>
-                            <Button disabled={!props.boardId || !newColumnName.trim()} onClick={handleAddColumn}>
+                            <Button
+                                disabled={!props.boardId || !newColumnName.trim()}
+                                onClick={handleAddColumn}
+                            >
                                 Create
                             </Button>
                         </DialogFooter>

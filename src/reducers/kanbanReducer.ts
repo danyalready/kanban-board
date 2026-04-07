@@ -1,10 +1,9 @@
-import { arrayMove } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
 
 import type { Column, Task } from "@/db/types";
 import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
 import {
-    calculatePosition,
+    calculateTaskPosition,
     filterTasksByColumn,
     needsReindex,
     reindex,
@@ -70,17 +69,6 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 columns: state.columns.filter((item) => item.id !== action.payload.columnId),
             };
         }
-        case KanbanActionType.MoveColumn: {
-            const activeIndex = state.columns.findIndex(
-                (item) => item.id === action.payload.columnId,
-            );
-            if (activeIndex === -1 || action.payload.targetIndex === -1) return state;
-
-            return {
-                ...state,
-                columns: arrayMove(state.columns, activeIndex, action.payload.targetIndex),
-            };
-        }
         case KanbanActionType.AddTask: {
             const newTask: Task = { id: uuidv4(), ...action.payload.data };
 
@@ -118,7 +106,7 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
 
             const index = targetIndex === -1 ? targetTasks.length : targetIndex;
 
-            const newPosition = calculatePosition(targetTasks, index);
+            const newPosition = calculateTaskPosition(targetTasks, index);
 
             let nextTasks = state.tasks.map((task) =>
                 task.id === taskId

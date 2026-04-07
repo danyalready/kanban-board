@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
 import {
     createColumn as svcCreateColumn,
-    moveColumn as svcMoveColumn,
     updateColumn as svcUpdateColumn,
     deleteColumn as svcDeleteColumn,
 } from "@/services/columnService";
@@ -12,13 +11,14 @@ import { getColumnsByBoard } from "@/services/columnService";
 import {
     createTask as svcCreateTask,
     deleteTask as svcDeleteTask,
-    getTasksByColumn,
+    getTasksByColumn as svcGetTasksByColumn,
     moveTask as svcMoveTask,
     updateTask as svcUpdateTask,
     TASK_POSITION_OFFSET,
 } from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
 import type { Task } from "@/db/types";
+import { calculateColumnPosition } from "@/model/column-ordering";
 
 import { useKanbanContext } from "./kanbanContext";
 
@@ -46,7 +46,9 @@ export function useKanbanActions() {
             dispatch({ type: KanbanActionType.SetColumns, payload: { columns } });
 
             // Load tasks for those columns
-            const allTasks = (await Promise.all(columns.map((c) => getTasksByColumn(c.id)))).flat();
+            const allTasks = (
+                await Promise.all(columns.map((c) => svcGetTasksByColumn(c.id)))
+            ).flat();
             dispatch({ type: KanbanActionType.SetTasks, payload: { tasks: allTasks } });
 
             // Load comments for those tasks
@@ -64,16 +66,29 @@ export function useKanbanActions() {
 
     const moveColumn = useCallback(
         async (columnId: string, targetIndex: number) => {
-            // Optimistic reorder in UI
-            dispatch({ type: KanbanActionType.MoveColumn, payload: { columnId, targetIndex } });
+            const activeIndex = state.columns.findIndex((column) => column.id === columnId);
+            const updatedPosition = calculateColumnPosition(
+                state.columns,
+                activeIndex,
+                targetIndex,
+            );
 
-            // Compute new position within the same board and persist
-            const moving = state.columns.find((c) => c.id === columnId);
-            if (!moving) return;
+            // Optimistically reorder in UI first
+            dispatch({
+                type: KanbanActionType.UpdateColumn,
+                payload: { columnId, data: { position: updatedPosition } },
+            });
 
-            await svcMoveColumn(columnId, targetIndex);
+            const prevState = structuredClone(state);
+
+            try {
+                await svcUpdateColumn(columnId, { position: updatedPosition });
+            } catch (error) {
+                dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
+                console.error("error", error);
+            }
         },
-        [dispatch, state.columns],
+        [dispatch, state],
     );
 
     const moveTask = useCallback(
