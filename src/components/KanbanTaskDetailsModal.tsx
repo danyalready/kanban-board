@@ -4,7 +4,7 @@ import type { Task } from "@/db/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import RichTextEditor from "./RichTextEditor";
 
 interface Props {
@@ -38,10 +38,11 @@ export default function KanbanTaskDetailsModal(props: Props) {
                     <DialogTitle>{props.task?.title}</DialogTitle>
                 </DialogHeader>
                 <h3>Description</h3>
-                <DialogDescription>
-                    <RichTextEditor value={description} onChange={setDescription} />
-                </DialogDescription>
-                <h3>Comments</h3>
+
+                <RichTextEditor value={description} onChange={setDescription} />
+                <DialogFooter>
+                    <h3>Comments</h3>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
