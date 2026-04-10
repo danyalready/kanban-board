@@ -108,62 +108,35 @@ export default function KanbanBoard(props: { boardId?: string }) {
         ({ active, over }: DragOverEvent) => {
             if (active.data.current?.type !== "task" || !over) return;
 
-            switch (over.data.current?.type) {
-                case "task": {
-                    if (
-                        active.data.current?.sortable.containerId !==
-                        over.data.current?.sortable.containerId
-                    ) {
-                        const overTask = state.tasks.find((task) => task.id === over.id);
-                        const targetColumn = overTask
-                            ? state.columns.find((column) => column.id === overTask.columnId)
-                            : state.columns.find((column) => column.id === over.id);
+            const isOverTask = over.data.current?.type === "task";
+            const isOverColumn = over.data.current?.type === "column";
+            const isMovingToAnotherColumn =
+                active.data.current?.sortable.containerId !==
+                over.data.current?.sortable.containerId;
 
-                        if (targetColumn) {
-                            const activeTask = state.tasks.find((t) => t.id === active.id);
-                            const tasksInTargetColumn = state.tasks
-                                .filter((task) => task.columnId === targetColumn.id)
-                                .sort((a, b) => a.position - b.position);
+            if (isOverTask && isMovingToAnotherColumn) {
+                const overTaskIndex = state.tasks.findIndex((task) => task.id === over.id);
 
-                            let targetIndex = over.data.current?.sortable.index ?? 0;
-                            if (activeTask && overTask && activeTask.columnId === targetColumn.id) {
-                                const activeIndex = tasksInTargetColumn.findIndex(
-                                    (t) => t.id === activeTask.id,
-                                );
-                                const overIndex = tasksInTargetColumn.findIndex(
-                                    (t) => t.id === overTask.id,
-                                );
-                                if (activeIndex < overIndex) targetIndex = overIndex + 1;
-                            }
-
-                            moveTask(
-                                {
-                                    targetColumnId: targetColumn.id,
-                                    targetIndex,
-                                    taskId: active.id.toString(),
-                                },
-                                { persist: false },
-                            );
-                        }
-                    }
-
-                    break;
-                }
-                case "column":
-                    moveTask(
-                        {
-                            taskId: active.id.toString(),
-                            targetIndex: -1,
-                            targetColumnId: over.id.toString(),
-                        },
-                        { persist: false },
-                    );
-                    break;
-                default:
-                    console.warn(`Type ${over.data.current?.type} is not defined.`);
+                moveTask(
+                    {
+                        taskId: active.id.toString(),
+                        targetIndex: overTaskIndex,
+                        targetColumnId: over.data.current?.task.columnId,
+                    },
+                    { persist: false },
+                );
+            } else if (isOverColumn) {
+                moveTask(
+                    {
+                        taskId: active.id.toString(),
+                        targetIndex: -1,
+                        targetColumnId: over.id.toString(),
+                    },
+                    { persist: false },
+                );
             }
         },
-        [moveTask, state.columns, state.tasks],
+        [moveTask, state.tasks],
     );
 
     const handleDragEnd = useCallback(
