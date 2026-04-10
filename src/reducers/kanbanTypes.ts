@@ -19,7 +19,6 @@ export enum KanbanActionType {
     AddColumn = "ADD_COLUMN",
     UpdateColumn = "UPDATE_COLUMN",
     DeleteColumn = "DELETE_COLUMN",
-    MoveColumn = "MOVE_COLUMN",
     AddTask = "ADD_TASK",
     UpdateTask = "UPDATE_TASK",
     DeleteTask = "DELETE_TASK",
@@ -37,18 +36,12 @@ export type KanbanAction =
     | { type: KanbanActionType.AddColumn; payload: { name: string; boardId: string } }
     | { type: KanbanActionType.UpdateColumn; payload: { columnId: string; data: Partial<Column> } }
     | { type: KanbanActionType.DeleteColumn; payload: { columnId: string } }
-    | { type: KanbanActionType.MoveColumn; payload: { columnId: string; targetIndex: number } }
     | { type: KanbanActionType.AddTask; payload: { columnId: string; data: Omit<Task, "id"> } }
     | { type: KanbanActionType.UpdateTask; payload: { taskId: string; data: Partial<Task> } }
     | { type: KanbanActionType.DeleteTask; payload: { taskId: string } }
     | {
           type: KanbanActionType.MoveTask;
-          payload: {
-              taskId: string;
-              targetIndex: number;
-              sourceColumnId: string;
-              targetColumnId: string;
-          };
+          payload: { taskId: string; targetIndex: number; targetColumnId: string };
       };
 
 export function isTask(active: null | Task | Column): active is Task {

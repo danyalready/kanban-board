@@ -2,12 +2,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import type { Column, Task } from "@/db/types";
 import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
-import {
-    calculateTaskPosition,
-    filterTasksByColumn,
-    needsReindex,
-    reindex,
-} from "@/model/task-ordering";
 
 import { KanbanActionType, type KanbanAction, type KanbanState } from "./kanbanTypes";
 
@@ -94,42 +88,6 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
                 ...state,
                 tasks: state.tasks.filter((item) => item.id !== action.payload.taskId),
             };
-        }
-        case KanbanActionType.MoveTask: {
-            const { taskId, sourceColumnId, targetColumnId, targetIndex } = action.payload;
-
-            const sourceTasks = filterTasksByColumn(state.tasks, sourceColumnId);
-            const targetTasks =
-                sourceColumnId === targetColumnId
-                    ? sourceTasks
-                    : filterTasksByColumn(state.tasks, targetColumnId);
-
-            const index = targetIndex === -1 ? targetTasks.length : targetIndex;
-
-            const newPosition = calculateTaskPosition(targetTasks, index);
-
-            let nextTasks = state.tasks.map((task) =>
-                task.id === taskId
-                    ? {
-                          ...task,
-                          columnId: targetColumnId,
-                          position: newPosition,
-                      }
-                    : task,
-            );
-
-            const updatedColumnTasks = filterTasksByColumn(nextTasks, targetColumnId);
-
-            if (needsReindex(updatedColumnTasks)) {
-                const reindexed = reindex(updatedColumnTasks);
-
-                nextTasks = nextTasks.map((task) => {
-                    const updated = reindexed.find((t) => t.id === task.id);
-                    return updated ? updated : task;
-                });
-            }
-
-            return { ...state, tasks: nextTasks };
         }
         default: {
             return state;

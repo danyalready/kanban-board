@@ -12,13 +12,13 @@ import {
     createTask as svcCreateTask,
     deleteTask as svcDeleteTask,
     getTasksByColumn as svcGetTasksByColumn,
-    moveTask as svcMoveTask,
     updateTask as svcUpdateTask,
     TASK_POSITION_OFFSET,
 } from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
 import type { Task } from "@/db/types";
 import { calculateColumnPosition } from "@/model/column-ordering";
+import { calculateTaskPosition, filterTasksByColumn } from "@/model/task-ordering";
 
 import { useKanbanContext } from "./kanbanContext";
 
@@ -96,13 +96,25 @@ export function useKanbanActions() {
             params: {
                 taskId: string;
                 targetIndex: number;
-                sourceColumnId: string;
                 targetColumnId: string;
             },
             options?: { persist?: boolean },
         ) => {
+            const { taskId, targetIndex, targetColumnId } = params;
+
+            const targetColumnTasks = filterTasksByColumn(state.tasks, targetColumnId);
+            const activeIndex = state.columns.findIndex((column) => column.id === taskId);
+            const updatedPosition = calculateTaskPosition(
+                targetColumnTasks,
+                activeIndex,
+                targetIndex,
+            );
+
             // Always optimistically reorder in UI
-            dispatch({ type: KanbanActionType.MoveTask, payload: params });
+            dispatch({
+                type: KanbanActionType.UpdateTask,
+                payload: { taskId, data: { columnId: targetColumnId, position: updatedPosition } },
+            });
 
             // Skip persistence during drag-over
             if (options?.persist === false) return;
@@ -110,7 +122,10 @@ export function useKanbanActions() {
             const prevState = structuredClone(state);
 
             try {
-                await svcMoveTask(params);
+                await svcUpdateTask(taskId, {
+                    columnId: targetColumnId,
+                    position: updatedPosition,
+                });
             } catch (error) {
                 dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
                 console.error("error", error);

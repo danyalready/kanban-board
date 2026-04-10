@@ -70,43 +70,25 @@ export default function KanbanBoard(props: { boardId?: string }) {
     );
 
     const handleTaskMove = useCallback(
-        (activeId: string, overId: string) => {
-            // Determine the target column and target index within that column
-            const overTask = state.tasks.find((task) => task.id === overId);
-            const targetColumn =
-                state.columns.find((column) => column.id === overId) ||
-                (overTask
-                    ? state.columns.find((column) => column.id === overTask.columnId)
-                    : undefined);
+        (taskId: string, overId: string) => {
+            const targetColumn = state.columns.find((column) => column.id === overId);
 
+            // `over` is a column only if the column is empty
             if (targetColumn) {
-                const tasksInTargetColumn = state.tasks
-                    .filter((task) => task.columnId === targetColumn.id)
-                    .sort((a, b) => a.position - b.position);
+                moveTask({
+                    taskId,
+                    targetIndex: -1,
+                    targetColumnId: overId,
+                });
 
-                const activeTask = state.tasks.find((task) => task.id === activeId);
-                const sourceColumnId = activeTask ? activeTask.columnId : targetColumn.id;
-
-                let targetTaskIndex = overTask
-                    ? tasksInTargetColumn.findIndex((task) => task.id === overTask.id)
-                    : -1;
-
-                // If moving down within same column, insert after the hovered task
-                if (overTask && activeTask && sourceColumnId === targetColumn.id) {
-                    const activeIndex = tasksInTargetColumn.findIndex(
-                        (t) => t.id === activeTask.id,
-                    );
-                    const overIndex = tasksInTargetColumn.findIndex((t) => t.id === overTask.id);
-                    if (activeIndex < overIndex) {
-                        targetTaskIndex = overIndex + 1;
-                    }
-                }
+                // `over` is a task
+            } else {
+                const targetTaskIndex = state.tasks.findIndex((task) => task.id === overId)!;
 
                 moveTask({
+                    taskId,
                     targetIndex: targetTaskIndex,
-                    targetColumnId: targetColumn.id,
-                    taskId: activeId,
-                    sourceColumnId,
+                    targetColumnId: state.tasks[targetTaskIndex].columnId,
                 });
             }
         },
@@ -159,9 +141,6 @@ export default function KanbanBoard(props: { boardId?: string }) {
                                     targetColumnId: targetColumn.id,
                                     targetIndex,
                                     taskId: active.id.toString(),
-                                    sourceColumnId: activeTask
-                                        ? activeTask.columnId
-                                        : targetColumn.id,
                                 },
                                 { persist: false },
                             );
@@ -170,24 +149,18 @@ export default function KanbanBoard(props: { boardId?: string }) {
 
                     break;
                 }
-                case "column": {
-                    const activeTask = state.tasks.find((t) => t.id === active.id);
-
+                case "column":
                     moveTask(
                         {
-                            targetColumnId: over.id.toString(),
-                            targetIndex: -1,
                             taskId: active.id.toString(),
-                            sourceColumnId: activeTask ? activeTask.columnId : over.id.toString(),
+                            targetIndex: -1,
+                            targetColumnId: over.id.toString(),
                         },
                         { persist: false },
                     );
-
                     break;
-                }
-                default: {
+                default:
                     console.warn(`Type ${over.data.current?.type} is not defined.`);
-                }
             }
         },
         [moveTask, state.columns, state.tasks],
@@ -199,11 +172,8 @@ export default function KanbanBoard(props: { boardId?: string }) {
 
             if (!over) return;
 
-            const activeCurrent = active.data.current;
-            const overCurrent = over.data.current;
-
-            const isColumn = activeCurrent?.type === "column" && overCurrent?.type === "column";
-            const isTask = activeCurrent?.type === "task";
+            const isColumn = active.data.current?.type === "column";
+            const isTask = active.data.current?.type === "task";
 
             if (isColumn) handleColumnMove(active.id.toString(), over.id.toString());
             else if (isTask) handleTaskMove(active.id.toString(), over.id.toString());

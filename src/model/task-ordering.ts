@@ -1,9 +1,15 @@
 import type { Task } from "@/db/types";
 import { TASK_MIN_GAP, TASK_POSITION_OFFSET } from "@/services/taskService";
 
-export function calculateTaskPosition(tasks: Task[], targetIndex: number): number {
-    const before = tasks[targetIndex - 1];
-    const after = tasks[targetIndex];
+export function calculateTaskPosition(
+    tasks: Task[],
+    activeIndex: number,
+    targetIndex: number,
+): number {
+    const isForwardMove = activeIndex < targetIndex;
+
+    const before = isForwardMove ? tasks[targetIndex] : tasks[targetIndex - 1];
+    const after = isForwardMove ? tasks[targetIndex + 1] : tasks[targetIndex];
 
     if (before && after) {
         return (before.position + after.position) / 2;
