@@ -20,6 +20,7 @@ import {
 import { type KanbanState } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
+import { filterTasksByColumn } from "@/model/task-ordering";
 
 import KanbanColumn from "./KanbanColumn";
 import { Button } from "./ui/button";
@@ -83,12 +84,14 @@ export default function KanbanBoard(props: { boardId?: string }) {
 
                 // `over` is a task
             } else {
-                const targetTaskIndex = state.tasks.findIndex((task) => task.id === overId)!;
+                const targetTask = state.tasks.find((task) => task.id === overId)!;
+                const targetColumnTasks = filterTasksByColumn(state.tasks, targetTask.columnId);
+                const targetTaskIndex = targetColumnTasks.findIndex((task) => task.id === overId)!;
 
                 moveTask({
                     taskId,
                     targetIndex: targetTaskIndex,
-                    targetColumnId: state.tasks[targetTaskIndex].columnId,
+                    targetColumnId: targetTask.columnId,
                 });
             }
         },
@@ -106,22 +109,25 @@ export default function KanbanBoard(props: { boardId?: string }) {
     // NOTE: used only for tasks while moving them between columns
     const handleDragOver = useCallback(
         ({ active, over }: DragOverEvent) => {
-            if (active.data.current?.type !== "task" || !over) return;
+            const activeCurrent = active.data.current;
+            const overCurrent = over?.data.current;
 
-            const isOverTask = over.data.current?.type === "task";
-            const isOverColumn = over.data.current?.type === "column";
+            if (activeCurrent?.type !== "task" || !overCurrent) return;
+
+            const isOverTask = overCurrent.type === "task";
+            const isOverColumn = overCurrent.type === "column";
             const isMovingToAnotherColumn =
-                active.data.current?.sortable.containerId !==
-                over.data.current?.sortable.containerId;
+                activeCurrent.sortable.containerId !== overCurrent.sortable.containerId;
 
             if (isOverTask && isMovingToAnotherColumn) {
-                const overTaskIndex = state.tasks.findIndex((task) => task.id === over.id);
+                const targetColumnTasks = filterTasksByColumn(state.tasks, overCurrent!.columnId);
+                const targetIndex = targetColumnTasks.findIndex((task) => task.id === over.id);
 
                 moveTask(
                     {
                         taskId: active.id.toString(),
-                        targetIndex: overTaskIndex,
-                        targetColumnId: over.data.current?.task.columnId,
+                        targetIndex,
+                        targetColumnId: overCurrent.task.columnId,
                     },
                     { persist: false },
                 );

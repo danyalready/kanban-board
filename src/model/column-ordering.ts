@@ -16,7 +16,7 @@ export function calculateColumnPosition(
     }
 
     if (before) {
-        return before.position + COLUMN_POSITION_OFFSET;
+        return before.position + COLUMN_POSITION_OFFSET / 2;
     }
 
     if (after) {

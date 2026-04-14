@@ -22,13 +22,13 @@ interface Props {
 
 export default function BoardFormDialog(props: Props) {
     const { register, handleSubmit } = useForm<Inputs>({ values: props.initialValues });
-    const isBoardEdit = Boolean(props.initialValues);
+    const isEditBoard = Boolean(props.initialValues);
 
     return (
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{isBoardEdit ? "✏️ Edit board" : "Create board"}</DialogTitle>
+                    <DialogTitle>{isEditBoard ? "✏️ Edit board" : "Create board"}</DialogTitle>
                 </DialogHeader>
                 <form className="space-y-2" onSubmit={handleSubmit(props.onSubmit)}>
                     <label className="text-sm">Board name</label>
@@ -40,7 +40,7 @@ export default function BoardFormDialog(props: Props) {
                     />
                 </form>
                 <DialogFooter>
-                    <Button type="submit">{isBoardEdit ? "Edit" : "Create"}</Button>
+                    <Button type="submit">{isEditBoard ? "Edit" : "Create"}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

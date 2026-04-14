@@ -103,7 +103,7 @@ export function useKanbanActions() {
             const { taskId, targetIndex, targetColumnId } = params;
 
             const targetColumnTasks = filterTasksByColumn(state.tasks, targetColumnId);
-            const activeIndex = state.columns.findIndex((column) => column.id === taskId);
+            const activeIndex = targetColumnTasks.findIndex((task) => task.id === taskId);
             const updatedPosition = calculateTaskPosition(
                 targetColumnTasks,
                 activeIndex,

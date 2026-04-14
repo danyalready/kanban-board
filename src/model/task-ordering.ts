@@ -16,18 +16,23 @@ export function calculateTaskPosition(
     }
 
     if (before) {
-        return before.position + TASK_POSITION_OFFSET;
+        return before.position + TASK_POSITION_OFFSET / 2;
     }
 
     if (after) {
         return after.position / 2;
     }
 
-    return TASK_POSITION_OFFSET;
+    return tasks[tasks.length - 1]
+        ? tasks[tasks.length - 1].position + TASK_POSITION_OFFSET
+        : TASK_POSITION_OFFSET;
 }
 
 export function filterTasksByColumn(tasks: Task[], columnId: string) {
-    return tasks.filter((t) => t.columnId === columnId).sort((a, b) => a.position - b.position);
+    const columnTasks = tasks.filter((t) => t.columnId === columnId);
+    const sortedColumnTasks = columnTasks.sort((a, b) => a.position - b.position);
+
+    return sortedColumnTasks;
 }
 
 export function reindex(tasks: Task[]): Task[] {
