@@ -1,24 +1,24 @@
-import { defaultDropAnimationSideEffects, DragOverlay } from "@dnd-kit/core";
+import { defaultDropAnimationSideEffects, DragOverlay as DndDragOverlay } from "@dnd-kit/core";
 import { createPortal } from "react-dom";
 
 import { isColumn, isTask } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
-import type { Column } from "@/db/types";
+import { filterTasksByColumn } from "@/model/task-ordering";
 
-import KanbanColumn from "./KanbanColumn";
-import KanbanTask from "./KanbanTask";
+import Column from "./column/Column";
+import Task from "./Task";
 
-export default function KanbanDragOverlay() {
+export default function DragOverlay() {
     const { state } = useKanbanContext();
-
-    const getColumnTasks = (columnId: Column["id"]) => state.tasks.filter((task) => task.columnId === columnId);
 
     const renderOverlayComponent = () => {
         if (isColumn(state.active)) {
+            const columnTasks = filterTasksByColumn(state.tasks, state.active.id);
+
             return (
-                <KanbanColumn
+                <Column
                     column={state.active}
-                    tasks={getColumnTasks(state.active.id)}
+                    tasks={columnTasks}
                     className="rotate-2 shadow-xl"
                     headerClassName="cursor-grabbing"
                 />
@@ -27,7 +27,7 @@ export default function KanbanDragOverlay() {
 
         if (isTask(state.active)) {
             return (
-                <KanbanTask
+                <Task
                     task={state.active}
                     isOverlay
                     className="rotate-2 shadow-xl"
@@ -40,7 +40,7 @@ export default function KanbanDragOverlay() {
     };
 
     return createPortal(
-        <DragOverlay
+        <DndDragOverlay
             dropAnimation={{
                 sideEffects: defaultDropAnimationSideEffects({
                     styles: { active: { visibility: "hidden" } },
@@ -48,7 +48,7 @@ export default function KanbanDragOverlay() {
             }}
         >
             {renderOverlayComponent()}
-        </DragOverlay>,
+        </DndDragOverlay>,
         document.body,
     );
 }

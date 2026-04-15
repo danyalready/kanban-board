@@ -19,7 +19,7 @@ interface Props {
     gripClassName?: string;
 }
 
-export default function KanbanTask(props: Props) {
+export default function Task(props: Props) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.task.id,
         data: {

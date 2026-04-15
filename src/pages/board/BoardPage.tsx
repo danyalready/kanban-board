@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
-import KanbanBoard from "@/components/KanbanBoard";
+import Board from "@/components/Board";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
-import KanbanTaskDetailsModal from "@/components/KanbanTaskDetailsModal";
+import TaskFormDialog from "@/components/TaskFormDialog";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 
 export default function BoardPage() {
@@ -28,9 +28,9 @@ export default function BoardPage() {
 
     return (
         <div>
-            <KanbanBoard boardId={boardId} />
+            <Board boardId={boardId} />
 
-            <KanbanTaskDetailsModal
+            <TaskFormDialog
                 task={state.tasks.find((task) => task.id === taskId) || null}
                 onClose={handleTaskDetailsModalClose}
             />

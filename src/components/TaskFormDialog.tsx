@@ -4,7 +4,7 @@ import type { Task } from "@/db/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import RichTextEditor from "./RichTextEditor";
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
     onClose: () => void;
 }
 
-export default function KanbanTaskDetailsModal(props: Props) {
+export default function TaskFormDialog(props: Props) {
     const [description, setDescription] = useState(props.task?.description || "");
     const debouncedDescription = useDebounce(description);
     const { updateTask } = useKanbanActions();
@@ -37,12 +37,16 @@ export default function KanbanTaskDetailsModal(props: Props) {
                 <DialogHeader>
                     <DialogTitle>{props.task?.title}</DialogTitle>
                 </DialogHeader>
-                <h3>Description</h3>
 
-                <RichTextEditor value={description} onChange={setDescription} />
-                <DialogFooter>
+                <section>
+                    <h3>Description</h3>
+                    <div dangerouslySetInnerHTML={{ __html: `<div>${description}</div>` }}></div>
+                    {/* <RichTextEditor value={description} onChange={setDescription} /> */}
+                </section>
+
+                <section>
                     <h3>Comments</h3>
-                </DialogFooter>
+                </section>
             </DialogContent>
         </Dialog>
     );

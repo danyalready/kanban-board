@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { PlusIcon } from "lucide-react";
 import {
     rectIntersection,
     DndContext,
@@ -22,7 +23,7 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 import { filterTasksByColumn } from "@/model/task-ordering";
 
-import KanbanColumn from "./KanbanColumn";
+import Column from "./column/Column";
 import { Button } from "./ui/button";
 import {
     Dialog,
@@ -33,9 +34,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "./ui/dialog";
-import KanbanDragOverlay from "./KanbanDragOverlay";
+import DragOverlay from "./DragOverlay";
 
-export default function KanbanBoard(props: { boardId?: string }) {
+export default function Board(props: { boardId?: string }) {
     const { state } = useKanbanContext();
     const { moveColumn, moveTask, setActive, setState, addColumn } = useKanbanActions();
     const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
@@ -190,7 +191,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                         state.columns
                             .sort((a, b) => a.position - b.position)
                             .map((column) => (
-                                <KanbanColumn
+                                <Column
                                     key={column.id}
                                     column={column}
                                     tasks={state.tasks
@@ -202,7 +203,9 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 </SortableContext>
                 <Dialog open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline">Add column</Button>
+                        <Button variant="outline">
+                            <PlusIcon /> Add column
+                        </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
@@ -230,7 +233,7 @@ export default function KanbanBoard(props: { boardId?: string }) {
                 </Dialog>
             </div>
 
-            <KanbanDragOverlay />
+            <DragOverlay />
         </DndContext>
     );
 }
