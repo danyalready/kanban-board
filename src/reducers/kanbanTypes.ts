@@ -38,11 +38,7 @@ export type KanbanAction =
     | { type: KanbanActionType.DeleteColumn; payload: { columnId: string } }
     | { type: KanbanActionType.AddTask; payload: { columnId: string; data: Omit<Task, "id"> } }
     | { type: KanbanActionType.UpdateTask; payload: { taskId: string; data: Partial<Task> } }
-    | { type: KanbanActionType.DeleteTask; payload: { taskId: string } }
-    | {
-          type: KanbanActionType.MoveTask;
-          payload: { taskId: string; targetIndex: number; targetColumnId: string };
-      };
+    | { type: KanbanActionType.DeleteTask; payload: { taskId: string } };
 
 export function isTask(active: null | Task | Column): active is Task {
     return Boolean(active && "priority" in active);

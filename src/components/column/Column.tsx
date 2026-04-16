@@ -1,13 +1,13 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 
 import { cn } from "@/utils/cn";
 import type { Column, Task as TaskT } from "@/db/types";
 
-import { Badge } from "../ui/badge";
 import Task from "../Task";
 import ColumnActions from "./ColumnActions";
+import ColumnEditableTitle from "./ColumnEditableTitle";
 
 interface Props {
     column: Column;
@@ -17,9 +17,7 @@ interface Props {
 }
 
 export default function Column(props: Props) {
-    const [isOpenMenu, setIsOpenMenu] = useState(false);
-
-    const items = useMemo(() => props.tasks.map((task) => task.id), [props.tasks]);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props.column.id,
@@ -36,45 +34,44 @@ export default function Column(props: Props) {
     };
 
     return (
-        <>
-            <div className="min-h-full w-80 flex-shrink-0" ref={setNodeRef}>
+        <div className="min-h-full w-80 flex-shrink-0" ref={setNodeRef}>
+            <div
+                style={style}
+                className={cn(
+                    "flex select-none flex-col gap-3 rounded-xl bg-secondary py-1 shadow-sm ring-1 ring-inset ring-border",
+                    props.className,
+                )}
+            >
                 <div
-                    style={style}
+                    {...listeners}
+                    {...attributes}
                     className={cn(
-                        "flex select-none flex-col gap-3 rounded-xl bg-secondary py-1 shadow-sm ring-1 ring-inset ring-border",
-                        props.className,
+                        "flex cursor-grab items-center justify-between px-4",
+                        props.headerClassName,
                     )}
                 >
-                    <div
-                        {...listeners}
-                        {...attributes}
-                        className={cn(
-                            "flex cursor-grab items-center justify-between px-4",
-                            props.headerClassName,
-                        )}
-                    >
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-semibold">{props.column.name}</h2>
-                            <Badge variant="outline">{props.tasks.length}</Badge>
-                        </div>
+                    <ColumnEditableTitle
+                        title={props.column.name}
+                        count={props.tasks.length}
+                        onChange={() => {}}
+                    />
 
-                        <ColumnActions
-                            open={isOpenMenu}
-                            onOpenChange={setIsOpenMenu}
-                            onClickAddTask={() => {}}
-                            onClickDelete={() => {}}
-                        />
-                    </div>
-
-                    <SortableContext items={items} strategy={verticalListSortingStrategy}>
-                        <div className="flex min-h-12 flex-col gap-1 px-1">
-                            {props.tasks.map((task) => (
-                                <Task key={task.id} task={task} />
-                            ))}
-                        </div>
-                    </SortableContext>
+                    <ColumnActions
+                        open={isMenuOpen}
+                        onOpenChange={setIsMenuOpen}
+                        onClickAddTask={() => {}}
+                        onClickDelete={() => {}}
+                    />
                 </div>
+
+                <SortableContext items={props.tasks} strategy={verticalListSortingStrategy}>
+                    <div className="flex min-h-12 flex-col gap-1 px-1">
+                        {props.tasks.map((task) => (
+                            <Task key={task.id} task={task} />
+                        ))}
+                    </div>
+                </SortableContext>
             </div>
-        </>
+        </div>
     );
 }
