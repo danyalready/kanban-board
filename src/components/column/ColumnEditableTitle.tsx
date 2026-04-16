@@ -32,6 +32,8 @@ export default function ColumnEditableTitle(props: Props) {
                 onChange={(e) => setDraft(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={(e) => {
+                    e.stopPropagation();
+
                     if (e.key === "Enter") handleSave();
                     if (e.key === "Escape") {
                         setDraft(props.title);

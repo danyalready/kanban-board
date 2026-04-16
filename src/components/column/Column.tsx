@@ -14,6 +14,7 @@ interface Props {
     tasks: TaskT[];
     className?: string;
     headerClassName?: string;
+    onColumnNameChange: (value: string) => void;
 }
 
 export default function Column(props: Props) {
@@ -53,7 +54,7 @@ export default function Column(props: Props) {
                     <ColumnEditableTitle
                         title={props.column.name}
                         count={props.tasks.length}
-                        onChange={() => {}}
+                        onChange={props.onColumnNameChange}
                     />
 
                     <ColumnActions

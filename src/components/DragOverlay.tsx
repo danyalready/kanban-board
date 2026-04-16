@@ -21,6 +21,7 @@ export default function DragOverlay() {
                     tasks={columnTasks}
                     className="rotate-2 shadow-xl"
                     headerClassName="cursor-grabbing"
+                    onColumnNameChange={() => {}}
                 />
             );
         }

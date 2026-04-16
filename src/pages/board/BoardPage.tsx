@@ -2,17 +2,25 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
 import Board from "@/components/Board";
-import TaskFormDialog from "@/components/TaskFormDialog";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
+
+import TaskFormDialog from "./TaskFormDialog";
 
 export default function BoardPage() {
     const { boardId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
     const { state } = useKanbanContext();
-    const { moveColumn, moveTask, setActive, setState, loadBoardData, clearBoardData } =
-        useKanbanActions();
+    const {
+        moveColumn,
+        moveTask,
+        setActive,
+        setState,
+        updateColumn,
+        loadBoardData,
+        clearBoardData,
+    } = useKanbanActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
 
     const taskId = searchParams.get("task");
@@ -39,6 +47,7 @@ export default function BoardPage() {
                 onDragStart={() => setPrevKanbanState(state)}
                 onDragCancel={() => setState(prevKanbanState)}
                 onDragEnd={() => setActive(null)}
+                onColumnChange={updateColumn}
             />
 
             <TaskFormDialog
