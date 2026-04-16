@@ -98,7 +98,7 @@ export function useKanbanActions() {
                 targetIndex: number;
                 targetColumnId: string;
             },
-            options?: { persist?: boolean },
+            persist?: boolean,
         ) => {
             const { taskId, targetIndex, targetColumnId } = params;
 
@@ -117,7 +117,7 @@ export function useKanbanActions() {
             });
 
             // Skip persistence during drag-over
-            if (options?.persist === false) return;
+            if (persist === false) return;
 
             const prevState = structuredClone(state);
 
