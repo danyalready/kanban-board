@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+
+import { useEditable } from "@/hooks/useEditable";
 
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
@@ -10,42 +12,36 @@ interface Props {
 }
 
 export default function ColumnEditableTitle(props: Props) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [draft, setDraft] = useState(props.title);
+    const { value, editing, setValue, startEdit, saveEdit, cancelEdit } = useEditable({
+        value: props.title,
+        onChange: props.onChange,
+    });
 
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (isEditing) inputRef.current?.focus();
-    }, [isEditing]);
+        if (editing) inputRef.current?.focus();
+    }, [editing]);
 
-    const handleSave = () => {
-        setIsEditing(false);
-        if (draft !== props.title) props.onChange(draft);
-    };
-
-    if (isEditing) {
+    if (editing) {
         return (
             <Input
                 ref={inputRef}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onBlur={handleSave}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onBlur={saveEdit}
                 onKeyDown={(e) => {
                     e.stopPropagation();
 
-                    if (e.key === "Enter") handleSave();
-                    if (e.key === "Escape") {
-                        setDraft(props.title);
-                        setIsEditing(false);
-                    }
+                    if (e.key === "Enter") saveEdit();
+                    if (e.key === "Escape") cancelEdit();
                 }}
             />
         );
     }
 
     return (
-        <div className="flex w-full items-center gap-2" onClick={() => setIsEditing(true)}>
+        <div className="flex w-full items-center gap-2" onClick={startEdit}>
             <h2 className="text-sm font-semibold">{props.title}</h2>
             <Badge variant="outline">{props.count}</Badge>
         </div>
