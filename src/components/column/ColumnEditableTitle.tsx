@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 import { useEditable } from "@/hooks/useEditable";
 
@@ -12,16 +12,12 @@ interface Props {
 }
 
 export default function ColumnEditableTitle(props: Props) {
+    const inputRef = useRef<HTMLInputElement>(null);
     const { value, editing, setValue, startEdit, saveEdit, cancelEdit } = useEditable({
         value: props.title,
+        inputRef: inputRef,
         onChange: props.onChange,
     });
-
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (editing) inputRef.current?.focus();
-    }, [editing]);
 
     if (editing) {
         return (

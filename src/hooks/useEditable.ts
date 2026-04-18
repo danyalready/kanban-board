@@ -1,13 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, RefObject } from "react";
 
 type UseEditableOptions = {
     value: string;
+    inputRef: RefObject<HTMLElement>;
     onChange: (v: string) => void;
     onSave?: (v: string) => void;
     onCancel?: () => void;
 };
 
-export function useEditable({ value, onChange, onSave, onCancel }: UseEditableOptions) {
+export function useEditable({ value, inputRef, onChange, onSave, onCancel }: UseEditableOptions) {
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState(value);
 
@@ -29,6 +30,10 @@ export function useEditable({ value, onChange, onSave, onCancel }: UseEditableOp
         }
         setEditing(false);
     }, [draft, value, onChange, onSave]);
+
+    useEffect(() => {
+        if (editing) inputRef.current?.focus();
+    }, [editing, inputRef]);
 
     return {
         value: draft,
