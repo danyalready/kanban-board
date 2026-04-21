@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { toast } from "sonner";
 
 import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
 import {
@@ -16,7 +17,7 @@ import {
     TASK_POSITION_OFFSET,
 } from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
-import type { Task } from "@/db/types";
+import type { Task, TaskPriority } from "@/db/types";
 import { calculateColumnPosition } from "@/model/column-ordering";
 import { calculateTaskPosition, filterTasksByColumn } from "@/model/task-ordering";
 
@@ -135,19 +136,37 @@ export function useKanbanActions() {
     );
 
     const addTask = useCallback(
-        async (columnId: string, title: string) => {
+        async (
+            columnId: string,
+            {
+                title,
+                description,
+                priority,
+            }: { title: string; description: string; priority: TaskPriority },
+        ) => {
             const tasksInColumn = state.tasks.filter((t) => t.columnId === columnId);
             const maxPosition = tasksInColumn.length
                 ? Math.max(...tasksInColumn.map((t) => t.position))
                 : 0;
             const position = maxPosition + TASK_POSITION_OFFSET;
 
-            const task = await svcCreateTask(columnId, title, position);
+            try {
+                const task = await svcCreateTask(columnId, {
+                    title,
+                    description,
+                    priority,
+                    position,
+                });
 
-            dispatch({
-                type: KanbanActionType.SetTasks,
-                payload: { tasks: [...state.tasks, task] },
-            });
+                dispatch({
+                    type: KanbanActionType.SetTasks,
+                    payload: { tasks: [...state.tasks, task] },
+                });
+
+                toast.success("Task has been created 🎉", { position: "top-center" });
+            } catch {
+                toast.error("Something went wrong.", { position: "top-center" });
+            }
         },
         [state.tasks, dispatch],
     );

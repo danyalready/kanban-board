@@ -1,19 +1,27 @@
 import { v4 as uuid } from "uuid";
 
 import { db } from "@/db/db";
-import type { Task } from "@/db/types";
+import type { Task, TaskPriority } from "@/db/types";
 
 export const TASK_POSITION_OFFSET = 1e4;
 export const TASK_MIN_GAP = 1e-4;
 export const TASK_MOVE_THRESHOLD = 10;
 
-export const createTask = async (columnId: string, title: string, position: number) => {
+export const createTask = async (
+    columnId: string,
+    {
+        title,
+        description,
+        priority,
+        position,
+    }: { title: string; description: string; priority: TaskPriority; position: number },
+) => {
     const newTask: Task = {
         id: uuid(),
         columnId,
         title,
-        description: "",
-        priority: "low",
+        description,
+        priority,
         createdAt: Date.now(),
         position,
     };

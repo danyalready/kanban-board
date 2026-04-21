@@ -32,8 +32,8 @@ const PRIORITY_OPTIONS: PriorityOption[] = [
     { label: "High", value: "high" },
 ];
 
-interface Inputs {
-    name: string;
+export interface Inputs {
+    title: string;
     description: string;
     priority: TaskPriority;
 }
@@ -47,7 +47,7 @@ interface Props {
 export default function CreateTaskFormDialog(props: Props) {
     const { register, handleSubmit, watch, setValue, reset } = useForm<Inputs>({
         values: {
-            name: "",
+            title: "",
             priority: "low",
             description: "",
         },
@@ -58,7 +58,7 @@ export default function CreateTaskFormDialog(props: Props) {
     }, [register]);
 
     useEffect(() => {
-        if (props.open) reset({ name: "", description: "", priority: "low" });
+        if (props.open) reset({ title: "", description: "", priority: "low" });
     }, [props.open, reset]);
 
     return (
@@ -70,21 +70,21 @@ export default function CreateTaskFormDialog(props: Props) {
 
                 <form onSubmit={handleSubmit(props.onSubmit)}>
                     <div className="mb-4">
-                        <Label htmlFor="name" required>
+                        <Label htmlFor="title" required>
                             Summary
                         </Label>
-                        <Input id="name" {...(register("name"), { required: true })} />
+                        <Input id="title" {...register("title", { required: true })} />
                     </div>
 
                     <div className="mb-4">
-                        <Label htmlFor="name" required>
+                        <Label htmlFor="priority" required>
                             Priority
                         </Label>
                         <Select
                             defaultValue={watch("priority")}
                             onValueChange={(value) => setValue("priority", value as TaskPriority)}
                         >
-                            <SelectTrigger className="w-full max-w-48">
+                            <SelectTrigger id="priority" className="w-full max-w-48">
                                 <SelectValue placeholder="Select priority" />
                             </SelectTrigger>
                             <SelectContent>

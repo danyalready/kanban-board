@@ -7,13 +7,14 @@ import { useKanbanActions } from "@/contexts/useKanbanActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
 
 import TaskFormDialog from "./task-form-dialog/TaskFormDialog";
-import CreateTaskFormDialog from "./CreateTaskFormDialog";
+import CreateTaskFormDialog, { type Inputs } from "./CreateTaskFormDialog";
 
 export default function BoardPage() {
     const { boardId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
     const { state } = useKanbanContext();
     const {
+        addTask,
         moveColumn,
         moveTask,
         setActive,
@@ -23,7 +24,7 @@ export default function BoardPage() {
         clearBoardData,
     } = useKanbanActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
-    const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+    const [isAddTaskFormOpenFor, setIsAddTaskOpenFor] = useState<null | string>(null);
 
     const taskId = searchParams.get("task");
     const task = state.tasks.find((task) => task.id === taskId);
@@ -31,6 +32,13 @@ export default function BoardPage() {
     const handleTaskDetailsModalClose = () => {
         searchParams.delete("task");
         setSearchParams(searchParams);
+    };
+
+    const handleAddTask = (inputs: Inputs) => {
+        if (!isAddTaskFormOpenFor) return;
+
+        addTask(isAddTaskFormOpenFor, inputs);
+        setIsAddTaskOpenFor(null);
     };
 
     useEffect(() => {
@@ -51,7 +59,7 @@ export default function BoardPage() {
                 onDragCancel={() => setState(prevKanbanState)}
                 onDragEnd={() => setActive(null)}
                 onColumnChange={updateColumn}
-                onClickAddTask={() => setIsTaskFormOpen(true)}
+                onClickAddTaskTo={(columnId) => setIsAddTaskOpenFor(columnId)}
             />
 
             <TaskFormDialog
@@ -66,9 +74,9 @@ export default function BoardPage() {
             />
 
             <CreateTaskFormDialog
-                open={isTaskFormOpen}
-                onOpenChange={setIsTaskFormOpen}
-                onSubmit={(inputs) => console.log(inputs)}
+                open={Boolean(isAddTaskFormOpenFor)}
+                onOpenChange={() => setIsAddTaskOpenFor(null)}
+                onSubmit={handleAddTask}
             />
         </div>
     );
