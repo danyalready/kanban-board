@@ -8,7 +8,5 @@ interface Props {
 }
 
 export default function RichTextEditor(props: Props) {
-    return (
-        <ReactQuill theme="snow" value={`<div>${props.value}</div>`} onChange={props.onChange} />
-    );
+    return <ReactQuill theme="snow" value={props.value} onChange={props.onChange} />;
 }

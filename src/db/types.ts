@@ -1,5 +1,3 @@
-export type Priority = "low" | "medium" | "high";
-
 export interface Board {
     id: string;
     name: string;
@@ -14,12 +12,14 @@ export interface Column {
     createdAt: number;
 }
 
+export type TaskPriority = "low" | "medium" | "high";
+
 export interface Task {
     id: string;
     columnId: string;
     title: string;
     description: string;
-    priority: Priority;
+    priority: TaskPriority;
     position: number;
     createdAt: number;
 }
