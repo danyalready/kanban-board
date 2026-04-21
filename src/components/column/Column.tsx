@@ -15,6 +15,7 @@ interface Props {
     className?: string;
     headerClassName?: string;
     onColumnNameChange: (value: string) => void;
+    onClickAddTask: () => void;
 }
 
 export default function Column(props: Props) {
@@ -60,7 +61,7 @@ export default function Column(props: Props) {
                     <ColumnActions
                         open={isMenuOpen}
                         onOpenChange={setIsMenuOpen}
-                        onClickAddTask={() => {}}
+                        onClickAddTask={props.onClickAddTask}
                         onClickDelete={() => {}}
                     />
                 </div>

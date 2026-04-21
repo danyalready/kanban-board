@@ -17,6 +17,16 @@ interface Props {
 }
 
 export default function ColumnActions(props: Props) {
+    const handleAddTaskClick = () => {
+        props.onClickAddTask();
+        props.onOpenChange(false);
+    };
+
+    const handleDeleteTaskClick = () => {
+        props.onClickDelete();
+        props.onOpenChange(false);
+    };
+
     return (
         <DropdownMenu open={props.open} onOpenChange={props.onOpenChange}>
             <DropdownMenuTrigger asChild>
@@ -25,13 +35,13 @@ export default function ColumnActions(props: Props) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={props.onClickAddTask}>
+                <DropdownMenuItem onClick={handleAddTaskClick}>
                     <SquarePlusIcon />
                     Add task
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onClick={props.onClickDelete}>
+                <DropdownMenuItem className="text-destructive" onClick={handleDeleteTaskClick}>
                     <Trash2Icon />
                     Delete
                 </DropdownMenuItem>

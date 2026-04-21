@@ -35,6 +35,7 @@ interface Props {
     onDragCancel: () => void;
     onDragEnd: () => void;
     onColumnChange: (columndId: string, data: Partial<{ name: string; position: number }>) => void;
+    onClickAddTask: () => void;
 }
 
 export default function Board(props: Props) {
@@ -150,6 +151,7 @@ export default function Board(props: Props) {
                             column={column}
                             tasks={props.tasks.filter((task) => task.columnId === column.id)}
                             onColumnNameChange={(name) => props.onColumnChange(column.id, { name })}
+                            onClickAddTask={props.onClickAddTask}
                         />
                     ))}
                 </SortableContext>

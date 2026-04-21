@@ -6,7 +6,8 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
 
-import TaskFormDialog from "./TaskFormDialog";
+import TaskFormDialog from "./task-form-dialog/TaskFormDialog";
+import CreateTaskFormDialog from "./CreateTaskFormDialog";
 
 export default function BoardPage() {
     const { boardId } = useParams();
@@ -22,8 +23,10 @@ export default function BoardPage() {
         clearBoardData,
     } = useKanbanActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
+    const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
 
     const taskId = searchParams.get("task");
+    const task = state.tasks.find((task) => task.id === taskId);
 
     const handleTaskDetailsModalClose = () => {
         searchParams.delete("task");
@@ -48,11 +51,24 @@ export default function BoardPage() {
                 onDragCancel={() => setState(prevKanbanState)}
                 onDragEnd={() => setActive(null)}
                 onColumnChange={updateColumn}
+                onClickAddTask={() => setIsTaskFormOpen(true)}
             />
 
             <TaskFormDialog
-                task={state.tasks.find((task) => task.id === taskId) || null}
-                onClose={handleTaskDetailsModalClose}
+                open={!!taskId}
+                initialValues={{
+                    title: task?.title || "",
+                    description: task?.description || "",
+                    priority: task?.priority || "low",
+                }}
+                isEdit
+                onOpenChange={handleTaskDetailsModalClose}
+            />
+
+            <CreateTaskFormDialog
+                open={isTaskFormOpen}
+                onOpenChange={setIsTaskFormOpen}
+                onSubmit={(inputs) => console.log(inputs)}
             />
         </div>
     );
