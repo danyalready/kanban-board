@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Calendar, Flag, MessageCircleMore, Grip } from "lucide-react";
+import { Calendar, MessageCircleMore, Grip } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import { getPriorityColor } from "@/utils/getPriorityColor";
@@ -11,6 +11,7 @@ import type { Task } from "@/db/types";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Avatar } from "./ui/avatar";
+import { PriorityIcon } from "./priority-icon/PriorityIcon";
 
 interface Props {
     task: Task;
@@ -48,10 +49,10 @@ export default function Task(props: Props) {
         >
             <div className="flex items-center justify-between gap-3">
                 <Badge variant="outline" className="flex gap-1 capitalize">
-                    <Flag
-                        size={10}
+                    <PriorityIcon
+                        priority={props.task.priority}
+                        className="size-4"
                         color={getPriorityColor(props.task.priority)}
-                        fill={getPriorityColor(props.task.priority)}
                     />
                     {props.task.priority}
                 </Badge>

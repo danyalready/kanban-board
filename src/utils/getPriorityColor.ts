@@ -1,11 +1,11 @@
 export function getPriorityColor(priority: "low" | "medium" | "high") {
     switch (priority) {
         case "low":
-            return "#f1c06f";
+            return "#22c55e";
         case "medium":
-            return "#0e9ceb";
+            return "#f59e0b";
         case "high":
-            return "#fa1877";
+            return "#ef4444";
         default:
             return "#fefefe";
     }
