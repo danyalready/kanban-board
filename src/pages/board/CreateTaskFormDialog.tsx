@@ -21,16 +21,7 @@ import { Label } from "@/components/ui/label";
 import RichTextEditor from "@/components/RichTextEditor";
 import type { TaskPriority } from "@/db/types";
 
-interface PriorityOption {
-    label: string;
-    value: TaskPriority;
-}
-
-const PRIORITY_OPTIONS: PriorityOption[] = [
-    { label: "Low", value: "low" },
-    { label: "Medium", value: "medium" },
-    { label: "High", value: "high" },
-];
+import { PRIORITY_OPTIONS } from "./options";
 
 export interface Inputs {
     title: string;
@@ -81,7 +72,7 @@ export default function CreateTaskFormDialog(props: Props) {
                             control={control}
                             render={({ field }) => (
                                 <Select value={field.value} onValueChange={field.onChange}>
-                                    <SelectTrigger id="priority" className="w-full max-w-48">
+                                    <SelectTrigger id="priority" className="w-full max-w-32">
                                         <SelectValue placeholder="Select priority" />
                                     </SelectTrigger>
 

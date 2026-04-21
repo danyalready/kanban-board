@@ -6,8 +6,8 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
 
-import TaskFormDialog from "./task-form-dialog/TaskFormDialog";
 import CreateTaskFormDialog, { type Inputs } from "./CreateTaskFormDialog";
+import ViewEditTaskDialog from "./ViewEditTaskDialog";
 
 export default function BoardPage() {
     const { boardId } = useParams();
@@ -62,21 +62,17 @@ export default function BoardPage() {
                 onClickAddTaskTo={(columnId) => setIsAddTaskOpenFor(columnId)}
             />
 
-            <TaskFormDialog
-                open={!!taskId}
-                initialValues={{
-                    title: task?.title || "",
-                    description: task?.description || "",
-                    priority: task?.priority || "low",
-                }}
-                isEdit
-                onOpenChange={handleTaskDetailsModalClose}
-            />
-
             <CreateTaskFormDialog
                 open={Boolean(isAddTaskFormOpenFor)}
                 onOpenChange={() => setIsAddTaskOpenFor(null)}
                 onSubmit={handleAddTask}
+            />
+
+            <ViewEditTaskDialog
+                open={Boolean(task)}
+                task={task}
+                onOpenChange={handleTaskDetailsModalClose}
+                onTaskChange={() => {}}
             />
         </div>
     );
