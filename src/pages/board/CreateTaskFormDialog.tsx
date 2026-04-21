@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 
 import {
     Dialog,
@@ -45,17 +45,13 @@ interface Props {
 }
 
 export default function CreateTaskFormDialog(props: Props) {
-    const { register, handleSubmit, watch, setValue, reset } = useForm<Inputs>({
+    const { register, control, handleSubmit, reset } = useForm<Inputs>({
         values: {
             title: "",
             priority: "low",
             description: "",
         },
     });
-
-    useEffect(() => {
-        register("description");
-    }, [register]);
 
     useEffect(() => {
         if (props.open) reset({ title: "", description: "", priority: "low" });
@@ -80,35 +76,46 @@ export default function CreateTaskFormDialog(props: Props) {
                         <Label htmlFor="priority" required>
                             Priority
                         </Label>
-                        <Select
-                            defaultValue={watch("priority")}
-                            onValueChange={(value) => setValue("priority", value as TaskPriority)}
-                        >
-                            <SelectTrigger id="priority" className="w-full max-w-48">
-                                <SelectValue placeholder="Select priority" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {PRIORITY_OPTIONS.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Controller
+                            name="priority"
+                            control={control}
+                            render={({ field }) => (
+                                <Select value={field.value} onValueChange={field.onChange}>
+                                    <SelectTrigger id="priority" className="w-full max-w-48">
+                                        <SelectValue placeholder="Select priority" />
+                                    </SelectTrigger>
+
+                                    <SelectContent>
+                                        {PRIORITY_OPTIONS.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
                     </div>
 
                     <div className="mb-4">
                         <Label htmlFor="description" aria-required>
                             Description
                         </Label>
-                        <RichTextEditor
-                            value={watch("description")}
-                            onChange={(value) => setValue("description", value)}
+                        <Controller
+                            name="description"
+                            control={control}
+                            render={({ field }) => (
+                                <RichTextEditor value={field.value} onChange={field.onChange} />
+                            )}
                         />
                     </div>
 
                     <DialogFooter>
-                        <Button onClick={() => props.onOpenChange(false)} variant="secondary">
+                        <Button
+                            type="button"
+                            onClick={() => props.onOpenChange(false)}
+                            variant="secondary"
+                        >
                             Cancel
                         </Button>
                         <Button type="submit">Create</Button>
