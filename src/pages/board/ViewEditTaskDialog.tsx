@@ -18,9 +18,9 @@ import {
 import type { Task, TaskPriority } from "@/db/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
 
 import { PRIORITY_OPTIONS } from "./options";
-import { useDebounce } from "@/hooks/useDebounce";
 
 // Features:
 // crud comments
