@@ -15,14 +15,14 @@ import {
     DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
-import type { Task } from "@/db/types";
+import type { Task, TaskPriority } from "@/db/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 import { PRIORITY_OPTIONS } from "./options";
+import { useDebounce } from "@/hooks/useDebounce";
 
 // Features:
-// edit/delete task
 // crud comments
 
 interface Props {
@@ -37,8 +37,10 @@ export default function ViewEditTaskDialog(props: Props) {
 
     const [editing, setEditing] = useState(false);
     const [titleDraft, setTitleDraft] = useState("");
+    const [descDraf, setDescDraft] = useState("");
+    const debouncedDescDraft = useDebounce(descDraf);
 
-    const save = () => {
+    const saveTitleChange = () => {
         setEditing(false);
 
         if (!titleDraft) {
@@ -48,15 +50,25 @@ export default function ViewEditTaskDialog(props: Props) {
         }
     };
 
-    const cancel = () => {
+    const cancelTitleChange = () => {
         setEditing(false);
         setTitleDraft(task!.title);
     };
+
+    const handlePriorityChange = (priority: TaskPriority) => {
+        props.onTaskChange(task!.id, { priority });
+    };
+
+    useEffect(() => {
+        if (task) props.onTaskChange(task.id, { description: debouncedDescDraft });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedDescDraft]);
 
     useEffect(() => {
         if (props.task) {
             setTask(props.task);
             setTitleDraft(props.task.title);
+            setDescDraft(props.task.description);
         }
     }, [props.task]);
 
@@ -69,10 +81,10 @@ export default function ViewEditTaskDialog(props: Props) {
                             autoFocus
                             value={titleDraft}
                             onChange={(e) => setTitleDraft(e.target.value)}
-                            onBlur={save}
+                            onBlur={saveTitleChange}
                             onKeyDown={(e) => {
-                                if (e.key === "Enter") save();
-                                if (e.key === "Escape") cancel();
+                                if (e.key === "Enter") saveTitleChange();
+                                if (e.key === "Escape") cancelTitleChange();
                             }}
                         />
                     ) : (
@@ -82,7 +94,7 @@ export default function ViewEditTaskDialog(props: Props) {
 
                 <div>
                     <Label htmlFor="priority">Priority</Label>
-                    <Select value={task?.priority} onValueChange={() => {}}>
+                    <Select value={task?.priority} onValueChange={handlePriorityChange}>
                         <SelectTrigger id="priority" className="h-8 w-full max-w-32">
                             <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
@@ -101,11 +113,7 @@ export default function ViewEditTaskDialog(props: Props) {
                     <Label htmlFor="description" aria-required>
                         Description
                     </Label>
-                    <RichTextEditor
-                        id="description"
-                        value={task?.description}
-                        onChange={() => {}}
-                    />
+                    <RichTextEditor id="description" value={descDraf} onChange={setDescDraft} />
                 </div>
 
                 <DialogFooter></DialogFooter>
