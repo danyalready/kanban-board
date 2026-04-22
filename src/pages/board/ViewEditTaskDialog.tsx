@@ -37,8 +37,8 @@ export default function ViewEditTaskDialog(props: Props) {
 
     const [editing, setEditing] = useState(false);
     const [titleDraft, setTitleDraft] = useState("");
-    const [descDraf, setDescDraft] = useState("");
-    const debouncedDescDraft = useDebounce(descDraf);
+    const [descDraft, setDescDraft] = useState("");
+    const debauncedDescDraft = useDebounce(descDraft);
 
     const saveTitleChange = () => {
         setEditing(false);
@@ -59,21 +59,32 @@ export default function ViewEditTaskDialog(props: Props) {
         props.onTaskChange(task!.id, { priority });
     };
 
-    useEffect(() => {
-        if (task) props.onTaskChange(task.id, { description: debouncedDescDraft });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedDescDraft]);
+    const handleOpenChange = (open: boolean) => {
+        if (!open && task) {
+            props.onTaskChange(task.id, { description: descDraft });
+        }
+
+        props.onOpenChange(open);
+    };
 
     useEffect(() => {
-        if (props.task) {
+        if (!task?.id) return;
+
+        props.onTaskChange(task.id, { description: debauncedDescDraft });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debauncedDescDraft, task?.id]);
+
+    useEffect(() => {
+        if (props.task?.id) {
             setTask(props.task);
             setTitleDraft(props.task.title);
             setDescDraft(props.task.description);
         }
-    }, [props.task]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.task?.id]);
 
     return (
-        <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+        <Dialog open={props.open} onOpenChange={handleOpenChange}>
             <DialogContent>
                 <DialogHeader>
                     {editing ? (
@@ -113,7 +124,7 @@ export default function ViewEditTaskDialog(props: Props) {
                     <Label htmlFor="description" aria-required>
                         Description
                     </Label>
-                    <RichTextEditor id="description" value={descDraf} onChange={setDescDraft} />
+                    <RichTextEditor id="description" value={descDraft} onChange={setDescDraft} />
                 </div>
 
                 <DialogFooter></DialogFooter>
