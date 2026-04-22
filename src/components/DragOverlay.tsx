@@ -22,6 +22,7 @@ export default function DragOverlay() {
                     className="rotate-2 shadow-xl"
                     headerClassName="cursor-grabbing"
                     onColumnNameChange={() => {}}
+                    onClickAddTask={() => {}}
                 />
             );
         }

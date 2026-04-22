@@ -15,6 +15,7 @@ export default function BoardPage() {
     const { state } = useKanbanContext();
     const {
         addTask,
+        updateTask,
         moveColumn,
         moveTask,
         setActive,
@@ -72,7 +73,7 @@ export default function BoardPage() {
                 open={Boolean(task)}
                 task={task}
                 onOpenChange={handleTaskDetailsModalClose}
-                onTaskChange={() => {}}
+                onTaskChange={updateTask}
             />
         </div>
     );
