@@ -99,7 +99,7 @@ export default function ViewEditTaskDialog(props: Props) {
                             }}
                         />
                     ) : (
-                        <DialogTitle onClick={() => setEditing(true)}>{task?.title}</DialogTitle>
+                        <DialogTitle onClick={() => setEditing(true)}>{titleDraft}</DialogTitle>
                     )}
                 </DialogHeader>
 

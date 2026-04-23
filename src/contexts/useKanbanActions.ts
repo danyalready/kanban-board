@@ -200,9 +200,20 @@ export function useKanbanActions() {
                 : 0;
             const position = maxPosition + COLUMN_POSITION_OFFSET;
 
-            await svcCreateColumn(boardId, name, position);
+            try {
+                const column = await svcCreateColumn(boardId, name, position);
+
+                dispatch({
+                    type: KanbanActionType.SetColumns,
+                    payload: { columns: [...state.columns, column] },
+                });
+
+                toast.success("Column has been created 🎉", { position: "top-center" });
+            } catch {
+                toast.error("Something went wrong.", { position: "top-center" });
+            }
         },
-        [state.columns],
+        [dispatch, state.columns],
     );
 
     const updateColumn = useCallback(

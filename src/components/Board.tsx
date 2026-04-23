@@ -21,6 +21,8 @@ import { Column as ColumnT, Task as TaskT } from "@/db/types";
 
 import Column from "./column/Column";
 import DragOverlay from "./DragOverlay";
+import { Button } from "./ui/button";
+import { PlusIcon } from "lucide-react";
 
 interface Props {
     columns: ColumnT[];
@@ -36,6 +38,7 @@ interface Props {
     onDragEnd: () => void;
     onColumnChange: (columndId: string, data: Partial<{ name: string; position: number }>) => void;
     onClickAddTaskTo: (columnId: string) => void;
+    onClickAddColumn: () => void;
 }
 
 export default function Board(props: Props) {
@@ -155,6 +158,10 @@ export default function Board(props: Props) {
                         />
                     ))}
                 </SortableContext>
+
+                <Button variant="outline" size="lg" onClick={props.onClickAddColumn}>
+                    <PlusIcon /> New column
+                </Button>
             </div>
 
             <DragOverlay />

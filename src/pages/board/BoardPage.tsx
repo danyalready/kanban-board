@@ -6,7 +6,8 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
 
-import CreateTaskFormDialog, { type Inputs } from "./CreateTaskFormDialog";
+import CreateTaskFormDialog, { type Inputs as TaskFormInputs } from "./CreateTaskFormDialog";
+import AddColumnFormDialog, { type Inputs as ColumnFormInputs } from "./AddColumnFormDialog";
 import ViewEditTaskDialog from "./ViewEditTaskDialog";
 
 export default function BoardPage() {
@@ -15,6 +16,7 @@ export default function BoardPage() {
     const { state } = useKanbanContext();
     const {
         addTask,
+        addColumn,
         updateTask,
         moveColumn,
         moveTask,
@@ -26,6 +28,7 @@ export default function BoardPage() {
     } = useKanbanActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
     const [isAddTaskFormOpenFor, setIsAddTaskOpenFor] = useState<null | string>(null);
+    const [isAddColumnFormOpen, setIsAddColumnFormOpen] = useState(false);
 
     const taskId = searchParams.get("task");
     const task = state.tasks.find((task) => task.id === taskId);
@@ -35,11 +38,17 @@ export default function BoardPage() {
         setSearchParams(searchParams);
     };
 
-    const handleAddTask = (inputs: Inputs) => {
+    const handleAddTask = (inputs: TaskFormInputs) => {
         if (!isAddTaskFormOpenFor) return;
 
         addTask(isAddTaskFormOpenFor, inputs);
         setIsAddTaskOpenFor(null);
+    };
+
+    const handleAddColumn = (inputs: ColumnFormInputs) => {
+        if (!boardId) return;
+
+        addColumn(boardId, inputs.name);
     };
 
     useEffect(() => {
@@ -61,6 +70,7 @@ export default function BoardPage() {
                 onDragEnd={() => setActive(null)}
                 onColumnChange={updateColumn}
                 onClickAddTaskTo={(columnId) => setIsAddTaskOpenFor(columnId)}
+                onClickAddColumn={() => setIsAddColumnFormOpen(true)}
             />
 
             <CreateTaskFormDialog
@@ -74,6 +84,12 @@ export default function BoardPage() {
                 task={task}
                 onOpenChange={handleTaskDetailsModalClose}
                 onTaskChange={updateTask}
+            />
+
+            <AddColumnFormDialog
+                open={isAddColumnFormOpen}
+                onOpenChange={setIsAddColumnFormOpen}
+                onSubmit={handleAddColumn}
             />
         </div>
     );
