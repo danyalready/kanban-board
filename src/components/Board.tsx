@@ -15,14 +15,14 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import { PlusIcon } from "lucide-react";
 
 import { filterTasksByColumn } from "@/model/task-ordering";
-import { Column as ColumnT, Task as TaskT } from "@/db/types";
+import type { Column as ColumnT, Task as TaskT } from "@/db/types";
 
 import Column from "./column/Column";
 import DragOverlay from "./DragOverlay";
 import { Button } from "./ui/button";
-import { PlusIcon } from "lucide-react";
 
 interface Props {
     columns: ColumnT[];
@@ -39,6 +39,7 @@ interface Props {
     onColumnChange: (columndId: string, data: Partial<{ name: string; position: number }>) => void;
     onClickAddTaskTo: (columnId: string) => void;
     onClickAddColumn: () => void;
+    onClickDeleteColumn: (column: ColumnT) => void;
 }
 
 export default function Board(props: Props) {
@@ -155,6 +156,7 @@ export default function Board(props: Props) {
                             tasks={props.tasks.filter((task) => task.columnId === column.id)}
                             onColumnNameChange={(name) => props.onColumnChange(column.id, { name })}
                             onClickAddTask={() => props.onClickAddTaskTo(column.id)}
+                            onClickDelete={() => props.onClickDeleteColumn(column)}
                         />
                     ))}
                 </SortableContext>

@@ -3,6 +3,8 @@ import { v4 as uuid } from "uuid";
 import { db } from "@/db/db";
 import type { Task, TaskPriority } from "@/db/types";
 
+import { deleteComment } from "./commentService";
+
 export const TASK_POSITION_OFFSET = 1e4;
 export const TASK_MIN_GAP = 1e-4;
 export const TASK_MOVE_THRESHOLD = 10;
@@ -40,9 +42,15 @@ export const updateTask = async (id: string, updates: Partial<Task>) => {
 };
 
 export const deleteTask = async (taskId: string) => {
-    await db.comments.where("taskId").equals(taskId).delete(); // cascade
+    await db.transaction("rw", db.comments, db.tasks, async () => {
+        const comments = await db.comments.where("taskId").equals(taskId).toArray();
 
-    return await db.tasks.delete(taskId);
+        for (const comment of comments) {
+            await deleteComment(comment.id);
+        }
+
+        await db.tasks.delete(taskId);
+    });
 };
 
 // TODO: store in local-storage

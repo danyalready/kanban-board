@@ -32,11 +32,13 @@ export const normalizeColumnsPositions = async (boardId: string) => {
 };
 
 export const deleteColumn = async (columnId: string) => {
-    const tasks = await db.tasks.where("columnId").equals(columnId).toArray();
+    await db.transaction("rw", db.comments, db.tasks, db.columns, async () => {
+        const tasks = await db.tasks.where("columnId").equals(columnId).toArray();
 
-    for (const task of tasks) {
-        await deleteTask(task.id); // cascade
-    }
+        for (const task of tasks) {
+            await deleteTask(task.id);
+        }
 
-    return await db.columns.delete(columnId);
+        await db.columns.delete(columnId);
+    });
 };

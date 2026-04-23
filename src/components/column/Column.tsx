@@ -1,5 +1,5 @@
-import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useState } from "react";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { cn } from "@/utils/cn";
@@ -16,6 +16,7 @@ interface Props {
     headerClassName?: string;
     onColumnNameChange: (value: string) => void;
     onClickAddTask: () => void;
+    onClickDelete: () => void;
 }
 
 export default function Column(props: Props) {
@@ -62,7 +63,7 @@ export default function Column(props: Props) {
                         open={isMenuOpen}
                         onOpenChange={setIsMenuOpen}
                         onClickAddTask={props.onClickAddTask}
-                        onClickDelete={() => {}}
+                        onClickDelete={props.onClickDelete}
                     />
                 </div>
 

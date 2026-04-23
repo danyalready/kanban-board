@@ -23,5 +23,5 @@ export const updateComment = async (id: string, updates: Partial<Comment>) => {
 };
 
 export const deleteComment = async (id: string) => {
-    return await db.comments.delete(id);
+    await db.comments.delete(id);
 };

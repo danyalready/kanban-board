@@ -227,9 +227,16 @@ export function useKanbanActions() {
 
     const deleteColumn = useCallback(
         async (columnId: string) => {
-            await svcDeleteColumn(columnId);
+            try {
+                await svcDeleteColumn(columnId);
 
-            dispatch({ type: KanbanActionType.DeleteColumn, payload: { columnId } });
+                dispatch({ type: KanbanActionType.DeleteColumn, payload: { columnId } });
+
+                toast.success("Column has been deleted.", { position: "top-center" });
+            } catch (error) {
+                console.error(error);
+                toast.error("Something went wrong.", { position: "top-center" });
+            }
         },
         [dispatch],
     );

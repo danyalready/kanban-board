@@ -5,10 +5,12 @@ import Board from "@/components/Board";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/contexts/useKanbanActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
+import type { Column } from "@/db/types";
 
 import CreateTaskFormDialog, { type Inputs as TaskFormInputs } from "./CreateTaskFormDialog";
 import AddColumnFormDialog, { type Inputs as ColumnFormInputs } from "./AddColumnFormDialog";
 import ViewEditTaskDialog from "./ViewEditTaskDialog";
+import DeleteColumnDialog from "./DeleteColumnDialog";
 
 export default function BoardPage() {
     const { boardId } = useParams();
@@ -17,18 +19,20 @@ export default function BoardPage() {
     const {
         addTask,
         addColumn,
+        moveTask,
         updateTask,
         moveColumn,
-        moveTask,
+        updateColumn,
+        deleteColumn,
         setActive,
         setState,
-        updateColumn,
         loadBoardData,
         clearBoardData,
     } = useKanbanActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
     const [isAddTaskFormOpenFor, setIsAddTaskOpenFor] = useState<null | string>(null);
     const [isAddColumnFormOpen, setIsAddColumnFormOpen] = useState(false);
+    const [columnToDelete, setColumnToDelete] = useState<Column | null>(null);
 
     const taskId = searchParams.get("task");
     const task = state.tasks.find((task) => task.id === taskId);
@@ -51,6 +55,13 @@ export default function BoardPage() {
         addColumn(boardId, inputs.name);
     };
 
+    const handleDeleteColumn = () => {
+        if (!columnToDelete) return;
+
+        deleteColumn(columnToDelete.id);
+        setColumnToDelete(null);
+    };
+
     useEffect(() => {
         if (boardId) loadBoardData(boardId);
 
@@ -71,6 +82,7 @@ export default function BoardPage() {
                 onColumnChange={updateColumn}
                 onClickAddTaskTo={(columnId) => setIsAddTaskOpenFor(columnId)}
                 onClickAddColumn={() => setIsAddColumnFormOpen(true)}
+                onClickDeleteColumn={setColumnToDelete}
             />
 
             <CreateTaskFormDialog
@@ -90,6 +102,13 @@ export default function BoardPage() {
                 open={isAddColumnFormOpen}
                 onOpenChange={setIsAddColumnFormOpen}
                 onSubmit={handleAddColumn}
+            />
+
+            <DeleteColumnDialog
+                columnName={columnToDelete?.name}
+                open={Boolean(columnToDelete)}
+                onOpenChange={() => setColumnToDelete(null)}
+                onConfirm={handleDeleteColumn}
             />
         </div>
     );
