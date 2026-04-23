@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Calendar, MessageCircleMore, Grip } from "lucide-react";
+import { CalendarIcon, MessageCircleMoreIcon, GripIcon } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 import { getPriorityColor } from "@/utils/getPriorityColor";
+import { formatDate } from "@/utils/formatDate";
 import type { Task } from "@/db/types";
 
 import { Badge } from "./ui/badge";
@@ -62,7 +63,7 @@ export default function Task(props: Props) {
                     {...attributes}
                     className={cn("cursor-grab p-1 text-gray-400", props.gripClassName)}
                 >
-                    <Grip size={16} />
+                    <GripIcon size={16} />
                 </div>
             </div>
             <div className="flex items-start justify-between">
@@ -79,13 +80,13 @@ export default function Task(props: Props) {
 
                 <div className="flex h-5 gap-2">
                     <div className="flex items-center gap-1">
-                        <MessageCircleMore size={12} />
+                        <MessageCircleMoreIcon size={12} />
                         <span className="text-xs">{0}</span>
                     </div>
                     <Separator orientation="vertical" />
                     <div className="flex items-center gap-1">
-                        <Calendar size={12} />
-                        <span className="text-xs">Today</span>
+                        <CalendarIcon size={12} />
+                        <span className="text-xs">{formatDate(props.task.createdAt)}</span>
                     </div>
                 </div>
             </div>
