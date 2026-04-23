@@ -15,10 +15,11 @@ import {
     DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
-import type { Task, TaskPriority } from "@/db/types";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
+import type { Task, TaskPriority } from "@/db/types";
 
 import { PRIORITY_OPTIONS } from "./options";
 
@@ -30,6 +31,7 @@ interface Props {
     task?: Task;
     onOpenChange: (open: boolean) => void;
     onTaskChange: (id: string, data: Partial<Task>) => void;
+    onDeleteTask: () => void;
 }
 
 export default function ViewEditTaskDialog(props: Props) {
@@ -57,6 +59,7 @@ export default function ViewEditTaskDialog(props: Props) {
 
     const handlePriorityChange = (priority: TaskPriority) => {
         props.onTaskChange(task!.id, { priority });
+        setTask({ ...task!, priority });
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -127,7 +130,14 @@ export default function ViewEditTaskDialog(props: Props) {
                     <RichTextEditor id="description" value={descDraft} onChange={setDescDraft} />
                 </div>
 
-                <DialogFooter></DialogFooter>
+                <DialogFooter className="sm:justify-between">
+                    <Button size="sm" variant="destructive" onClick={props.onDeleteTask}>
+                        Delete
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => props.onOpenChange(false)}>
+                        Close
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

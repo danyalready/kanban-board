@@ -10,21 +10,21 @@ import {
 
 interface Props {
     open: boolean;
-    columnName?: string;
+    taskName?: string;
     onConfirm: () => void;
     onOpenChange: (open: boolean) => void;
 }
 
-export default function DeleteColumnDialog(props: Props) {
+export default function DeleteTaskDialog(props: Props) {
     return (
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete “{props.columnName}”?</DialogTitle>
+                    <DialogTitle>Delete “{props.taskName}”?</DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    This will permanently delete the “{props.columnName}” column and all tickets
-                    within it. This action cannot be undone.
+                    This will permanently delete the “{props.taskName}” task and all comments within
+                    it. This action cannot be undone.
                 </DialogDescription>
                 <DialogFooter>
                     <Button size="sm" variant="secondary" onClick={() => props.onOpenChange(false)}>

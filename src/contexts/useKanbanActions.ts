@@ -185,9 +185,16 @@ export function useKanbanActions() {
 
     const deleteTask = useCallback(
         async (taskId: string) => {
-            await svcDeleteTask(taskId);
+            try {
+                await svcDeleteTask(taskId);
 
-            dispatch({ type: KanbanActionType.DeleteTask, payload: { taskId } });
+                dispatch({ type: KanbanActionType.DeleteTask, payload: { taskId } });
+
+                toast.success("Task has been deleted.", { position: "top-center" });
+            } catch (error) {
+                console.error(error);
+                toast.error("Something went wrong.", { position: "top-center" });
+            }
         },
         [dispatch],
     );
