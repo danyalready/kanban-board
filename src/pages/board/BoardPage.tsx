@@ -13,22 +13,15 @@ import ViewEditTaskDialog from "./ViewEditTaskDialog";
 import DeleteColumnDialog from "./DeleteColumnDialog";
 import DeleteTaskDialog from "./DeleteTaskDialog";
 import { useColumnActions } from "@/hooks/kanban/useColumnActions";
+import { useTaskActions } from "@/hooks/kanban/useTaskActions";
 
 export default function BoardPage() {
     const { boardId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
     const { state } = useKanbanContext();
-    const {
-        addTask,
-        moveTask,
-        updateTask,
-        deleteTask,
-        setActive,
-        setState,
-        loadBoardData,
-        clearBoardData,
-    } = useKanbanActions();
+    const { setActive, setState, loadBoardData, clearBoardData } = useKanbanActions();
     const { addColumn, updateColumn, moveColumn, deleteColumn } = useColumnActions();
+    const { addTask, moveTask, updateTask, deleteTask } = useTaskActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
     const [isAddTaskFormOpenFor, setIsAddTaskOpenFor] = useState<null | string>(null);
     const [isAddColumnFormOpen, setIsAddColumnFormOpen] = useState(false);
