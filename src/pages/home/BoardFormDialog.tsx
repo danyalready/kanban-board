@@ -8,6 +8,8 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Inputs {
     boardName: string;
@@ -31,17 +33,17 @@ export default function BoardFormDialog(props: Props) {
                     <DialogTitle>{isEditBoard ? "✏️ Edit board" : "Create board"}</DialogTitle>
                 </DialogHeader>
                 <form className="space-y-2" onSubmit={handleSubmit(props.onSubmit)}>
-                    <label className="text-sm">Board name</label>
-                    <input
-                        className="w-full rounded-md border px-3 py-2 text-sm outline-none ring-1 ring-inset ring-border focus:ring-2"
-                        placeholder="e.g. Personal"
-                        required
-                        {...register("boardName")}
-                    />
+                    <div className="mb-4">
+                        <Label htmlFor="title" required>
+                            Board name
+                        </Label>
+                        <Input id="title" {...register("boardName", { required: true })} />
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="submit">{isEditBoard ? "Save" : "Create"}</Button>
+                    </DialogFooter>
                 </form>
-                <DialogFooter>
-                    <Button type="submit">{isEditBoard ? "Save" : "Create"}</Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
