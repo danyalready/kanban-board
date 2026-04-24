@@ -80,7 +80,7 @@ export default function BoardPage() {
     }, [boardId, loadBoardData, clearBoardData]);
 
     return (
-        <div>
+        <div className="h-full">
             <Board
                 columns={state.columns.sort((a, b) => a.position - b.position)}
                 tasks={state.tasks.sort((a, b) => a.position - b.position)}

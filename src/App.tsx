@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import KanbanProvider from "./contexts/KanbanProvider";
 import BoardPage from "./pages/board/BoardPage";
 import HomePage from "./pages/home/HomePage";
-import AppLayout from "./components/layout/AppLayout";
+import AppLayout from "./AppLayout";
 import { ThemeProvider } from "./contexts/ThemeProvider";
 
 export default function App() {
