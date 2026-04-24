@@ -26,11 +26,13 @@ export const updateBoard = async (id: string, updates: Partial<Board>) => {
 };
 
 export const deleteBoard = async (boardId: string) => {
-    const columns = await db.columns.where("boardId").equals(boardId).toArray();
+    await db.transaction("rw", db.comments, db.tasks, db.columns, db.boards, async () => {
+        const columns = await db.columns.where("boardId").equals(boardId).toArray();
 
-    for (const col of columns) {
-        await deleteColumn(col.id); // cascade
-    }
+        for (const column of columns) {
+            await deleteColumn(column.id);
+        }
 
-    return await db.boards.delete(boardId);
+        await db.boards.delete(boardId);
+    });
 };

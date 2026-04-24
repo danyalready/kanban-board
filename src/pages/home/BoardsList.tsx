@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
 import type { Board } from "@/db/types";
+
+import BoardActions from "./BoardActions";
 
 interface Props {
     boards: Board[];
     onClickEdit: (board: Board) => void;
+    onClickDelete: (board: Board) => void;
 }
 
 export default function BoardsList(props: Props) {
@@ -24,15 +26,10 @@ export default function BoardsList(props: Props) {
                             {new Date(board.createdAt).toLocaleString()}
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => props.onClickEdit(board)}>
-                            Edit
-                        </Button>
-
-                        <Button asChild>
-                            <Link to={`/${board.id}`}>Open</Link>
-                        </Button>
-                    </div>
+                    <BoardActions
+                        onClickEdit={() => props.onClickEdit(board)}
+                        onClickDelete={() => props.onClickDelete(board)}
+                    />
                 </li>
             ))}
         </ul>

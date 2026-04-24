@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
+import { deleteBoard as svcDeleteBoard } from "@/services/boardService";
 import {
     createColumn as svcCreateColumn,
     updateColumn as svcUpdateColumn,
@@ -248,6 +249,17 @@ export function useKanbanActions() {
         [dispatch],
     );
 
+    const deleteBoard = useCallback(async (boardId: string) => {
+        try {
+            await svcDeleteBoard(boardId);
+
+            toast.success("Board has been deleted.", { position: "top-center" });
+        } catch (error) {
+            console.error(error);
+            toast.error("Something went wrong.", { position: "top-center" });
+        }
+    }, []);
+
     return {
         setActive,
         setState,
@@ -261,5 +273,6 @@ export function useKanbanActions() {
         addColumn,
         updateColumn,
         deleteColumn,
+        deleteBoard,
     };
 }

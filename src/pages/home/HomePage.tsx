@@ -1,20 +1,24 @@
 import { useMemo, useState } from "react";
 
-import type { Board } from "@/db/types";
-import { createBoard, updateBoard } from "@/services/boardService";
 import { Button } from "@/components/ui/button";
+import { createBoard, updateBoard } from "@/services/boardService";
 import { useKanbanContext } from "@/contexts/kanbanContext";
+import { useKanbanActions } from "@/contexts/useKanbanActions";
+import type { Board } from "@/db/types";
 
 import BoardFormDialog from "./BoardFormDialog";
 import BoardsList from "./BoardsList";
+import DeleteBoardDialog from "./DeleteBoardDialog";
 
 export default function HomePage() {
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [nameInput, setNameInput] = useState("");
     const [editingBoard, setEditingBoard] = useState<Board | null>(null);
+    const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
 
     const { state } = useKanbanContext();
+    const { deleteBoard } = useKanbanActions();
 
     const canSubmit = useMemo(() => nameInput.trim().length > 0, [nameInput]);
 
@@ -33,10 +37,19 @@ export default function HomePage() {
 
     const handleEdit = async () => {
         if (!editingBoard || !canSubmit) return;
+
         await updateBoard(editingBoard.id, { name: nameInput.trim() });
+
         setIsEditOpen(false);
         setEditingBoard(null);
         setNameInput("");
+    };
+
+    const handleDelete = () => {
+        if (!boardToDelete) return;
+
+        deleteBoard(boardToDelete.id);
+        setBoardToDelete(null);
     };
 
     return (
@@ -46,15 +59,26 @@ export default function HomePage() {
                 <Button onClick={() => setIsAddOpen(true)}>Create board</Button>
             </div>
 
-            <BoardsList boards={state.boards} onClickEdit={handleStartEdit} />
+            <BoardsList
+                boards={state.boards}
+                onClickEdit={handleStartEdit}
+                onClickDelete={setBoardToDelete}
+            />
 
-            {/* Dialogs */}
             <BoardFormDialog open={isAddOpen} onSubmit={handleCreate} onOpenChange={setIsAddOpen} />
+
             <BoardFormDialog
                 open={isEditOpen}
                 initialValues={{ boardName: nameInput }}
                 onOpenChange={setIsEditOpen}
                 onSubmit={handleEdit}
+            />
+
+            <DeleteBoardDialog
+                open={Boolean(boardToDelete)}
+                boardName={boardToDelete?.name}
+                onOpenChange={() => setBoardToDelete(null)}
+                onConfirm={handleDelete}
             />
         </div>
     );

@@ -40,7 +40,7 @@ export default function BoardFormDialog(props: Props) {
                     />
                 </form>
                 <DialogFooter>
-                    <Button type="submit">{isEditBoard ? "Edit" : "Create"}</Button>
+                    <Button type="submit">{isEditBoard ? "Save" : "Create"}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
