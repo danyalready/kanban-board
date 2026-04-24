@@ -147,7 +147,7 @@ export default function Board(props: Props) {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex min-h-screen gap-2 overflow-x-auto overflow-y-hidden bg-background p-6">
+            <div className="flex gap-2 overflow-x-auto overflow-y-hidden bg-background p-6">
                 <SortableContext items={props.columns} strategy={horizontalListSortingStrategy}>
                     {props.columns.map((column) => (
                         <Column
