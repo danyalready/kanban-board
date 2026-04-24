@@ -1,48 +1,33 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { createBoard, updateBoard } from "@/services/boardService";
 import { useKanbanContext } from "@/contexts/kanbanContext";
-import { useKanbanActions } from "@/contexts/useKanbanActions";
+import { useBoardActions } from "@/hooks/kanban/useBoardActions";
 import type { Board } from "@/db/types";
 
-import BoardFormDialog from "./BoardFormDialog";
+import BoardFormDialog, { type Inputs } from "./BoardFormDialog";
 import BoardsList from "./BoardsList";
 import DeleteBoardDialog from "./DeleteBoardDialog";
 
 export default function HomePage() {
     const [isAddOpen, setIsAddOpen] = useState(false);
-    const [isEditOpen, setIsEditOpen] = useState(false);
-    const [nameInput, setNameInput] = useState("");
-    const [editingBoard, setEditingBoard] = useState<Board | null>(null);
+    const [boardToEdit, setBoardToEdit] = useState<Board | null>(null);
     const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
 
     const { state } = useKanbanContext();
-    const { deleteBoard } = useKanbanActions();
+    const { addBoard, updateBoard, deleteBoard } = useBoardActions();
 
-    const canSubmit = useMemo(() => nameInput.trim().length > 0, [nameInput]);
-
-    const handleCreate = async () => {
-        if (!canSubmit) return;
-        await createBoard(nameInput.trim());
-        setNameInput("");
+    const handleCreate = (inputs: Inputs) => {
+        addBoard(inputs.boardName);
         setIsAddOpen(false);
     };
 
-    const handleStartEdit = (board: Board) => {
-        setEditingBoard(board);
-        setNameInput(board.name);
-        setIsEditOpen(true);
-    };
+    const handleEdit = (inputs: Inputs) => {
+        if (!boardToEdit) return;
 
-    const handleEdit = async () => {
-        if (!editingBoard || !canSubmit) return;
+        updateBoard(boardToEdit.id, { name: inputs.boardName });
 
-        await updateBoard(editingBoard.id, { name: nameInput.trim() });
-
-        setIsEditOpen(false);
-        setEditingBoard(null);
-        setNameInput("");
+        setBoardToEdit(null);
     };
 
     const handleDelete = () => {
@@ -60,17 +45,17 @@ export default function HomePage() {
             </div>
 
             <BoardsList
-                boards={state.boards}
-                onClickEdit={handleStartEdit}
+                boards={state.boards.sort((a, b) => b.createdAt - a.createdAt)}
+                onClickEdit={setBoardToEdit}
                 onClickDelete={setBoardToDelete}
             />
 
             <BoardFormDialog open={isAddOpen} onSubmit={handleCreate} onOpenChange={setIsAddOpen} />
 
             <BoardFormDialog
-                open={isEditOpen}
-                initialValues={{ boardName: nameInput }}
-                onOpenChange={setIsEditOpen}
+                open={Boolean(boardToEdit)}
+                initialValues={{ boardName: boardToEdit?.name || "" }}
+                onOpenChange={() => setBoardToEdit(null)}
                 onSubmit={handleEdit}
             />
 

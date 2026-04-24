@@ -49,7 +49,7 @@ export default function Column(props: Props) {
                     {...listeners}
                     {...attributes}
                     className={cn(
-                        "flex cursor-grab items-center justify-between px-4",
+                        "flex cursor-grab items-center justify-between px-4 pt-2",
                         props.headerClassName,
                     )}
                 >
