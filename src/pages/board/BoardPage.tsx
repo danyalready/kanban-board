@@ -12,6 +12,7 @@ import AddColumnFormDialog, { type Inputs as ColumnFormInputs } from "./AddColum
 import ViewEditTaskDialog from "./ViewEditTaskDialog";
 import DeleteColumnDialog from "./DeleteColumnDialog";
 import DeleteTaskDialog from "./DeleteTaskDialog";
+import { useColumnActions } from "@/hooks/kanban/useColumnActions";
 
 export default function BoardPage() {
     const { boardId } = useParams();
@@ -19,18 +20,15 @@ export default function BoardPage() {
     const { state } = useKanbanContext();
     const {
         addTask,
-        addColumn,
         moveTask,
         updateTask,
-        moveColumn,
-        updateColumn,
-        deleteColumn,
         deleteTask,
         setActive,
         setState,
         loadBoardData,
         clearBoardData,
     } = useKanbanActions();
+    const { addColumn, updateColumn, moveColumn, deleteColumn } = useColumnActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
     const [isAddTaskFormOpenFor, setIsAddTaskOpenFor] = useState<null | string>(null);
     const [isAddColumnFormOpen, setIsAddColumnFormOpen] = useState(false);

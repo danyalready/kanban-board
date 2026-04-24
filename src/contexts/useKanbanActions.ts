@@ -2,12 +2,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
-import {
-    createColumn as svcCreateColumn,
-    updateColumn as svcUpdateColumn,
-    deleteColumn as svcDeleteColumn,
-} from "@/services/columnService";
-import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
+
 import { getColumnsByBoard } from "@/services/columnService";
 import {
     createTask as svcCreateTask,
@@ -18,7 +13,6 @@ import {
 } from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
 import type { Task, TaskPriority } from "@/db/types";
-import { calculateColumnPosition } from "@/model/column-ordering";
 import { calculateTaskPosition, filterTasksByColumn } from "@/model/task-ordering";
 
 import { useKanbanContext } from "./kanbanContext";
@@ -64,33 +58,6 @@ export function useKanbanActions() {
     const clearBoardData = useCallback(() => {
         dispatch({ type: KanbanActionType.ClearBoardData });
     }, [dispatch]);
-
-    const moveColumn = useCallback(
-        async (columnId: string, targetIndex: number) => {
-            const activeIndex = state.columns.findIndex((column) => column.id === columnId);
-            const updatedPosition = calculateColumnPosition(
-                state.columns,
-                activeIndex,
-                targetIndex,
-            );
-
-            // Optimistically reorder in UI first
-            dispatch({
-                type: KanbanActionType.UpdateColumn,
-                payload: { columnId, data: { position: updatedPosition } },
-            });
-
-            const prevState = structuredClone(state);
-
-            try {
-                await svcUpdateColumn(columnId, { position: updatedPosition });
-            } catch (error) {
-                dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
-                console.error("error", error);
-            }
-        },
-        [dispatch, state],
-    );
 
     const moveTask = useCallback(
         async (
@@ -199,67 +166,14 @@ export function useKanbanActions() {
         [dispatch],
     );
 
-    const addColumn = useCallback(
-        async (boardId: string, name: string) => {
-            const columnsInBoard = state.columns.filter((c) => c.boardId === boardId);
-            const maxPosition = columnsInBoard.length
-                ? Math.max(...columnsInBoard.map((c) => c.position))
-                : 0;
-            const position = maxPosition + COLUMN_POSITION_OFFSET;
-
-            try {
-                const column = await svcCreateColumn(boardId, name, position);
-
-                dispatch({
-                    type: KanbanActionType.SetColumns,
-                    payload: { columns: [...state.columns, column] },
-                });
-
-                toast.success("Column has been created 🎉", { position: "top-center" });
-            } catch {
-                toast.error("Something went wrong.", { position: "top-center" });
-            }
-        },
-        [dispatch, state.columns],
-    );
-
-    const updateColumn = useCallback(
-        async (columnId: string, data: Partial<{ name: string; position: number }>) => {
-            await svcUpdateColumn(columnId, data);
-
-            dispatch({ type: KanbanActionType.UpdateColumn, payload: { columnId, data } });
-        },
-        [dispatch],
-    );
-
-    const deleteColumn = useCallback(
-        async (columnId: string) => {
-            try {
-                await svcDeleteColumn(columnId);
-
-                dispatch({ type: KanbanActionType.DeleteColumn, payload: { columnId } });
-
-                toast.success("Column has been deleted.", { position: "top-center" });
-            } catch (error) {
-                console.error(error);
-                toast.error("Something went wrong.", { position: "top-center" });
-            }
-        },
-        [dispatch],
-    );
-
     return {
         setActive,
         setState,
         loadBoardData,
         clearBoardData,
-        moveColumn,
         moveTask,
         addTask,
         updateTask,
         deleteTask,
-        addColumn,
-        updateColumn,
-        deleteColumn,
     };
 }
