@@ -3,7 +3,9 @@ import { useParams, useSearchParams } from "react-router-dom";
 
 import Board from "@/components/Board";
 import { useKanbanContext } from "@/contexts/kanbanContext";
-import { useKanbanActions } from "@/contexts/useKanbanActions";
+import { useKanbanActions } from "@/hooks/kanban/useKanbanActions";
+import { useColumnActions } from "@/hooks/kanban/useColumnActions";
+import { useTaskActions } from "@/hooks/kanban/useTaskActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
 import type { Column, Task } from "@/db/types";
 
@@ -12,8 +14,6 @@ import AddColumnFormDialog, { type Inputs as ColumnFormInputs } from "./AddColum
 import ViewEditTaskDialog from "./ViewEditTaskDialog";
 import DeleteColumnDialog from "./DeleteColumnDialog";
 import DeleteTaskDialog from "./DeleteTaskDialog";
-import { useColumnActions } from "@/hooks/kanban/useColumnActions";
-import { useTaskActions } from "@/hooks/kanban/useTaskActions";
 
 export default function BoardPage() {
     const { boardId } = useParams();

@@ -4,8 +4,7 @@ import { KanbanActionType, type KanbanState } from "@/reducers/kanbanTypes";
 import { getColumnsByBoard } from "@/services/columnService";
 import { getTasksByColumn } from "@/services/taskService";
 import { getCommentsByTask } from "@/services/commentService";
-
-import { useKanbanContext } from "./kanbanContext";
+import { useKanbanContext } from "@/contexts/kanbanContext";
 
 export function useKanbanActions() {
     const { dispatch } = useKanbanContext();
