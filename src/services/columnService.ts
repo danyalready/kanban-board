@@ -6,6 +6,11 @@ import type { Column } from "@/db/types";
 import { deleteTask } from "./taskService";
 
 export const COLUMN_POSITION_OFFSET = 1e4;
+export const COLUMN_MIN_GAP = 1e-4;
+
+export const getColumn = async (columnId: string) => {
+    return await db.columns.where("id").equals(columnId).first();
+};
 
 export const createColumn = async (boardId: string, name: string, position: number) => {
     const column: Column = { id: uuid(), boardId, name, position, createdAt: Date.now() };
@@ -24,11 +29,17 @@ export const updateColumn = async (id: string, updates: Partial<Column>) => {
 };
 
 export const normalizeColumnsPositions = async (boardId: string) => {
-    const columns = await getColumnsByBoard(boardId);
+    return await db.transaction("rw", db.columns, async () => {
+        const columns = await db.columns.where("boardId").equals(boardId).sortBy("position");
+        const updates = columns.map((column, index) => ({
+            ...column,
+            position: (index + 1) * COLUMN_POSITION_OFFSET,
+        }));
 
-    for (let i = 0; i < columns.length; i++) {
-        await updateColumn(columns[i].id, { position: i * COLUMN_POSITION_OFFSET });
-    }
+        await db.columns.bulkPut(updates);
+
+        return updates;
+    });
 };
 
 export const deleteColumn = async (columnId: string) => {

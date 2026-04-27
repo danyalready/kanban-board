@@ -4,10 +4,15 @@ import { toast } from "sonner";
 import {
     createTask as svcCreateTask,
     deleteTask as svcDeleteTask,
+    normalizeTaskPositions as svcNormalizeTaskPositions,
     updateTask as svcUpdateTask,
     TASK_POSITION_OFFSET,
 } from "@/services/taskService";
-import { calculateTaskPosition, filterTasksByColumn } from "@/model/task-ordering";
+import {
+    calculateTaskPosition,
+    filterTasksByColumn,
+    needsTaskPositionNormalization,
+} from "@/model/task-ordering";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { KanbanActionType } from "@/reducers/kanbanTypes";
 import type { Task, TaskPriority } from "@/db/types";
@@ -98,6 +103,29 @@ export function useTaskActions() {
                     columnId: targetColumnId,
                     position: updatedPosition,
                 });
+
+                const nextTasks = state.tasks.map((task) =>
+                    task.id === taskId
+                        ? { ...task, columnId: targetColumnId, position: updatedPosition }
+                        : task,
+                );
+                const nextTargetColumnTasks = filterTasksByColumn(nextTasks, targetColumnId);
+
+                if (needsTaskPositionNormalization(nextTargetColumnTasks)) {
+                    const normalizedTasks = await svcNormalizeTaskPositions(targetColumnId);
+                    const normalizedTaskMap = new Map(
+                        normalizedTasks.map((task) => [task.id, task]),
+                    );
+
+                    dispatch({
+                        type: KanbanActionType.SetTasks,
+                        payload: {
+                            tasks: state.tasks.map(
+                                (task) => normalizedTaskMap.get(task.id) ?? task,
+                            ),
+                        },
+                    });
+                }
             } catch (error) {
                 dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
                 console.error("error", error);

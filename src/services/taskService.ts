@@ -68,9 +68,15 @@ export const deleteTask = async (taskId: string) => {
 // };
 
 export const normalizeTaskPositions = async (columnId: string) => {
-    const tasks = await db.tasks.where("columnId").equals(columnId).sortBy("position");
+    return await db.transaction("rw", db.tasks, async () => {
+        const tasks = await db.tasks.where("columnId").equals(columnId).sortBy("position");
+        const updates = tasks.map((task, index) => ({
+            ...task,
+            position: (index + 1) * TASK_POSITION_OFFSET,
+        }));
 
-    for (let i = 0; i < tasks.length; i++) {
-        await updateTask(tasks[i].id, { position: i * TASK_POSITION_OFFSET });
-    }
+        await db.tasks.bulkPut(updates);
+
+        return updates;
+    });
 };

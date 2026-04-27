@@ -1,15 +1,16 @@
 import { useCallback } from "react";
+import { toast } from "sonner";
 
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import {
     createColumn as svcCreateColumn,
     updateColumn as svcUpdateColumn,
     deleteColumn as svcDeleteColumn,
+    normalizeColumnsPositions as svcNormalizeColumnsPositions,
     COLUMN_POSITION_OFFSET,
 } from "@/services/columnService";
 import { KanbanActionType } from "@/reducers/kanbanTypes";
-import { toast } from "sonner";
-import { calculateColumnPosition } from "@/model/column-ordering";
+import { calculateColumnPosition, needsColumnPositionNormalization } from "@/model/column-ordering";
 
 export function useColumnActions() {
     const { dispatch, state } = useKanbanContext();
@@ -55,12 +56,23 @@ export function useColumnActions() {
 
     const moveColumn = useCallback(
         async (columnId: string, targetIndex: number) => {
-            const activeIndex = state.columns.findIndex((column) => column.id === columnId);
+            const activeColumn = state.columns.find((column) => column.id === columnId);
+
+            if (!activeColumn) return;
+
+            const columnsInBoard = state.columns
+                .filter((column) => column.boardId === activeColumn.boardId)
+                .sort((a, b) => a.position - b.position);
+            const activeIndex = columnsInBoard.findIndex((column) => column.id === columnId);
+
+            if (activeIndex === -1 || targetIndex === -1 || activeIndex === targetIndex) return;
+
             const updatedPosition = calculateColumnPosition(
-                state.columns,
+                columnsInBoard,
                 activeIndex,
                 targetIndex,
             );
+            const prevState = structuredClone(state);
 
             // Optimistically reorder in UI first
             dispatch({
@@ -68,12 +80,36 @@ export function useColumnActions() {
                 payload: { columnId, data: { position: updatedPosition } },
             });
 
-            const prevState = structuredClone(state);
-
             try {
                 await svcUpdateColumn(columnId, { position: updatedPosition });
+
+                const nextBoardColumns = columnsInBoard
+                    .map((column) =>
+                        column.id === columnId ? { ...column, position: updatedPosition } : column,
+                    )
+                    .sort((a, b) => a.position - b.position);
+
+                if (needsColumnPositionNormalization(nextBoardColumns)) {
+                    const normalizedColumns = await svcNormalizeColumnsPositions(
+                        activeColumn.boardId,
+                    );
+                    const normalizedColumnMap = new Map(
+                        normalizedColumns.map((column) => [column.id, column]),
+                    );
+
+                    dispatch({
+                        type: KanbanActionType.SetColumns,
+                        payload: {
+                            columns: state.columns.map(
+                                (column) => normalizedColumnMap.get(column.id) ?? column,
+                            ),
+                        },
+                    });
+                }
             } catch (error) {
                 dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
+                toast.error(`Something went wrong while moving column "${activeColumn.name}".`);
+
                 console.error("error", error);
             }
         },

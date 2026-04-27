@@ -1,5 +1,5 @@
 import type { Column } from "@/db/types";
-import { COLUMN_POSITION_OFFSET } from "@/services/columnService";
+import { COLUMN_MIN_GAP, COLUMN_POSITION_OFFSET } from "@/services/columnService";
 
 export function calculateColumnPosition(
     columns: Column[],
@@ -24,4 +24,25 @@ export function calculateColumnPosition(
     }
 
     return COLUMN_POSITION_OFFSET;
+}
+
+export function normalizeColumnPositions(columns: Column[]): Column[] {
+    return columns.map((column, index) => ({
+        ...column,
+        position: (index + 1) * COLUMN_POSITION_OFFSET,
+    }));
+}
+
+export function needsColumnPositionNormalization(columns: Column[]): boolean {
+    for (let i = 0; i < columns.length; i++) {
+        if (columns[i].position <= COLUMN_MIN_GAP) {
+            return true;
+        }
+
+        if (i > 0 && columns[i].position - columns[i - 1].position <= COLUMN_MIN_GAP) {
+            return true;
+        }
+    }
+
+    return false;
 }

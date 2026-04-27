@@ -35,16 +35,20 @@ export function filterTasksByColumn(tasks: Task[], columnId: string) {
     return sortedColumnTasks;
 }
 
-export function reindex(tasks: Task[]): Task[] {
+export function normalizeTaskPositions(tasks: Task[]): Task[] {
     return tasks.map((t, i) => ({
         ...t,
         position: (i + 1) * TASK_POSITION_OFFSET,
     }));
 }
 
-export function needsReindex(tasks: Task[]): boolean {
-    for (let i = 1; i < tasks.length; i++) {
-        if (tasks[i].position - tasks[i - 1].position <= TASK_MIN_GAP) {
+export function needsTaskPositionNormalization(tasks: Task[]): boolean {
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].position <= TASK_MIN_GAP) {
+            return true;
+        }
+
+        if (i > 0 && tasks[i].position - tasks[i - 1].position <= TASK_MIN_GAP) {
             return true;
         }
     }

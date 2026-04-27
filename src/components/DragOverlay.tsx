@@ -23,6 +23,7 @@ export default function DragOverlay() {
                     headerClassName="cursor-grabbing"
                     onColumnNameChange={() => {}}
                     onClickAddTask={() => {}}
+                    onClickDelete={() => {}}
                 />
             );
         }
