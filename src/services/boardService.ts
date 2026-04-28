@@ -6,8 +6,11 @@ import type { Board } from "@/db/types";
 import { deleteColumn } from "./columnService";
 
 export const createBoard = async (name: string) => {
-    const board = { id: uuid(), name, createdAt: Date.now() };
+    const trimmedName = name.trim();
 
+    if (!trimmedName.length) throw new Error("Board name cannot be empty.");
+
+    const board = { id: uuid(), name: trimmedName, createdAt: Date.now() };
     await db.boards.add(board);
 
     return board;

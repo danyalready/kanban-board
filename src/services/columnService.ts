@@ -13,8 +13,17 @@ export const getColumn = async (columnId: string) => {
 };
 
 export const createColumn = async (boardId: string, name: string, position: number) => {
-    const column: Column = { id: uuid(), boardId, name, position, createdAt: Date.now() };
+    const trimmedName = name.trim();
 
+    if (!trimmedName.length) throw new Error("Column name cannot be empty.");
+
+    const column: Column = {
+        id: uuid(),
+        boardId,
+        name: trimmedName,
+        position,
+        createdAt: Date.now(),
+    };
     await db.columns.add(column);
 
     return column;

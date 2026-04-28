@@ -18,16 +18,19 @@ export const createTask = async (
         position,
     }: { title: string; description: string; priority: TaskPriority; position: number },
 ) => {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle.length) throw new Error("Task title cannot be empty.");
+
     const newTask: Task = {
         id: uuid(),
         columnId,
-        title,
+        title: trimmedTitle,
         description,
         priority,
         createdAt: Date.now(),
         position,
     };
-
     await db.tasks.add(newTask);
 
     return newTask;

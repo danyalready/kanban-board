@@ -4,6 +4,10 @@ import { db } from "@/db/db";
 import type { Comment } from "@/db/types";
 
 export const createComment = async (taskId: string, text: string) => {
+    const trimmedText = text.trim();
+
+    if (!trimmedText.length) throw new Error("Text cannot be empty.");
+
     const comment: Comment = {
         id: uuid(),
         taskId,
@@ -11,6 +15,7 @@ export const createComment = async (taskId: string, text: string) => {
         createdAt: Date.now(),
     };
     await db.comments.add(comment);
+
     return comment;
 };
 
