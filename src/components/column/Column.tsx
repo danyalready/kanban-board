@@ -3,7 +3,8 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 
 import { cn } from "@/utils/cn";
-import type { Column, Task as TaskT } from "@/db/types";
+import type { Column, Comment, Task as TaskT } from "@/db/types";
+import { countCommentsByTaskId } from "@/utils/comments";
 
 import Task from "../Task";
 import ColumnActions from "./ColumnActions";
@@ -12,6 +13,7 @@ import ColumnEditableTitle from "./ColumnEditableTitle";
 interface Props {
     column: Column;
     tasks: TaskT[];
+    comments: Comment[];
     className?: string;
     headerClassName?: string;
     onColumnNameChange: (value: string) => void;
@@ -70,7 +72,11 @@ export default function Column(props: Props) {
                 <SortableContext items={props.tasks} strategy={verticalListSortingStrategy}>
                     <div className="flex min-h-12 flex-col gap-1 px-1">
                         {props.tasks.map((task) => (
-                            <Task key={task.id} task={task} />
+                            <Task
+                                key={task.id}
+                                task={task}
+                                commentsCount={countCommentsByTaskId(task.id, props.comments)}
+                            />
                         ))}
                     </div>
                 </SortableContext>

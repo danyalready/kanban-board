@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { isColumn, isTask } from "@/reducers/kanbanTypes";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { filterTasksByColumn } from "@/model/task-ordering";
+import { countCommentsByTaskId } from "@/utils/comments";
 
 import Column from "./column/Column";
 import Task from "./Task";
@@ -19,6 +20,7 @@ export default function DragOverlay() {
                 <Column
                     column={state.active}
                     tasks={columnTasks}
+                    comments={state.comments}
                     className="rotate-2 shadow-xl"
                     headerClassName="cursor-grabbing"
                     onColumnNameChange={() => {}}
@@ -32,6 +34,7 @@ export default function DragOverlay() {
             return (
                 <Task
                     task={state.active}
+                    commentsCount={countCommentsByTaskId(state.active.id, state.comments)}
                     isOverlay
                     className="rotate-2 shadow-xl"
                     gripClassName="cursor-grabbing"

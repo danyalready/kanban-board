@@ -16,6 +16,7 @@ import { PriorityIcon } from "./priority-icon/PriorityIcon";
 
 interface Props {
     task: Task;
+    commentsCount: number;
     isOverlay?: boolean;
     className?: string;
     gripClassName?: string;
@@ -81,7 +82,7 @@ export default function Task(props: Props) {
                 <div className="flex h-5 gap-2">
                     <div className="flex items-center gap-1">
                         <MessageCircleMoreIcon size={12} />
-                        <span className="text-xs">{0}</span>
+                        <span className="text-xs">{props.commentsCount}</span>
                     </div>
                     <Separator orientation="vertical" />
                     <div className="flex items-center gap-1">

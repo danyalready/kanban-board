@@ -18,7 +18,7 @@ import {
 import { PlusIcon } from "lucide-react";
 
 import { filterTasksByColumn } from "@/model/task-ordering";
-import type { Column as ColumnT, Task as TaskT } from "@/db/types";
+import type { Column as ColumnT, Comment, Task as TaskT } from "@/db/types";
 
 import Column from "./column/Column";
 import DragOverlay from "./DragOverlay";
@@ -27,6 +27,7 @@ import { Button } from "./ui/button";
 interface Props {
     columns: ColumnT[];
     tasks: TaskT[];
+    comments: Comment[];
     onSetActive: (item: ColumnT | TaskT) => void;
     onMoveTask: (
         params: { taskId: string; targetColumnId: string; targetIndex: number },
@@ -154,6 +155,7 @@ export default function Board(props: Props) {
                             key={column.id}
                             column={column}
                             tasks={props.tasks.filter((task) => task.columnId === column.id)}
+                            comments={props.comments}
                             onColumnNameChange={(name) => props.onColumnChange(column.id, { name })}
                             onClickAddTask={() => props.onClickAddTaskTo(column.id)}
                             onClickDelete={() => props.onClickDeleteColumn(column)}

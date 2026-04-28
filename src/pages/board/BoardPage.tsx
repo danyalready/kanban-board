@@ -6,6 +6,7 @@ import { useKanbanContext } from "@/contexts/kanbanContext";
 import { useKanbanActions } from "@/hooks/kanban/useKanbanActions";
 import { useColumnActions } from "@/hooks/kanban/useColumnActions";
 import { useTaskActions } from "@/hooks/kanban/useTaskActions";
+import { useCommentActions } from "@/hooks/kanban/useCommentActions";
 import type { KanbanState } from "@/reducers/kanbanTypes";
 import type { Column, Task } from "@/db/types";
 
@@ -22,6 +23,7 @@ export default function BoardPage() {
     const { setActive, setState, loadBoardData, clearBoardData } = useKanbanActions();
     const { addColumn, updateColumn, moveColumn, deleteColumn } = useColumnActions();
     const { addTask, moveTask, updateTask, deleteTask } = useTaskActions();
+    const { addComment, updateComment, deleteComment } = useCommentActions();
     const [prevKanbanState, setPrevKanbanState] = useState<KanbanState>(state);
     const [isAddTaskFormOpenFor, setIsAddTaskOpenFor] = useState<null | string>(null);
     const [isAddColumnFormOpen, setIsAddColumnFormOpen] = useState(false);
@@ -30,6 +32,11 @@ export default function BoardPage() {
 
     const taskId = searchParams.get("task");
     const task = state.tasks.find((task) => task.id === taskId);
+    const comments = task
+        ? state.comments
+              .filter((comment) => comment.taskId === task.id)
+              .sort((a, b) => a.createdAt - b.createdAt)
+        : [];
 
     const handleTaskDetailsModalClose = () => {
         searchParams.delete("task");
@@ -75,6 +82,7 @@ export default function BoardPage() {
             <Board
                 columns={state.columns.sort((a, b) => a.position - b.position)}
                 tasks={state.tasks.sort((a, b) => a.position - b.position)}
+                comments={state.comments}
                 onSetActive={setActive}
                 onMoveColumn={moveColumn}
                 onMoveTask={moveTask}
@@ -96,8 +104,12 @@ export default function BoardPage() {
             <ViewEditTaskDialog
                 open={Boolean(task)}
                 task={task}
+                comments={comments}
                 onOpenChange={handleTaskDetailsModalClose}
                 onTaskChange={updateTask}
+                onAddComment={addComment}
+                onCommentChange={updateComment}
+                onDeleteComment={deleteComment}
                 onDeleteTask={() => task && setTaskToDelete(task)}
             />
 
