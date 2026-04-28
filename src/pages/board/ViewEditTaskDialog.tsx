@@ -39,6 +39,7 @@ interface Props {
 
 export default function ViewEditTaskDialog(props: Props) {
     const [task, setTask] = useState<Task | undefined>(props.task);
+    const [localComments, setLocalComments] = useState(props.comments);
 
     const [editing, setEditing] = useState(false);
     const [titleDraft, setTitleDraft] = useState("");
@@ -118,6 +119,10 @@ export default function ViewEditTaskDialog(props: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.task?.id]);
 
+    useEffect(() => {
+        if (props.open) setLocalComments(props.comments);
+    }, [props.comments, props.open]);
+
     return (
         <Dialog open={props.open} onOpenChange={handleOpenChange}>
             <DialogContent>
@@ -187,10 +192,10 @@ export default function ViewEditTaskDialog(props: Props) {
                     </div>
 
                     <div className="mt-2 space-y-2">
-                        {props.comments.length === 0 ? (
+                        {localComments.length === 0 ? (
                             <p className="text-sm text-muted-foreground">No comments yet.</p>
                         ) : (
-                            props.comments.map((comment) => {
+                            localComments.map((comment) => {
                                 const isEditingComment = editingCommentId === comment.id;
 
                                 return (
