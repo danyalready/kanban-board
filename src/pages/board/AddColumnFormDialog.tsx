@@ -41,7 +41,13 @@ export default function AddColumnFormDialog(props: Props) {
                         <Label htmlFor="name" aria-required>
                             Column name
                         </Label>
-                        <Input id="name" {...register("name", { required: true })} />
+                        <Input
+                            id="name"
+                            {...register("name", {
+                                required: true,
+                                validate: (value) => value.trim().length > 0,
+                            })}
+                        />
                     </div>
 
                     <DialogFooter>

@@ -60,7 +60,13 @@ export default function CreateTaskFormDialog(props: Props) {
                         <Label htmlFor="title" required>
                             Summary
                         </Label>
-                        <Input id="title" {...register("title", { required: true })} />
+                        <Input
+                            id="title"
+                            {...register("title", {
+                                required: true,
+                                validate: (value) => value.trim().length > 0,
+                            })}
+                        />
                     </div>
 
                     <div className="mb-4">

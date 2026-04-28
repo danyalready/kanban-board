@@ -37,7 +37,13 @@ export default function BoardFormDialog(props: Props) {
                         <Label htmlFor="title" required>
                             Board name
                         </Label>
-                        <Input id="title" {...register("boardName", { required: true })} />
+                        <Input
+                            id="title"
+                            {...register("boardName", {
+                                required: true,
+                                validate: (value) => value.trim().length > 0,
+                            })}
+                        />
                     </div>
 
                     <DialogFooter>
