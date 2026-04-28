@@ -87,6 +87,33 @@ export function kanbanReducer(state: KanbanState, action: KanbanAction): KanbanS
             return {
                 ...state,
                 tasks: state.tasks.filter((item) => item.id !== action.payload.taskId),
+                comments: state.comments.filter(
+                    (comment) => comment.taskId !== action.payload.taskId,
+                ),
+            };
+        }
+        case KanbanActionType.AddComment: {
+            return {
+                ...state,
+                comments: [...state.comments, action.payload.comment],
+            };
+        }
+        case KanbanActionType.UpdateComment: {
+            return {
+                ...state,
+                comments: state.comments.map((comment) =>
+                    comment.id === action.payload.commentId
+                        ? { ...comment, ...action.payload.data }
+                        : comment,
+                ),
+            };
+        }
+        case KanbanActionType.DeleteComment: {
+            return {
+                ...state,
+                comments: state.comments.filter(
+                    (comment) => comment.id !== action.payload.commentId,
+                ),
             };
         }
         default: {

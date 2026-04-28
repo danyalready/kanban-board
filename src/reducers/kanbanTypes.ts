@@ -23,6 +23,9 @@ export enum KanbanActionType {
     UpdateTask = "UPDATE_TASK",
     DeleteTask = "DELETE_TASK",
     MoveTask = "MOVE_TASK",
+    AddComment = "ADD_COMMENT",
+    UpdateComment = "UPDATE_COMMENT",
+    DeleteComment = "DELETE_COMMENT",
 }
 
 export type KanbanAction =
@@ -38,7 +41,13 @@ export type KanbanAction =
     | { type: KanbanActionType.DeleteColumn; payload: { columnId: string } }
     | { type: KanbanActionType.AddTask; payload: { columnId: string; data: Omit<Task, "id"> } }
     | { type: KanbanActionType.UpdateTask; payload: { taskId: string; data: Partial<Task> } }
-    | { type: KanbanActionType.DeleteTask; payload: { taskId: string } };
+    | { type: KanbanActionType.DeleteTask; payload: { taskId: string } }
+    | { type: KanbanActionType.AddComment; payload: { comment: Comment } }
+    | {
+          type: KanbanActionType.UpdateComment;
+          payload: { commentId: string; data: Partial<Comment> };
+      }
+    | { type: KanbanActionType.DeleteComment; payload: { commentId: string } };
 
 export function isTask(active: null | Task | Column): active is Task {
     return Boolean(active && "priority" in active);
