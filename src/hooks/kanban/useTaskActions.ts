@@ -29,6 +29,10 @@ export function useTaskActions() {
                 priority,
             }: { title: string; description: string; priority: TaskPriority },
         ) => {
+            const trimmedTitle = title.trim();
+
+            if (!trimmedTitle) return;
+
             const tasksInColumn = state.tasks.filter((t) => t.columnId === columnId);
             const maxPosition = tasksInColumn.length
                 ? Math.max(...tasksInColumn.map((t) => t.position))
@@ -37,7 +41,7 @@ export function useTaskActions() {
 
             try {
                 const task = await svcCreateTask(columnId, {
-                    title,
+                    title: trimmedTitle,
                     description,
                     priority,
                     position,

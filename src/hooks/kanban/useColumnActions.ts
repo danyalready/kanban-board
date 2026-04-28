@@ -17,6 +17,10 @@ export function useColumnActions() {
 
     const addColumn = useCallback(
         async (boardId: string, name: string) => {
+            const trimmedName = name.trim();
+
+            if (!trimmedName) return;
+
             const columnsInBoard = state.columns.filter((c) => c.boardId === boardId);
             const maxPosition = columnsInBoard.length
                 ? Math.max(...columnsInBoard.map((c) => c.position))
@@ -24,7 +28,7 @@ export function useColumnActions() {
             const position = maxPosition + COLUMN_POSITION_OFFSET;
 
             try {
-                const column = await svcCreateColumn(boardId, name, position);
+                const column = await svcCreateColumn(boardId, trimmedName, position);
 
                 dispatch({
                     type: KanbanActionType.SetColumns,

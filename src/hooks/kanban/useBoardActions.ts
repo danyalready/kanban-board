@@ -10,8 +10,12 @@ import type { Board } from "@/db/types";
 
 export function useBoardActions() {
     const addBoard = useCallback(async (name: string) => {
+        const trimmedName = name.trim();
+
+        if (!trimmedName) return;
+
         try {
-            await createBoard(name);
+            await createBoard(trimmedName);
 
             toast.success("Board has been created 🎉", { position: "top-center" });
         } catch {
