@@ -14,6 +14,7 @@ A local-first Kanban board built with React, TypeScript, Vite, Dexie, dnd-kit, R
 -   Light and dark theme toggle
 -   Local persistence with IndexedDB through Dexie
 -   Sparse position ordering with automatic position normalization
+-   One-time demo board seed for first-time users
 
 ## Tech Stack
 
@@ -91,6 +92,8 @@ The app stores all data locally in IndexedDB:
 -   `comments`
 
 Columns and tasks use numeric sparse positions for drag-and-drop ordering. When positions become too dense, the app normalizes them back to predictable gaps.
+
+On the first run in a clean browser profile, the app creates a demo board with sample columns, tasks, and comments. If the user deletes all boards later, the demo board is not recreated automatically.
 
 ## Notes
 

@@ -2,6 +2,7 @@ import { type PropsWithChildren, useEffect, useReducer } from "react";
 import { liveQuery } from "dexie";
 
 import { db } from "@/db/db";
+import { seedDemoBoardIfNeeded } from "@/db/demoData";
 import { kanbanReducer } from "@/reducers/kanbanReducer";
 import { KanbanActionType } from "@/reducers/kanbanTypes";
 
@@ -17,11 +18,25 @@ export default function KanbanProvider(props: PropsWithChildren) {
     });
 
     useEffect(() => {
-        const sub = liveQuery(() => db.boards.toArray()).subscribe((rows) =>
-            dispatch({ type: KanbanActionType.SetBoards, payload: { boards: rows } }),
-        );
+        let sub: { unsubscribe: () => void } | undefined;
+        let cancelled = false;
 
-        return () => sub.unsubscribe();
+        seedDemoBoardIfNeeded()
+            .catch((error) => {
+                console.error("Failed to seed demo board", error);
+            })
+            .finally(() => {
+                if (cancelled) return;
+
+                sub = liveQuery(() => db.boards.toArray()).subscribe((rows) =>
+                    dispatch({ type: KanbanActionType.SetBoards, payload: { boards: rows } }),
+                );
+            });
+
+        return () => {
+            cancelled = true;
+            sub?.unsubscribe();
+        };
     }, []);
 
     return (
