@@ -1,50 +1,97 @@
-# React + TypeScript + Vite
+# React Kanban Board
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local-first Kanban board built with React, TypeScript, Vite, Dexie, dnd-kit, Radix UI, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
--   [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
--   [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+-   Create, rename, and delete boards
+-   Create, rename, reorder, and delete columns
+-   Create, edit, move, prioritize, and delete tasks
+-   Drag tasks within a column or across columns
+-   Drag columns horizontally
+-   Add, edit, and delete task comments
+-   Rich-text task descriptions
+-   Light and dark theme toggle
+-   Local persistence with IndexedDB through Dexie
+-   Sparse position ordering with automatic position normalization
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+-   React 18
+-   TypeScript
+-   Vite
+-   React Router
+-   Dexie / IndexedDB
+-   dnd-kit
+-   Shadcn UI / Radix UI
+-   Tailwind CSS
+-   React Quill
+-   Sonner
 
--   Configure the top-level `parserOptions` property like this:
+## Getting Started
 
-```js
-export default tseslint.config({
-    languageOptions: {
-        // other options...
-        parserOptions: {
-            project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-            tsconfigRootDir: import.meta.dirname,
-        },
-    },
-});
+Install dependencies:
+
+```bash
+npm install
 ```
 
--   Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
--   Optionally add `...tseslint.configs.stylisticTypeChecked`
--   Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Start the development server:
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
-
-export default tseslint.config({
-    // Set the react version
-    settings: { react: { version: "18.3" } },
-    plugins: {
-        // Add the react plugin
-        react,
-    },
-    rules: {
-        // other rules...
-        // Enable its recommended rules
-        ...react.configs.recommended.rules,
-        ...react.configs["jsx-runtime"].rules,
-    },
-});
+```bash
+npm run dev
 ```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
+
+Run lint checks:
+
+```bash
+npm run lint
+```
+
+Format the codebase:
+
+```bash
+npm run format
+```
+
+## Project Structure
+
+```text
+src/
+  components/        Shared UI and board rendering components
+  contexts/          Kanban and theme providers
+  db/                Dexie database setup and entity types
+  hooks/kanban/      Board, column, task, comment, and shared Kanban actions
+  model/             Column and task ordering logic
+  pages/             Home and board screens
+  reducers/          Kanban reducer and action types
+  services/          IndexedDB persistence services
+  utils/             Shared utility functions
+```
+
+## Data Model
+
+The app stores all data locally in IndexedDB:
+
+-   `boards`
+-   `columns`
+-   `tasks`
+-   `comments`
+
+Columns and tasks use numeric sparse positions for drag-and-drop ordering. When positions become too dense, the app normalizes them back to predictable gaps.
+
+## Notes
+
+The app is client-only and does not require a backend. Clearing browser site data will remove stored boards, columns, tasks, and comments.
