@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 import {
+    type CreateTaskInput,
     createTask as svcCreateTask,
     deleteTask as svcDeleteTask,
     normalizeTaskPositions as svcNormalizeTaskPositions,
@@ -15,25 +16,17 @@ import {
 } from "@/model/task-ordering";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { KanbanActionType } from "@/reducers/kanbanTypes";
-import type { Task, TaskPriority } from "@/db/types";
+import { validateCreateTaskInput, validateUpdateTaskInput } from "@/model/validation";
 
 export function useTaskActions() {
     const { dispatch, state } = useKanbanContext();
 
     const addTask = useCallback(
-        async (
-            columnId: string,
-            {
-                title,
-                description,
-                priority,
-            }: { title: string; description: string; priority: TaskPriority },
-        ) => {
-            const trimmedTitle = title.trim();
+        async (columnId: string, data: CreateTaskInput) => {
+            const validData = validateCreateTaskInput(data);
+            if (!validData) return;
 
-            if (!trimmedTitle) return;
-
-            const tasksInColumn = state.tasks.filter((t) => t.columnId === columnId);
+            const tasksInColumn = filterTasksByColumn(state.tasks, columnId);
             const maxPosition = tasksInColumn.length
                 ? Math.max(...tasksInColumn.map((t) => t.position))
                 : 0;
@@ -41,9 +34,7 @@ export function useTaskActions() {
 
             try {
                 const task = await svcCreateTask(columnId, {
-                    title: trimmedTitle,
-                    description,
-                    priority,
+                    ...validData,
                     position,
                 });
 
@@ -61,13 +52,22 @@ export function useTaskActions() {
     );
 
     const updateTask = useCallback(
-        async (
-            taskId: string,
-            data: Partial<{ title: string; description: string; priority: Task["priority"] }>,
-        ) => {
-            await svcUpdateTask(taskId, data);
+        async (taskId: string, data: Partial<CreateTaskInput>) => {
+            const validData = validateUpdateTaskInput(data);
+            if (!validData) return;
 
-            dispatch({ type: KanbanActionType.UpdateTask, payload: { taskId, data: data } });
+            if (Object.keys(validData).length === 0) return;
+
+            try {
+                await svcUpdateTask(taskId, validData);
+
+                dispatch({
+                    type: KanbanActionType.UpdateTask,
+                    payload: { taskId, data: validData },
+                });
+            } catch {
+                toast.error("Something went wrong.", { position: "top-center" });
+            }
         },
         [dispatch],
     );
