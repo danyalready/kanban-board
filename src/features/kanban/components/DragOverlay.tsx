@@ -2,7 +2,6 @@ import { createPortal } from "react-dom";
 import { defaultDropAnimationSideEffects, DragOverlay as DndDragOverlay } from "@dnd-kit/core";
 
 import { isColumn, isTask } from "@/app/kanban/types";
-
 import { useKanban } from "@/app/kanban/useKanban";
 import { filterTasksByColumn } from "@/domain/kanban/taskOrdering";
 import { countCommentsByTaskId } from "@/domain/kanban/comments";

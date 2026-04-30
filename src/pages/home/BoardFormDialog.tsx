@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog";
@@ -18,8 +19,12 @@ interface Props {
 }
 
 export default function BoardFormDialog(props: Props) {
-    const { register, handleSubmit } = useForm<Inputs>({ values: props.initialValues });
+    const { register, handleSubmit, reset } = useForm<Inputs>({ values: props.initialValues });
     const isEditBoard = Boolean(props.initialValues);
+
+    useEffect(() => {
+        if (!props.open) reset();
+    }, [props.open, reset]);
 
     return (
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>

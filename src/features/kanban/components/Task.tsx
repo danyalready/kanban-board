@@ -9,7 +9,6 @@ import { getPriorityColor } from "@/shared/utils/getPriorityColor";
 import { formatDate } from "@/shared/utils/formatDate";
 import type { Task } from "@/domain/kanban/types";
 import { t } from "@/shared/i18n";
-
 import { Badge } from "@/shared/ui/badge";
 import { Separator } from "@/shared/ui/separator";
 import { Avatar } from "@/shared/ui/avatar";

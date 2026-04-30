@@ -15,6 +15,7 @@ import AddColumnFormDialog, { type Inputs as ColumnFormInputs } from "./AddColum
 import ViewEditTaskDialog from "./ViewEditTaskDialog";
 import DeleteColumnDialog from "./DeleteColumnDialog";
 import DeleteTaskDialog from "./DeleteTaskDialog";
+import NoColumnsState from "./NoColumnsState";
 
 export default function BoardPage() {
     const { boardId } = useParams();
@@ -79,21 +80,25 @@ export default function BoardPage() {
 
     return (
         <div className="h-full">
-            <Board
-                columns={state.columns.sort((a, b) => a.position - b.position)}
-                tasks={state.tasks.sort((a, b) => a.position - b.position)}
-                comments={state.comments}
-                onSetActive={setActive}
-                onMoveColumn={moveColumn}
-                onMoveTask={moveTask}
-                onDragStart={() => setPrevKanbanState(state)}
-                onDragCancel={() => setState(prevKanbanState)}
-                onDragEnd={() => setActive(null)}
-                onColumnChange={updateColumn}
-                onClickAddTaskTo={(columnId) => setIsAddTaskOpenFor(columnId)}
-                onClickAddColumn={() => setIsAddColumnFormOpen(true)}
-                onClickDeleteColumn={setColumnToDelete}
-            />
+            {state.columns.length ? (
+                <Board
+                    columns={state.columns.sort((a, b) => a.position - b.position)}
+                    tasks={state.tasks.sort((a, b) => a.position - b.position)}
+                    comments={state.comments}
+                    onSetActive={setActive}
+                    onMoveColumn={moveColumn}
+                    onMoveTask={moveTask}
+                    onDragStart={() => setPrevKanbanState(state)}
+                    onDragCancel={() => setState(prevKanbanState)}
+                    onDragEnd={() => setActive(null)}
+                    onColumnChange={updateColumn}
+                    onClickAddTaskTo={(columnId) => setIsAddTaskOpenFor(columnId)}
+                    onClickAddColumn={() => setIsAddColumnFormOpen(true)}
+                    onClickDeleteColumn={setColumnToDelete}
+                />
+            ) : (
+                <NoColumnsState onClickCreate={() => setIsAddColumnFormOpen(true)} />
+            )}
 
             <CreateTaskFormDialog
                 open={Boolean(isAddTaskFormOpenFor)}
