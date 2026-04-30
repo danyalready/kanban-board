@@ -1,16 +1,10 @@
 import { useEffect } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/shared/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 
 export interface Inputs {
     name: string;

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { EllipsisIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { EllipsisIcon, SquarePlusIcon, Trash2Icon } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -11,37 +10,38 @@ import {
 import { Button } from "@/shared/ui/button";
 
 interface Props {
-    onClickEdit: () => void;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onClickAddTask: () => void;
     onClickDelete: () => void;
 }
 
-export default function BoardActions(props: Props) {
-    const [open, setOpen] = useState(false);
-
-    const handleClickEdit = () => {
-        setOpen(false);
-        props.onClickEdit();
+export default function ColumnActions(props: Props) {
+    const handleAddTaskClick = () => {
+        props.onClickAddTask();
+        props.onOpenChange(false);
     };
 
-    const handleClickDelete = () => {
-        setOpen(false);
+    const handleDeleteTaskClick = () => {
         props.onClickDelete();
+        props.onOpenChange(false);
     };
 
     return (
-        <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenu open={props.open} onOpenChange={props.onOpenChange}>
             <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="link">
                     <EllipsisIcon />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleClickEdit}>
-                    <PencilIcon />
-                    Edit
+                <DropdownMenuItem onClick={handleAddTaskClick}>
+                    <SquarePlusIcon />
+                    Add task
                 </DropdownMenuItem>
+
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onClick={handleClickDelete}>
+                <DropdownMenuItem className="text-destructive" onClick={handleDeleteTaskClick}>
                     <Trash2Icon />
                     Delete
                 </DropdownMenuItem>

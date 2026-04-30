@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import type { Board } from "@/db/types";
+import type { Board } from "@/domain/kanban/types";
 
 import BoardActions from "./BoardActions";
 

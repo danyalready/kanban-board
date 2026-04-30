@@ -1,27 +1,15 @@
 import { useEffect, useState } from "react";
 import { CheckIcon, PencilIcon, SendIcon, Trash2Icon, XIcon } from "lucide-react";
 
-import RichTextEditor from "@/components/RichTextEditor";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogFooter,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/useDebounce";
-import { formatDate } from "@/utils/formatDate";
-import type { Comment, Task, TaskPriority } from "@/db/types";
+import RichTextEditor from "@/shared/ui/RichTextEditor";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/shared/ui/dialog";
+import { Button } from "@/shared/ui/button";
+import { Label } from "@/shared/ui/label";
+import { Input } from "@/shared/ui/input";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { formatDate } from "@/shared/utils/formatDate";
+import type { Comment, Task, TaskPriority } from "@/domain/kanban/types";
 
 import { PRIORITY_OPTIONS } from "./options";
 

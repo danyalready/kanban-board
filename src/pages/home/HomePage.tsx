@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { useKanbanContext } from "@/contexts/kanbanContext";
-import { useBoardActions } from "@/hooks/kanban/useBoardActions";
-import type { Board } from "@/db/types";
+import { Button } from "@/shared/ui/button";
+import { useBoardActions } from "@/features/kanban/hooks/useBoardActions";
+import type { Board } from "@/domain/kanban/types";
+import { useKanban } from "@/app/kanban/useKanban";
 
 import BoardFormDialog, { type Inputs } from "./BoardFormDialog";
 import BoardsList from "./BoardsList";
@@ -14,7 +14,7 @@ export default function HomePage() {
     const [boardToEdit, setBoardToEdit] = useState<Board | null>(null);
     const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
 
-    const { state } = useKanbanContext();
+    const { state } = useKanban();
     const { addBoard, updateBoard, deleteBoard } = useBoardActions();
 
     const handleCreate = (inputs: Inputs) => {

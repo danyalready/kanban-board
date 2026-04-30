@@ -1,25 +1,13 @@
 import { useEffect } from "react";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogFooter,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import RichTextEditor from "@/components/RichTextEditor";
-import type { TaskPriority } from "@/db/types";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/shared/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Input } from "@/shared/ui/input";
+import { Button } from "@/shared/ui/button";
+import { Label } from "@/shared/ui/label";
+import RichTextEditor from "@/shared/ui/RichTextEditor";
+import type { TaskPriority } from "@/domain/kanban/types";
 
 import { PRIORITY_OPTIONS } from "./options";
 

@@ -1,4 +1,4 @@
-import type { TaskPriority } from "@/db/types";
+import type { TaskPriority } from "@/domain/kanban/types";
 
 export interface PriorityOption {
     label: string;

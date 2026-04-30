@@ -74,10 +74,9 @@ src/
   components/        Shared UI and board rendering components
   contexts/          Kanban and theme providers
   db/                Dexie database setup and entity types
+  domain/kanban/     Kanban reducer, types, ordering, constants, and validation
   hooks/kanban/      Board, column, task, comment, and shared Kanban actions
-  model/             Column and task ordering logic
   pages/             Home and board screens
-  reducers/          Kanban reducer and action types
   services/          IndexedDB persistence services
   utils/             Shared utility functions
 ```

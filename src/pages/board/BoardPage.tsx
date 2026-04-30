@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
-import Board from "@/components/Board";
-import { useKanbanContext } from "@/contexts/kanbanContext";
-import { useKanbanActions } from "@/hooks/kanban/useKanbanActions";
-import { useColumnActions } from "@/hooks/kanban/useColumnActions";
-import { useTaskActions } from "@/hooks/kanban/useTaskActions";
-import { useCommentActions } from "@/hooks/kanban/useCommentActions";
-import type { KanbanState } from "@/reducers/kanbanTypes";
-import type { Column, Task } from "@/db/types";
+import { useKanban } from "@/app/kanban/useKanban";
+import { useKanbanActions } from "@/features/kanban/hooks/useKanbanActions";
+import { useColumnActions } from "@/features/kanban/hooks/useColumnActions";
+import { useTaskActions } from "@/features/kanban/hooks/useTaskActions";
+import { useCommentActions } from "@/features/kanban/hooks/useCommentActions";
+import type { KanbanState } from "@/app/kanban/types";
+import type { Column, Task } from "@/domain/kanban/types";
+import Board from "@/features/kanban/components/Board";
 
 import CreateTaskFormDialog, { type Inputs as TaskFormInputs } from "./CreateTaskFormDialog";
 import AddColumnFormDialog, { type Inputs as ColumnFormInputs } from "./AddColumnFormDialog";
@@ -19,7 +19,7 @@ import DeleteTaskDialog from "./DeleteTaskDialog";
 export default function BoardPage() {
     const { boardId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
-    const { state } = useKanbanContext();
+    const { state } = useKanban();
     const { setActive, setState, loadBoardData, clearBoardData } = useKanbanActions();
     const { addColumn, updateColumn, moveColumn, deleteColumn } = useColumnActions();
     const { addTask, moveTask, updateTask, deleteTask } = useTaskActions();
