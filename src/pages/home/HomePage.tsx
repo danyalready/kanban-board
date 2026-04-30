@@ -9,6 +9,7 @@ import { t } from "@/shared/i18n";
 import BoardFormDialog, { type Inputs } from "./BoardFormDialog";
 import BoardsList from "./BoardsList";
 import DeleteBoardDialog from "./DeleteBoardDialog";
+import NoBoardsState from "./NoBoardsState";
 
 export default function HomePage() {
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -45,11 +46,15 @@ export default function HomePage() {
                 <Button onClick={() => setIsAddOpen(true)}>{t("action.createBoard")}</Button>
             </div>
 
-            <BoardsList
-                boards={state.boards.sort((a, b) => b.createdAt - a.createdAt)}
-                onClickEdit={setBoardToEdit}
-                onClickDelete={setBoardToDelete}
-            />
+            {state.boards.length ? (
+                <BoardsList
+                    boards={state.boards.sort((a, b) => b.createdAt - a.createdAt)}
+                    onClickEdit={setBoardToEdit}
+                    onClickDelete={setBoardToDelete}
+                />
+            ) : (
+                <NoBoardsState />
+            )}
 
             <BoardFormDialog open={isAddOpen} onSubmit={handleCreate} onOpenChange={setIsAddOpen} />
 
