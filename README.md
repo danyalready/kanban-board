@@ -71,15 +71,21 @@ npm run format
 
 ```text
 src/
-  components/        Shared UI and board rendering components
-  contexts/          Kanban and theme providers
-  db/                Dexie database setup and entity types
-  domain/kanban/     Kanban reducer, types, ordering, constants, and validation
-  hooks/kanban/      Board, column, task, comment, and shared Kanban actions
-  pages/             Home and board screens
-  services/          IndexedDB persistence services
-  utils/             Shared utility functions
+  app/               Application shell, providers, global state, and routing layout
+  data/              Seed data and app-level data initialization
+  domain/kanban/     Kanban domain types, ordering, constants, validation, and services
+  features/kanban/   Board rendering components and Kanban action hooks
+  pages/             Route-level home and board screens
+  shared/            Shared hooks, IndexedDB setup, UI primitives, and utilities
 ```
+
+Key folders:
+
+-   `src/app/kanban/` owns the reducer-backed Kanban context.
+-   `src/app/theme/` owns theme context and persistence.
+-   `src/domain/kanban/services/` contains IndexedDB persistence services for boards, columns, tasks, and comments.
+-   `src/features/kanban/` contains user-facing Kanban behavior: board UI, drag overlays, tasks, and action hooks.
+-   `src/shared/lib/db.ts` defines the Dexie database tables.
 
 ## Data Model
 
