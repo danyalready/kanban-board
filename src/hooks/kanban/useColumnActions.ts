@@ -11,24 +11,39 @@ import {
 } from "@/services/columnService";
 import { KanbanActionType } from "@/reducers/kanbanTypes";
 import { calculateColumnPosition, needsColumnPositionNormalization } from "@/model/column-ordering";
+import {
+    getValidationMessage,
+    validateCreateColumnInput,
+    validateUpdateColumnInput,
+} from "@/model/validation";
 
 export function useColumnActions() {
     const { dispatch, state } = useKanbanContext();
 
     const addColumn = useCallback(
         async (boardId: string, name: string) => {
-            const trimmedName = name.trim();
-
-            if (!trimmedName) return;
-
             const columnsInBoard = state.columns.filter((c) => c.boardId === boardId);
             const maxPosition = columnsInBoard.length
                 ? Math.max(...columnsInBoard.map((c) => c.position))
                 : 0;
             const position = maxPosition + COLUMN_POSITION_OFFSET;
+            let validData: ReturnType<typeof validateCreateColumnInput>;
 
             try {
-                const column = await svcCreateColumn(boardId, trimmedName, position);
+                validData = validateCreateColumnInput(boardId, name, position);
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid column data.", {
+                    position: "top-center",
+                });
+                return;
+            }
+
+            try {
+                const column = await svcCreateColumn(
+                    validData.boardId,
+                    validData.name,
+                    validData.position,
+                );
 
                 dispatch({
                     type: KanbanActionType.SetColumns,
@@ -36,8 +51,10 @@ export function useColumnActions() {
                 });
 
                 toast.success("Column has been created 🎉", { position: "top-center" });
-            } catch {
-                toast.error("Something went wrong.", { position: "top-center" });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                    position: "top-center",
+                });
             }
         },
         [dispatch, state.columns],
@@ -45,14 +62,32 @@ export function useColumnActions() {
 
     const updateColumn = useCallback(
         async (columnId: string, data: Partial<{ name: string; position: number }>) => {
-            try {
-                await svcUpdateColumn(columnId, data);
+            let validData: ReturnType<typeof validateUpdateColumnInput>;
 
-                dispatch({ type: KanbanActionType.UpdateColumn, payload: { columnId, data } });
+            try {
+                validData = validateUpdateColumnInput(data);
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid column data.", {
+                    position: "top-center",
+                });
+                return;
+            }
+
+            if (Object.keys(validData).length === 0) return;
+
+            try {
+                await svcUpdateColumn(columnId, validData);
+
+                dispatch({
+                    type: KanbanActionType.UpdateColumn,
+                    payload: { columnId, data: validData },
+                });
 
                 toast.success("Column has been updated", { position: "top-center" });
-            } catch {
-                toast.error("Something went wrong.", { position: "top-center" });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                    position: "top-center",
+                });
             }
         },
         [dispatch],
@@ -76,20 +111,31 @@ export function useColumnActions() {
                 activeIndex,
                 targetIndex,
             );
+            let validMoveData: ReturnType<typeof validateUpdateColumnInput>;
+
+            try {
+                validMoveData = validateUpdateColumnInput({ position: updatedPosition });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid column position.", {
+                    position: "top-center",
+                });
+                return;
+            }
+
             const prevState = structuredClone(state);
 
             // Optimistically reorder in UI first
             dispatch({
                 type: KanbanActionType.UpdateColumn,
-                payload: { columnId, data: { position: updatedPosition } },
+                payload: { columnId, data: validMoveData },
             });
 
             try {
-                await svcUpdateColumn(columnId, { position: updatedPosition });
+                await svcUpdateColumn(columnId, validMoveData);
 
                 const nextBoardColumns = columnsInBoard
                     .map((column) =>
-                        column.id === columnId ? { ...column, position: updatedPosition } : column,
+                        column.id === columnId ? { ...column, ...validMoveData } : column,
                     )
                     .sort((a, b) => a.position - b.position);
 

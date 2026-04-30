@@ -16,27 +16,37 @@ import {
 } from "@/model/task-ordering";
 import { useKanbanContext } from "@/contexts/kanbanContext";
 import { KanbanActionType } from "@/reducers/kanbanTypes";
-import { validateCreateTaskInput, validateUpdateTaskInput } from "@/model/validation";
+import {
+    getValidationMessage,
+    validateCreateTaskInput,
+    validateUpdateTaskInput,
+} from "@/model/validation";
+
+type CreateTaskActionInput = Omit<CreateTaskInput, "position">;
 
 export function useTaskActions() {
     const { dispatch, state } = useKanbanContext();
 
     const addTask = useCallback(
-        async (columnId: string, data: CreateTaskInput) => {
-            const validData = validateCreateTaskInput(data);
-            if (!validData) return;
-
+        async (columnId: string, data: CreateTaskActionInput) => {
             const tasksInColumn = filterTasksByColumn(state.tasks, columnId);
             const maxPosition = tasksInColumn.length
                 ? Math.max(...tasksInColumn.map((t) => t.position))
                 : 0;
             const position = maxPosition + TASK_POSITION_OFFSET;
+            let validInput: ReturnType<typeof validateCreateTaskInput>;
 
             try {
-                const task = await svcCreateTask(columnId, {
-                    ...validData,
-                    position,
+                validInput = validateCreateTaskInput(columnId, { ...data, position });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid task data.", {
+                    position: "top-center",
                 });
+                return;
+            }
+
+            try {
+                const task = await svcCreateTask(validInput.columnId, validInput.data);
 
                 dispatch({
                     type: KanbanActionType.SetTasks,
@@ -44,8 +54,10 @@ export function useTaskActions() {
                 });
 
                 toast.success("Task has been created 🎉", { position: "top-center" });
-            } catch {
-                toast.error("Something went wrong.", { position: "top-center" });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                    position: "top-center",
+                });
             }
         },
         [state.tasks, dispatch],
@@ -53,8 +65,16 @@ export function useTaskActions() {
 
     const updateTask = useCallback(
         async (taskId: string, data: Partial<CreateTaskInput>) => {
-            const validData = validateUpdateTaskInput(data);
-            if (!validData) return;
+            let validData: ReturnType<typeof validateUpdateTaskInput>;
+
+            try {
+                validData = validateUpdateTaskInput(data);
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid task data.", {
+                    position: "top-center",
+                });
+                return;
+            }
 
             if (Object.keys(validData).length === 0) return;
 
@@ -65,8 +85,10 @@ export function useTaskActions() {
                     type: KanbanActionType.UpdateTask,
                     payload: { taskId, data: validData },
                 });
-            } catch {
-                toast.error("Something went wrong.", { position: "top-center" });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                    position: "top-center",
+                });
             }
         },
         [dispatch],
@@ -90,11 +112,24 @@ export function useTaskActions() {
                 activeIndex,
                 targetIndex,
             );
+            let validMoveData: ReturnType<typeof validateUpdateTaskInput>;
+
+            try {
+                validMoveData = validateUpdateTaskInput({
+                    columnId: targetColumnId,
+                    position: updatedPosition,
+                });
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid task position.", {
+                    position: "top-center",
+                });
+                return;
+            }
 
             // Always optimistically reorder in UI
             dispatch({
                 type: KanbanActionType.UpdateTask,
-                payload: { taskId, data: { columnId: targetColumnId, position: updatedPosition } },
+                payload: { taskId, data: validMoveData },
             });
 
             // Skip persistence during drag-over
@@ -103,15 +138,10 @@ export function useTaskActions() {
             const prevState = structuredClone(state);
 
             try {
-                await svcUpdateTask(taskId, {
-                    columnId: targetColumnId,
-                    position: updatedPosition,
-                });
+                await svcUpdateTask(taskId, validMoveData);
 
                 const nextTasks = state.tasks.map((task) =>
-                    task.id === taskId
-                        ? { ...task, columnId: targetColumnId, position: updatedPosition }
-                        : task,
+                    task.id === taskId ? { ...task, ...validMoveData } : task,
                 );
                 const nextTargetColumnTasks = filterTasksByColumn(nextTasks, targetColumnId);
 

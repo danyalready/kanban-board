@@ -9,25 +9,40 @@ import {
     deleteComment as svcDeleteComment,
     updateComment as svcUpdateComment,
 } from "@/services/commentService";
+import {
+    getValidationMessage,
+    validateCreateCommentInput,
+    validateUpdateCommentInput,
+} from "@/model/validation";
 
 export function useCommentActions() {
     const { dispatch, state } = useKanbanContext();
 
     const addComment = useCallback(
         async (taskId: string, text: string) => {
-            const trimmedText = text.trim();
-
-            if (!trimmedText) return;
+            let validData: ReturnType<typeof validateCreateCommentInput>;
 
             try {
-                const comment = await svcCreateComment(taskId, trimmedText);
+                validData = validateCreateCommentInput(taskId, text);
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid comment data.", {
+                    position: "top-center",
+                });
+                return;
+            }
+
+            try {
+                const comment = await svcCreateComment(validData.taskId, validData.text);
 
                 dispatch({ type: KanbanActionType.AddComment, payload: { comment } });
             } catch (error) {
                 console.error(error);
-                toast.error("Something went wrong while adding comment.", {
-                    position: "top-center",
-                });
+                toast.error(
+                    getValidationMessage(error) ?? "Something went wrong while adding comment.",
+                    {
+                        position: "top-center",
+                    },
+                );
             }
         },
         [dispatch],
@@ -39,14 +54,18 @@ export function useCommentActions() {
 
             if (!prevComment) return;
 
-            const nextText = data.text?.trim();
+            let updates: ReturnType<typeof validateUpdateCommentInput>;
 
-            if (!nextText) {
-                toast.error("Comment cannot be empty.", { position: "top-center" });
+            try {
+                updates = validateUpdateCommentInput(data);
+            } catch (error) {
+                toast.error(getValidationMessage(error) ?? "Invalid comment data.", {
+                    position: "top-center",
+                });
                 return;
             }
 
-            const updates = { ...data, text: nextText };
+            if (Object.keys(updates).length === 0) return;
 
             dispatch({
                 type: KanbanActionType.UpdateComment,

@@ -7,29 +7,58 @@ import {
     deleteBoard as svcDeleteBoard,
 } from "@/services/boardService";
 import type { Board } from "@/db/types";
+import {
+    getValidationMessage,
+    validateCreateBoardInput,
+    validateUpdateBoardInput,
+} from "@/model/validation";
 
 export function useBoardActions() {
     const addBoard = useCallback(async (name: string) => {
-        const trimmedName = name.trim();
-
-        if (!trimmedName) return;
+        let validName: string;
 
         try {
-            await createBoard(trimmedName);
+            validName = validateCreateBoardInput(name);
+        } catch (error) {
+            toast.error(getValidationMessage(error) ?? "Invalid board data.", {
+                position: "top-center",
+            });
+            return;
+        }
+
+        try {
+            await createBoard(validName);
 
             toast.success("Board has been created 🎉", { position: "top-center" });
-        } catch {
-            toast.error("Something went wrong.", { position: "top-center" });
+        } catch (error) {
+            toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                position: "top-center",
+            });
         }
     }, []);
 
     const updateBoard = useCallback(async (boardId: string, updates: Partial<Board>) => {
+        let validUpdates: Partial<Board>;
+
         try {
-            await svcUpdateBoard(boardId, updates);
+            validUpdates = validateUpdateBoardInput(updates);
+        } catch (error) {
+            toast.error(getValidationMessage(error) ?? "Invalid board data.", {
+                position: "top-center",
+            });
+            return;
+        }
+
+        if (Object.keys(validUpdates).length === 0) return;
+
+        try {
+            await svcUpdateBoard(boardId, validUpdates);
 
             toast.success("Board has been updated.", { position: "top-center" });
-        } catch {
-            toast.error("Something went wrong.", { position: "top-center" });
+        } catch (error) {
+            toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                position: "top-center",
+            });
         }
     }, []);
 
