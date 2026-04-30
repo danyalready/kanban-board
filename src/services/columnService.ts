@@ -2,6 +2,11 @@ import { v4 as uuid } from "uuid";
 
 import { db } from "@/db/db";
 import type { Column } from "@/db/types";
+import {
+    validateCreateColumnInput,
+    validateRecordId,
+    validateUpdateColumnInput,
+} from "@/model/validation";
 
 import { deleteTask } from "./taskService";
 
@@ -13,15 +18,13 @@ export const getColumn = async (columnId: string) => {
 };
 
 export const createColumn = async (boardId: string, name: string, position: number) => {
-    const trimmedName = name.trim();
-
-    if (!trimmedName.length) throw new Error("Column name cannot be empty.");
+    const validData = validateCreateColumnInput(boardId, name, position);
 
     const column: Column = {
         id: uuid(),
-        boardId,
-        name: trimmedName,
-        position,
+        boardId: validData.boardId,
+        name: validData.name,
+        position: validData.position,
         createdAt: Date.now(),
     };
     await db.columns.add(column);
@@ -34,7 +37,12 @@ export const getColumnsByBoard = async (boardId: string) => {
 };
 
 export const updateColumn = async (id: string, updates: Partial<Column>) => {
-    return await db.columns.update(id, updates);
+    const validId = validateRecordId(id, "Column ID");
+    const validUpdates = validateUpdateColumnInput(updates);
+
+    if (Object.keys(validUpdates).length === 0) return 0;
+
+    return await db.columns.update(validId, validUpdates);
 };
 
 export const normalizeColumnsPositions = async (boardId: string) => {

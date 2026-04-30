@@ -2,16 +2,19 @@ import { v4 as uuid } from "uuid";
 
 import { db } from "@/db/db";
 import type { Comment } from "@/db/types";
+import {
+    validateCreateCommentInput,
+    validateRecordId,
+    validateUpdateCommentInput,
+} from "@/model/validation";
 
 export const createComment = async (taskId: string, text: string) => {
-    const trimmedText = text.trim();
-
-    if (!trimmedText.length) throw new Error("Text cannot be empty.");
+    const validData = validateCreateCommentInput(taskId, text);
 
     const comment: Comment = {
         id: uuid(),
-        taskId,
-        text,
+        taskId: validData.taskId,
+        text: validData.text,
         createdAt: Date.now(),
     };
     await db.comments.add(comment);
@@ -24,7 +27,12 @@ export const getCommentsByTask = async (taskId: string) => {
 };
 
 export const updateComment = async (id: string, updates: Partial<Comment>) => {
-    return await db.comments.update(id, updates);
+    const validId = validateRecordId(id, "Comment ID");
+    const validUpdates = validateUpdateCommentInput(updates);
+
+    if (Object.keys(validUpdates).length === 0) return 0;
+
+    return await db.comments.update(validId, validUpdates);
 };
 
 export const deleteComment = async (id: string) => {

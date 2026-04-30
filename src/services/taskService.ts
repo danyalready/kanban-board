@@ -2,7 +2,11 @@ import { v4 as uuid } from "uuid";
 
 import { db } from "@/db/db";
 import type { Task, TaskPriority } from "@/db/types";
-import { validateCreateTaskInput } from "@/model/validation";
+import {
+    validateCreateTaskInput,
+    validateRecordId,
+    validateUpdateTaskInput,
+} from "@/model/validation";
 
 import { deleteComment } from "./commentService";
 
@@ -18,10 +22,14 @@ export interface CreateTaskInput {
 }
 
 export const createTask = async (columnId: string, data: CreateTaskInput) => {
-    const validData = validateCreateTaskInput(data);
-    if (!validData) throw new Error("Invalid task input data.");
+    const validInput = validateCreateTaskInput(columnId, data);
 
-    const newTask: Task = { id: uuid(), columnId, createdAt: Date.now(), ...validData };
+    const newTask: Task = {
+        id: uuid(),
+        columnId: validInput.columnId,
+        createdAt: Date.now(),
+        ...validInput.data,
+    };
     await db.tasks.add(newTask);
 
     return newTask;
@@ -32,7 +40,12 @@ export const getTasksByColumn = async (columnId: string) => {
 };
 
 export const updateTask = async (id: string, updates: Partial<Task>) => {
-    return await db.tasks.update(id, updates);
+    const validId = validateRecordId(id, "Task ID");
+    const validUpdates = validateUpdateTaskInput(updates);
+
+    if (Object.keys(validUpdates).length === 0) return 0;
+
+    return await db.tasks.update(validId, validUpdates);
 };
 
 export const deleteTask = async (taskId: string) => {
