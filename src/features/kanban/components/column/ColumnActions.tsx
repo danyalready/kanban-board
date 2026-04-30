@@ -8,6 +8,7 @@ import {
     DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { Button } from "@/shared/ui/button";
+import { t } from "@/shared/i18n";
 
 interface Props {
     open: boolean;
@@ -37,13 +38,13 @@ export default function ColumnActions(props: Props) {
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleAddTaskClick}>
                     <SquarePlusIcon />
-                    Add task
+                    {t("action.addTask")}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive" onClick={handleDeleteTaskClick}>
                     <Trash2Icon />
-                    Delete
+                    {t("action.delete")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

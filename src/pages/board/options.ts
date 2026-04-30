@@ -1,4 +1,5 @@
 import type { TaskPriority } from "@/domain/kanban/types";
+import { t } from "@/shared/i18n";
 
 export interface PriorityOption {
     label: string;
@@ -6,7 +7,7 @@ export interface PriorityOption {
 }
 
 export const PRIORITY_OPTIONS: PriorityOption[] = [
-    { label: "Low", value: "low" },
-    { label: "Medium", value: "medium" },
-    { label: "High", value: "high" },
+    { label: t("priority.low"), value: "low" },
+    { label: t("priority.medium"), value: "medium" },
+    { label: t("priority.high"), value: "high" },
 ];

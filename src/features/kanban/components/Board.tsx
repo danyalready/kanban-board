@@ -20,6 +20,7 @@ import { PlusIcon } from "lucide-react";
 import { filterTasksByColumn } from "@/domain/kanban/taskOrdering";
 import type { Column as ColumnT, Comment, Task as TaskT } from "@/domain/kanban/types";
 import { Button } from "@/shared/ui/button";
+import { t } from "@/shared/i18n";
 
 import Column from "./column/Column";
 import DragOverlay from "./DragOverlay";
@@ -164,7 +165,7 @@ export default function Board(props: Props) {
                 </SortableContext>
 
                 <Button variant="outline" size="lg" onClick={props.onClickAddColumn}>
-                    <PlusIcon /> New column
+                    <PlusIcon /> {t("column.form.newTitle")}
                 </Button>
             </div>
 

@@ -5,6 +5,7 @@ import { Button } from "@/shared/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { t } from "@/shared/i18n";
 
 export interface Inputs {
     name: string;
@@ -27,13 +28,13 @@ export default function AddColumnFormDialog(props: Props) {
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>New column</DialogTitle>
+                    <DialogTitle>{t("column.form.newTitle")}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(props.onSubmit)}>
                     <div className="mb-4">
                         <Label htmlFor="name" aria-required>
-                            Column name
+                            {t("column.form.name")}
                         </Label>
                         <Input
                             id="name"
@@ -50,9 +51,9 @@ export default function AddColumnFormDialog(props: Props) {
                             variant="secondary"
                             onClick={() => props.onOpenChange(false)}
                         >
-                            Cancel
+                            {t("action.cancel")}
                         </Button>
-                        <Button type="submit">Create</Button>
+                        <Button type="submit">{t("action.create")}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

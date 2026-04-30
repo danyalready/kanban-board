@@ -1,3 +1,5 @@
+import { t } from "@/shared/i18n";
+
 export function formatDate(input: string | number | Date) {
     const date = new Date(input);
     const now = new Date();
@@ -11,7 +13,7 @@ export function formatDate(input: string | number | Date) {
         now.getMonth() === date.getMonth() &&
         now.getDate() === date.getDate();
 
-    if (isSameDay) return "Today";
+    if (isSameDay) return t("date.today");
 
     const yesterday = new Date();
     yesterday.setDate(now.getDate() - 1);
@@ -21,11 +23,11 @@ export function formatDate(input: string | number | Date) {
         yesterday.getMonth() === date.getMonth() &&
         yesterday.getDate() === date.getDate();
 
-    if (isYesterday) return "Yesterday";
+    if (isYesterday) return t("date.yesterday");
 
     // < 7 days
     if (diffDays < 7) {
-        return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+        return t(diffDays === 1 ? "date.oneDayAgo" : "date.daysAgo", { count: diffDays });
     }
 
     // >= 7 days → normal date

@@ -22,6 +22,7 @@ import {
     validateUpdateTaskInput,
 } from "@/domain/kanban/validation";
 import { useKanban } from "@/app/kanban/useKanban";
+import { t } from "@/shared/i18n";
 
 type CreateTaskActionInput = Omit<CreateTaskInput, "position">;
 
@@ -40,7 +41,7 @@ export function useTaskActions() {
             try {
                 validInput = validateCreateTaskInput(columnId, { ...data, position });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid task data.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidTaskData"), {
                     position: "top-center",
                 });
                 return;
@@ -54,9 +55,9 @@ export function useTaskActions() {
                     payload: { tasks: [...state.tasks, task] },
                 });
 
-                toast.success("Task has been created 🎉", { position: "top-center" });
+                toast.success(t("feedback.taskCreated"), { position: "top-center" });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.somethingWentWrong"), {
                     position: "top-center",
                 });
             }
@@ -71,7 +72,7 @@ export function useTaskActions() {
             try {
                 validData = validateUpdateTaskInput(data);
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid task data.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidTaskData"), {
                     position: "top-center",
                 });
                 return;
@@ -87,7 +88,7 @@ export function useTaskActions() {
                     payload: { taskId, data: validData },
                 });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.somethingWentWrong"), {
                     position: "top-center",
                 });
             }
@@ -121,7 +122,7 @@ export function useTaskActions() {
                     position: updatedPosition,
                 });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid task position.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidTaskPosition"), {
                     position: "top-center",
                 });
                 return;
@@ -176,10 +177,10 @@ export function useTaskActions() {
 
                 dispatch({ type: KanbanActionType.DeleteTask, payload: { taskId } });
 
-                toast.success("Task has been deleted.", { position: "top-center" });
+                toast.success(t("feedback.taskDeleted"), { position: "top-center" });
             } catch (error) {
                 console.error(error);
-                toast.error("Something went wrong.", { position: "top-center" });
+                toast.error(t("feedback.somethingWentWrong"), { position: "top-center" });
             }
         },
         [dispatch],

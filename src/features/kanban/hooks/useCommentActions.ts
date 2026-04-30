@@ -14,6 +14,7 @@ import {
     validateUpdateCommentInput,
 } from "@/domain/kanban/validation";
 import { useKanban } from "@/app/kanban/useKanban";
+import { t } from "@/shared/i18n";
 
 export function useCommentActions() {
     const { dispatch, state } = useKanban();
@@ -25,7 +26,7 @@ export function useCommentActions() {
             try {
                 validData = validateCreateCommentInput(taskId, text);
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid comment data.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidCommentData"), {
                     position: "top-center",
                 });
                 return;
@@ -37,12 +38,9 @@ export function useCommentActions() {
                 dispatch({ type: KanbanActionType.AddComment, payload: { comment } });
             } catch (error) {
                 console.error(error);
-                toast.error(
-                    getValidationMessage(error) ?? "Something went wrong while adding comment.",
-                    {
-                        position: "top-center",
-                    },
-                );
+                toast.error(getValidationMessage(error) ?? t("feedback.addCommentFailed"), {
+                    position: "top-center",
+                });
             }
         },
         [dispatch],
@@ -59,7 +57,7 @@ export function useCommentActions() {
             try {
                 updates = validateUpdateCommentInput(data);
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid comment data.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidCommentData"), {
                     position: "top-center",
                 });
                 return;
@@ -80,7 +78,7 @@ export function useCommentActions() {
                     payload: { commentId, data: { text: prevComment.text } },
                 });
                 console.error(error);
-                toast.error("Something went wrong while updating comment.", {
+                toast.error(t("feedback.updateCommentFailed"), {
                     position: "top-center",
                 });
             }
@@ -102,7 +100,7 @@ export function useCommentActions() {
                     payload: { comments: prevComments },
                 });
                 console.error(error);
-                toast.error("Something went wrong while deleting comment.", {
+                toast.error(t("feedback.deleteCommentFailed"), {
                     position: "top-center",
                 });
             }

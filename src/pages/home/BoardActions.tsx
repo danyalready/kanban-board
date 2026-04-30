@@ -9,6 +9,7 @@ import {
     DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { Button } from "@/shared/ui/button";
+import { t } from "@/shared/i18n";
 
 interface Props {
     onClickEdit: () => void;
@@ -38,12 +39,12 @@ export default function BoardActions(props: Props) {
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleClickEdit}>
                     <PencilIcon />
-                    Edit
+                    {t("action.edit")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive" onClick={handleClickDelete}>
                     <Trash2Icon />
-                    Delete
+                    {t("action.delete")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

@@ -4,6 +4,7 @@ import { Button } from "@/shared/ui/button";
 import { useBoardActions } from "@/features/kanban/hooks/useBoardActions";
 import type { Board } from "@/domain/kanban/types";
 import { useKanban } from "@/app/kanban/useKanban";
+import { t } from "@/shared/i18n";
 
 import BoardFormDialog, { type Inputs } from "./BoardFormDialog";
 import BoardsList from "./BoardsList";
@@ -40,8 +41,8 @@ export default function HomePage() {
     return (
         <div className="mx-auto max-w-3xl p-6">
             <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-xl font-semibold">Boards</h1>
-                <Button onClick={() => setIsAddOpen(true)}>Create board</Button>
+                <h1 className="text-xl font-semibold">{t("board.boards")}</h1>
+                <Button onClick={() => setIsAddOpen(true)}>{t("action.createBoard")}</Button>
             </div>
 
             <BoardsList

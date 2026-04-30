@@ -7,6 +7,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/shared/ui/dialog";
+import { t } from "@/shared/i18n";
 
 interface Props {
     open: boolean;
@@ -20,18 +21,19 @@ export default function DeleteTaskDialog(props: Props) {
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete “{props.taskName}”?</DialogTitle>
+                    <DialogTitle>
+                        {t("delete.task.title", { name: props.taskName ?? "" })}
+                    </DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    This will permanently delete the “{props.taskName}” task and all comments within
-                    it. This action cannot be undone.
+                    {t("delete.task.description", { name: props.taskName ?? "" })}
                 </DialogDescription>
                 <DialogFooter>
                     <Button size="sm" variant="secondary" onClick={() => props.onOpenChange(false)}>
-                        Cancel
+                        {t("action.cancel")}
                     </Button>
                     <Button size="sm" variant="destructive" onClick={props.onConfirm}>
-                        Delete
+                        {t("action.delete")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

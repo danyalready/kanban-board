@@ -28,7 +28,7 @@ export const getBoard = async (id: string) => {
 };
 
 export const updateBoard = async (id: string, updates: Partial<Board>) => {
-    const validId = validateRecordId(id, "Board ID");
+    const validId = validateRecordId(id, "field.boardId");
     const validUpdates = validateUpdateBoardInput(updates);
 
     if (Object.keys(validUpdates).length === 0) return 0;

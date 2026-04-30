@@ -10,6 +10,7 @@ import { Input } from "@/shared/ui/input";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { formatDate } from "@/shared/utils/formatDate";
 import type { Comment, Task, TaskPriority } from "@/domain/kanban/types";
+import { t } from "@/shared/i18n";
 
 import { PRIORITY_OPTIONS } from "./options";
 
@@ -132,10 +133,10 @@ export default function ViewEditTaskDialog(props: Props) {
                 </DialogHeader>
 
                 <div>
-                    <Label htmlFor="priority">Priority</Label>
+                    <Label htmlFor="priority">{t("task.form.priority")}</Label>
                     <Select value={task?.priority} onValueChange={handlePriorityChange}>
                         <SelectTrigger id="priority" className="h-8 w-full max-w-32">
-                            <SelectValue placeholder="Select priority" />
+                            <SelectValue placeholder={t("task.form.priorityPlaceholder")} />
                         </SelectTrigger>
 
                         <SelectContent>
@@ -150,18 +151,18 @@ export default function ViewEditTaskDialog(props: Props) {
 
                 <div>
                     <Label htmlFor="description" aria-required>
-                        Description
+                        {t("task.form.description")}
                     </Label>
                     <RichTextEditor id="description" value={descDraft} onChange={setDescDraft} />
                 </div>
 
                 <div>
-                    <Label htmlFor="comment">Comments</Label>
+                    <Label htmlFor="comment">{t("comment.title")}</Label>
                     <div className="flex gap-2">
                         <Input
                             id="comment"
                             value={commentDraft}
-                            placeholder="Add a comment"
+                            placeholder={t("comment.placeholder")}
                             onChange={(e) => setCommentDraft(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") handleAddComment();
@@ -172,7 +173,7 @@ export default function ViewEditTaskDialog(props: Props) {
                             size="icon"
                             disabled={!commentDraft.trim()}
                             onClick={handleAddComment}
-                            aria-label="Add comment"
+                            aria-label={t("action.addComment")}
                             className="shrink-0"
                         >
                             <SendIcon />
@@ -181,7 +182,7 @@ export default function ViewEditTaskDialog(props: Props) {
 
                     <div className="mt-2 space-y-2">
                         {localComments.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">No comments yet.</p>
+                            <p className="text-sm text-muted-foreground">{t("comment.empty")}</p>
                         ) : (
                             localComments.map((comment) => {
                                 const isEditingComment = editingCommentId === comment.id;
@@ -208,7 +209,7 @@ export default function ViewEditTaskDialog(props: Props) {
                                                             onClick={() =>
                                                                 saveCommentChange(comment.id)
                                                             }
-                                                            aria-label="Save comment"
+                                                            aria-label={t("action.saveComment")}
                                                         >
                                                             <CheckIcon />
                                                         </Button>
@@ -218,7 +219,9 @@ export default function ViewEditTaskDialog(props: Props) {
                                                             size="icon"
                                                             className="h-7 w-7"
                                                             onClick={cancelEditingComment}
-                                                            aria-label="Cancel comment edit"
+                                                            aria-label={t(
+                                                                "action.cancelCommentEdit",
+                                                            )}
                                                         >
                                                             <XIcon />
                                                         </Button>
@@ -233,7 +236,7 @@ export default function ViewEditTaskDialog(props: Props) {
                                                             onClick={() =>
                                                                 startEditingComment(comment)
                                                             }
-                                                            aria-label="Edit comment"
+                                                            aria-label={t("action.editComment")}
                                                         >
                                                             <PencilIcon />
                                                         </Button>
@@ -245,7 +248,7 @@ export default function ViewEditTaskDialog(props: Props) {
                                                             onClick={() =>
                                                                 props.onDeleteComment(comment.id)
                                                             }
-                                                            aria-label="Delete comment"
+                                                            aria-label={t("action.deleteComment")}
                                                         >
                                                             <Trash2Icon />
                                                         </Button>
@@ -284,10 +287,10 @@ export default function ViewEditTaskDialog(props: Props) {
 
                 <DialogFooter className="mt-4 sm:justify-between">
                     <Button size="sm" variant="destructive" onClick={props.onDeleteTask}>
-                        Delete
+                        {t("action.delete")}
                     </Button>
                     <Button size="sm" variant="secondary" onClick={() => props.onOpenChange(false)}>
-                        Close
+                        {t("action.close")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

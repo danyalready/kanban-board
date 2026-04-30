@@ -27,7 +27,7 @@ export const getCommentsByTask = async (taskId: string) => {
 };
 
 export const updateComment = async (id: string, updates: Partial<Comment>) => {
-    const validId = validateRecordId(id, "Comment ID");
+    const validId = validateRecordId(id, "field.commentId");
     const validUpdates = validateUpdateCommentInput(updates);
 
     if (Object.keys(validUpdates).length === 0) return 0;

@@ -19,6 +19,7 @@ import {
     validateUpdateColumnInput,
 } from "@/domain/kanban/validation";
 import { useKanban } from "@/app/kanban/useKanban";
+import { t } from "@/shared/i18n";
 
 export function useColumnActions() {
     const { dispatch, state } = useKanban();
@@ -35,7 +36,7 @@ export function useColumnActions() {
             try {
                 validData = validateCreateColumnInput(boardId, name, position);
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid column data.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidColumnData"), {
                     position: "top-center",
                 });
                 return;
@@ -53,9 +54,9 @@ export function useColumnActions() {
                     payload: { columns: [...state.columns, column] },
                 });
 
-                toast.success("Column has been created 🎉", { position: "top-center" });
+                toast.success(t("feedback.columnCreated"), { position: "top-center" });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.somethingWentWrong"), {
                     position: "top-center",
                 });
             }
@@ -70,7 +71,7 @@ export function useColumnActions() {
             try {
                 validData = validateUpdateColumnInput(data);
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid column data.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidColumnData"), {
                     position: "top-center",
                 });
                 return;
@@ -86,9 +87,9 @@ export function useColumnActions() {
                     payload: { columnId, data: validData },
                 });
 
-                toast.success("Column has been updated", { position: "top-center" });
+                toast.success(t("feedback.columnUpdated"), { position: "top-center" });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.somethingWentWrong"), {
                     position: "top-center",
                 });
             }
@@ -119,7 +120,7 @@ export function useColumnActions() {
             try {
                 validMoveData = validateUpdateColumnInput({ position: updatedPosition });
             } catch (error) {
-                toast.error(getValidationMessage(error) ?? "Invalid column position.", {
+                toast.error(getValidationMessage(error) ?? t("feedback.invalidColumnPosition"), {
                     position: "top-center",
                 });
                 return;
@@ -161,7 +162,7 @@ export function useColumnActions() {
                 }
             } catch (error) {
                 dispatch({ type: KanbanActionType.SetState, payload: { state: prevState } });
-                toast.error(`Something went wrong while moving column "${activeColumn.name}".`);
+                toast.error(t("feedback.moveColumnFailed", { name: activeColumn.name }));
 
                 console.error("error", error);
             }
@@ -176,10 +177,10 @@ export function useColumnActions() {
 
                 dispatch({ type: KanbanActionType.DeleteColumn, payload: { columnId } });
 
-                toast.success("Column has been deleted.", { position: "top-center" });
+                toast.success(t("feedback.columnDeleted"), { position: "top-center" });
             } catch (error) {
                 console.error(error);
-                toast.error("Something went wrong.", { position: "top-center" });
+                toast.error(t("feedback.somethingWentWrong"), { position: "top-center" });
             }
         },
         [dispatch],

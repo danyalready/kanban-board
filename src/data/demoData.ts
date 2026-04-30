@@ -1,5 +1,6 @@
 import { db } from "@/shared/lib/db";
 import type { Board, Column, Comment, Task } from "@/domain/kanban/types";
+import { t } from "@/shared/i18n";
 
 const DEMO_SEED_KEY = "kanban-demo-board-seeded";
 const POSITION_OFFSET = 1e4;
@@ -23,7 +24,7 @@ export async function seedDemoBoardIfNeeded() {
 
     const board: Board = {
         id: boardId,
-        name: "🚀 Product Launch",
+        name: t("demo.board.name"),
         createdAt: now - 1000 * 60 * 60 * 24 * 6,
     };
 
@@ -31,28 +32,28 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: backlogColumnId,
             boardId,
-            name: "Backlog",
+            name: t("demo.column.backlog"),
             position: POSITION_OFFSET,
             createdAt: now - 1000 * 60 * 60 * 24 * 6,
         },
         {
             id: progressColumnId,
             boardId,
-            name: "In Progress",
+            name: t("demo.column.inProgress"),
             position: POSITION_OFFSET * 2,
             createdAt: now - 1000 * 60 * 60 * 24 * 5,
         },
         {
             id: reviewColumnId,
             boardId,
-            name: "Review",
+            name: t("demo.column.review"),
             position: POSITION_OFFSET * 3,
             createdAt: now - 1000 * 60 * 60 * 24 * 4,
         },
         {
             id: doneColumnId,
             boardId,
-            name: "Done",
+            name: t("demo.column.done"),
             position: POSITION_OFFSET * 4,
             createdAt: now - 1000 * 60 * 60 * 24 * 3,
         },
@@ -62,9 +63,8 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-task-research",
             columnId: backlogColumnId,
-            title: "📝 Collect launch requirements",
-            description:
-                "<p>Gather the launch checklist, audience notes, and stakeholder expectations.</p>",
+            title: t("demo.task.research.title"),
+            description: t("demo.task.research.description"),
             priority: "high",
             position: POSITION_OFFSET,
             createdAt: now - 1000 * 60 * 60 * 24 * 5,
@@ -72,8 +72,8 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-task-pricing",
             columnId: backlogColumnId,
-            title: "Finalize pricing copy",
-            description: "<p>Prepare short pricing descriptions for the launch page.</p>",
+            title: t("demo.task.pricing.title"),
+            description: t("demo.task.pricing.description"),
             priority: "medium",
             position: POSITION_OFFSET * 2,
             createdAt: now - 1000 * 60 * 60 * 24 * 4,
@@ -81,8 +81,8 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-task-landing",
             columnId: progressColumnId,
-            title: "Build launch landing page",
-            description: "<p>Create the first version of the launch page and wire the CTA.</p>",
+            title: t("demo.task.landing.title"),
+            description: t("demo.task.landing.description"),
             priority: "high",
             position: POSITION_OFFSET,
             createdAt: now - 1000 * 60 * 60 * 24 * 3,
@@ -90,8 +90,8 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-task-email",
             columnId: progressColumnId,
-            title: "Draft announcement email",
-            description: "<p>Write the launch email and prepare subject line options.</p>",
+            title: t("demo.task.email.title"),
+            description: t("demo.task.email.description"),
             priority: "medium",
             position: POSITION_OFFSET * 2,
             createdAt: now - 1000 * 60 * 60 * 24 * 2,
@@ -99,9 +99,8 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-task-qa",
             columnId: reviewColumnId,
-            title: "Run smoke tests",
-            description:
-                "<p>Check board creation, drag-and-drop, comments, and theme switching.</p>",
+            title: t("demo.task.qa.title"),
+            description: t("demo.task.qa.description"),
             priority: "high",
             position: POSITION_OFFSET,
             createdAt: now - 1000 * 60 * 60 * 24,
@@ -109,8 +108,8 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-task-brand",
             columnId: doneColumnId,
-            title: "✅ Approve brand assets",
-            description: "<p>Logo, color, and social preview assets are ready for launch.</p>",
+            title: t("demo.task.brand.title"),
+            description: t("demo.task.brand.description"),
             priority: "low",
             position: POSITION_OFFSET,
             createdAt: now - 1000 * 60 * 60 * 12,
@@ -121,19 +120,19 @@ export async function seedDemoBoardIfNeeded() {
         {
             id: "demo-comment-research-1",
             taskId: "demo-task-research",
-            text: "Include feedback from sales and support before this moves forward.",
+            text: t("demo.comment.research"),
             createdAt: now - 1000 * 60 * 60 * 24 * 4,
         },
         {
             id: "demo-comment-landing-1",
             taskId: "demo-task-landing",
-            text: "Hero copy is ready. Waiting on final screenshots.",
+            text: t("demo.comment.landing"),
             createdAt: now - 1000 * 60 * 60 * 30,
         },
         {
             id: "demo-comment-qa-1",
             taskId: "demo-task-qa",
-            text: "Remember to verify the empty-state behavior after deleting the demo board.",
+            text: t("demo.comment.qa"),
             createdAt: now - 1000 * 60 * 60 * 8,
         },
     ];

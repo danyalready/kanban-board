@@ -8,6 +8,7 @@ import { cn } from "@/shared/utils/cn";
 import { getPriorityColor } from "@/shared/utils/getPriorityColor";
 import { formatDate } from "@/shared/utils/formatDate";
 import type { Task } from "@/domain/kanban/types";
+import { t } from "@/shared/i18n";
 
 import { Badge } from "@/shared/ui/badge";
 import { Separator } from "@/shared/ui/separator";
@@ -76,7 +77,7 @@ export default function Task(props: Props) {
             <div className="flex items-center justify-between gap-2">
                 <Avatar className="size-6">
                     <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>DO</AvatarFallback>
+                    <AvatarFallback>{t("avatar.fallback")}</AvatarFallback>
                 </Avatar>
 
                 <div className="flex h-5 gap-2">

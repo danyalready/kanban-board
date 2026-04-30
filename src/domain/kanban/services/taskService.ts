@@ -37,7 +37,7 @@ export const getTasksByColumn = async (columnId: string) => {
 };
 
 export const updateTask = async (id: string, updates: Partial<Task>) => {
-    const validId = validateRecordId(id, "Task ID");
+    const validId = validateRecordId(id, "field.taskId");
     const validUpdates = validateUpdateTaskInput(updates);
 
     if (Object.keys(validUpdates).length === 0) return 0;

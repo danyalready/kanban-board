@@ -7,6 +7,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/shared/ui/dialog";
+import { t } from "@/shared/i18n";
 
 interface Props {
     open: boolean;
@@ -20,18 +21,19 @@ export default function DeleteBoardDialog(props: Props) {
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete “{props.boardName}”?</DialogTitle>
+                    <DialogTitle>
+                        {t("delete.board.title", { name: props.boardName ?? "" })}
+                    </DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    This will permanently delete the “{props.boardName}” board and all data within
-                    it. This action cannot be undone.
+                    {t("delete.board.description", { name: props.boardName ?? "" })}
                 </DialogDescription>
                 <DialogFooter>
                     <Button size="sm" variant="secondary" onClick={() => props.onOpenChange(false)}>
-                        Cancel
+                        {t("action.cancel")}
                     </Button>
                     <Button size="sm" variant="destructive" onClick={props.onConfirm}>
-                        Delete
+                        {t("action.delete")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

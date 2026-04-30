@@ -10,6 +10,7 @@ import {
 } from "@/shared/ui/breadcrumb";
 import type { Board } from "@/domain/kanban/types";
 import ThemeToggle from "@/shared/ui/ThemeToggle";
+import { t } from "@/shared/i18n";
 
 interface Props {
     board?: Board;
@@ -27,10 +28,10 @@ export default function Header(props: Props) {
                     <BreadcrumbList>
                         <BreadcrumbItem>
                             {isHome ? (
-                                <BreadcrumbPage>Boards</BreadcrumbPage>
+                                <BreadcrumbPage>{t("board.boards")}</BreadcrumbPage>
                             ) : (
                                 <BreadcrumbLink asChild>
-                                    <Link to="/">Boards</Link>
+                                    <Link to="/">{t("board.boards")}</Link>
                                 </BreadcrumbLink>
                             )}
                         </BreadcrumbItem>
@@ -40,7 +41,7 @@ export default function Header(props: Props) {
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
                                     <BreadcrumbPage>
-                                        {props.board?.name || "Loading..."}
+                                        {props.board?.name || t("kanban.loading")}
                                     </BreadcrumbPage>
                                 </BreadcrumbItem>
                             </>

@@ -7,6 +7,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/shared/ui/dialog";
+import { t } from "@/shared/i18n";
 
 interface Props {
     open: boolean;
@@ -20,18 +21,19 @@ export default function DeleteColumnDialog(props: Props) {
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete “{props.columnName}”?</DialogTitle>
+                    <DialogTitle>
+                        {t("delete.column.title", { name: props.columnName ?? "" })}
+                    </DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    This will permanently delete the “{props.columnName}” column and all tickets
-                    within it. This action cannot be undone.
+                    {t("delete.column.description", { name: props.columnName ?? "" })}
                 </DialogDescription>
                 <DialogFooter>
                     <Button size="sm" variant="secondary" onClick={() => props.onOpenChange(false)}>
-                        Cancel
+                        {t("action.cancel")}
                     </Button>
                     <Button size="sm" variant="destructive" onClick={props.onConfirm}>
-                        Delete
+                        {t("action.delete")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -12,6 +12,7 @@ import {
     validateCreateBoardInput,
     validateUpdateBoardInput,
 } from "@/domain/kanban/validation";
+import { t } from "@/shared/i18n";
 
 export function useBoardActions() {
     const addBoard = useCallback(async (name: string) => {
@@ -20,7 +21,7 @@ export function useBoardActions() {
         try {
             validName = validateCreateBoardInput(name);
         } catch (error) {
-            toast.error(getValidationMessage(error) ?? "Invalid board data.", {
+            toast.error(getValidationMessage(error) ?? t("feedback.invalidBoardData"), {
                 position: "top-center",
             });
             return;
@@ -29,9 +30,9 @@ export function useBoardActions() {
         try {
             await createBoard(validName);
 
-            toast.success("Board has been created 🎉", { position: "top-center" });
+            toast.success(t("feedback.boardCreated"), { position: "top-center" });
         } catch (error) {
-            toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+            toast.error(getValidationMessage(error) ?? t("feedback.somethingWentWrong"), {
                 position: "top-center",
             });
         }
@@ -43,7 +44,7 @@ export function useBoardActions() {
         try {
             validUpdates = validateUpdateBoardInput(updates);
         } catch (error) {
-            toast.error(getValidationMessage(error) ?? "Invalid board data.", {
+            toast.error(getValidationMessage(error) ?? t("feedback.invalidBoardData"), {
                 position: "top-center",
             });
             return;
@@ -54,9 +55,9 @@ export function useBoardActions() {
         try {
             await svcUpdateBoard(boardId, validUpdates);
 
-            toast.success("Board has been updated.", { position: "top-center" });
+            toast.success(t("feedback.boardUpdated"), { position: "top-center" });
         } catch (error) {
-            toast.error(getValidationMessage(error) ?? "Something went wrong.", {
+            toast.error(getValidationMessage(error) ?? t("feedback.somethingWentWrong"), {
                 position: "top-center",
             });
         }
@@ -66,10 +67,10 @@ export function useBoardActions() {
         try {
             await svcDeleteBoard(boardId);
 
-            toast.success("Board has been deleted.", { position: "top-center" });
+            toast.success(t("feedback.boardDeleted"), { position: "top-center" });
         } catch (error) {
             console.error(error);
-            toast.error("Something went wrong.", { position: "top-center" });
+            toast.error(t("feedback.somethingWentWrong"), { position: "top-center" });
         }
     }, []);
 

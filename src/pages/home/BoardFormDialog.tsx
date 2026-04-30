@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { t } from "@/shared/i18n";
 
 export interface Inputs {
     boardName: string;
@@ -24,12 +25,14 @@ export default function BoardFormDialog(props: Props) {
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{isEditBoard ? "✏️ Edit board" : "Create board"}</DialogTitle>
+                    <DialogTitle>
+                        {isEditBoard ? t("board.form.editTitle") : t("board.form.createTitle")}
+                    </DialogTitle>
                 </DialogHeader>
                 <form className="space-y-2" onSubmit={handleSubmit(props.onSubmit)}>
                     <div className="mb-4">
                         <Label htmlFor="title" required>
-                            Board name
+                            {t("board.form.name")}
                         </Label>
                         <Input
                             id="title"
@@ -41,7 +44,9 @@ export default function BoardFormDialog(props: Props) {
                     </div>
 
                     <DialogFooter>
-                        <Button type="submit">{isEditBoard ? "Save" : "Create"}</Button>
+                        <Button type="submit">
+                            {isEditBoard ? t("action.save") : t("action.create")}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

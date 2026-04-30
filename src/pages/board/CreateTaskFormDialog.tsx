@@ -8,6 +8,7 @@ import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import RichTextEditor from "@/shared/ui/RichTextEditor";
 import type { TaskPriority } from "@/domain/kanban/types";
+import { t } from "@/shared/i18n";
 
 import { PRIORITY_OPTIONS } from "./options";
 
@@ -40,13 +41,13 @@ export default function CreateTaskFormDialog(props: Props) {
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create task</DialogTitle>
+                    <DialogTitle>{t("task.form.createTitle")}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(props.onSubmit)}>
                     <div className="mb-4">
                         <Label htmlFor="title" required>
-                            Summary
+                            {t("task.form.summary")}
                         </Label>
                         <Input
                             id="title"
@@ -59,7 +60,7 @@ export default function CreateTaskFormDialog(props: Props) {
 
                     <div className="mb-4">
                         <Label htmlFor="priority" required>
-                            Priority
+                            {t("task.form.priority")}
                         </Label>
                         <Controller
                             name="priority"
@@ -67,7 +68,9 @@ export default function CreateTaskFormDialog(props: Props) {
                             render={({ field }) => (
                                 <Select value={field.value} onValueChange={field.onChange}>
                                     <SelectTrigger id="priority" className="w-full max-w-32">
-                                        <SelectValue placeholder="Select priority" />
+                                        <SelectValue
+                                            placeholder={t("task.form.priorityPlaceholder")}
+                                        />
                                     </SelectTrigger>
 
                                     <SelectContent>
@@ -84,7 +87,7 @@ export default function CreateTaskFormDialog(props: Props) {
 
                     <div className="mb-4">
                         <Label htmlFor="description" aria-required>
-                            Description
+                            {t("task.form.description")}
                         </Label>
                         <Controller
                             name="description"
@@ -101,9 +104,9 @@ export default function CreateTaskFormDialog(props: Props) {
                             onClick={() => props.onOpenChange(false)}
                             variant="secondary"
                         >
-                            Cancel
+                            {t("action.cancel")}
                         </Button>
-                        <Button type="submit">Create</Button>
+                        <Button type="submit">{t("action.create")}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

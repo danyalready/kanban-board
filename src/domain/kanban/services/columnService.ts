@@ -35,7 +35,7 @@ export const getColumnsByBoard = async (boardId: string) => {
 };
 
 export const updateColumn = async (id: string, updates: Partial<Column>) => {
-    const validId = validateRecordId(id, "Column ID");
+    const validId = validateRecordId(id, "field.columnId");
     const validUpdates = validateUpdateColumnInput(updates);
 
     if (Object.keys(validUpdates).length === 0) return 0;
