@@ -149,7 +149,7 @@ export default function Board(props: Props) {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex min-h-full gap-2 p-6">
+            <div className="flex min-h-full min-w-max gap-2 p-6">
                 <SortableContext items={props.columns} strategy={horizontalListSortingStrategy}>
                     {props.columns.map((column) => (
                         <Column
