@@ -85,7 +85,13 @@ export default function ViewEditTaskDialog(props: Props) {
 
     return (
         <Dialog open={props.open} onOpenChange={handleOpenChange}>
-            <DialogContent>
+            <DialogContent
+                onEscapeKeyDown={(event) => {
+                    const active = document.activeElement;
+
+                    if (active?.tagName === "INPUT") event.preventDefault();
+                }}
+            >
                 <DialogHeader>
                     {editing ? (
                         <Input
