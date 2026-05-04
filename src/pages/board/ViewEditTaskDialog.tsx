@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { CheckIcon, PencilIcon, SendIcon, Trash2Icon, XIcon } from "lucide-react";
 
 import RichTextEditor from "@/shared/ui/RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
@@ -8,11 +7,11 @@ import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import { Input } from "@/shared/ui/input";
 import { useDebounce } from "@/shared/hooks/useDebounce";
-import { formatDate } from "@/shared/utils/formatDate";
 import type { Comment, Task, TaskPriority } from "@/domain/kanban/types";
 import { t } from "@/shared/i18n";
 
 import { PRIORITY_OPTIONS } from "./options";
+import Comments from "./Comments";
 
 interface Props {
     open: boolean;
@@ -33,9 +32,7 @@ export default function ViewEditTaskDialog(props: Props) {
     const [editing, setEditing] = useState(false);
     const [titleDraft, setTitleDraft] = useState("");
     const [descDraft, setDescDraft] = useState("");
-    const [commentDraft, setCommentDraft] = useState("");
-    const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-    const [editingCommentDraft, setEditingCommentDraft] = useState("");
+
     const debauncedDescDraft = useDebounce(descDraft);
 
     const saveTitleChange = () => {
@@ -66,30 +63,6 @@ export default function ViewEditTaskDialog(props: Props) {
         props.onOpenChange(open);
     };
 
-    const handleAddComment = () => {
-        if (!task || !commentDraft.trim()) return;
-
-        props.onAddComment(task.id, commentDraft);
-        setCommentDraft("");
-    };
-
-    const startEditingComment = (comment: Comment) => {
-        setEditingCommentId(comment.id);
-        setEditingCommentDraft(comment.text);
-    };
-
-    const cancelEditingComment = () => {
-        setEditingCommentId(null);
-        setEditingCommentDraft("");
-    };
-
-    const saveCommentChange = (commentId: string) => {
-        if (!editingCommentDraft.trim()) return;
-
-        props.onCommentChange(commentId, { text: editingCommentDraft });
-        cancelEditingComment();
-    };
-
     useEffect(() => {
         if (!task?.id) return;
 
@@ -102,8 +75,6 @@ export default function ViewEditTaskDialog(props: Props) {
             setTask(props.task);
             setTitleDraft(props.task.title);
             setDescDraft(props.task.description);
-            setCommentDraft("");
-            cancelEditingComment();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.task?.id]);
@@ -156,134 +127,12 @@ export default function ViewEditTaskDialog(props: Props) {
                     <RichTextEditor id="description" value={descDraft} onChange={setDescDraft} />
                 </div>
 
-                <div>
-                    <Label htmlFor="comment">{t("comment.title")}</Label>
-                    <div className="flex gap-2">
-                        <Input
-                            id="comment"
-                            value={commentDraft}
-                            placeholder={t("comment.placeholder")}
-                            onChange={(e) => setCommentDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") handleAddComment();
-                            }}
-                        />
-                        <Button
-                            type="button"
-                            size="icon"
-                            disabled={!commentDraft.trim()}
-                            onClick={handleAddComment}
-                            aria-label={t("action.addComment")}
-                            className="shrink-0"
-                        >
-                            <SendIcon />
-                        </Button>
-                    </div>
-
-                    <div className="mt-2 space-y-2">
-                        {localComments.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">{t("comment.empty")}</p>
-                        ) : (
-                            localComments.map((comment) => {
-                                const isEditingComment = editingCommentId === comment.id;
-
-                                return (
-                                    <div
-                                        key={comment.id}
-                                        className="rounded-md border bg-card p-3 text-card-foreground"
-                                    >
-                                        <div className="flex items-center justify-between gap-3">
-                                            <span className="text-xs text-muted-foreground">
-                                                {formatDate(comment.createdAt)}
-                                            </span>
-
-                                            <div className="flex items-center gap-1">
-                                                {isEditingComment ? (
-                                                    <>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7"
-                                                            disabled={!editingCommentDraft.trim()}
-                                                            onClick={() =>
-                                                                saveCommentChange(comment.id)
-                                                            }
-                                                            aria-label={t("action.saveComment")}
-                                                        >
-                                                            <CheckIcon />
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7"
-                                                            onClick={cancelEditingComment}
-                                                            aria-label={t(
-                                                                "action.cancelCommentEdit",
-                                                            )}
-                                                        >
-                                                            <XIcon />
-                                                        </Button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7"
-                                                            onClick={() =>
-                                                                startEditingComment(comment)
-                                                            }
-                                                            aria-label={t("action.editComment")}
-                                                        >
-                                                            <PencilIcon />
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7 text-destructive hover:text-destructive"
-                                                            onClick={() =>
-                                                                props.onDeleteComment(comment.id)
-                                                            }
-                                                            aria-label={t("action.deleteComment")}
-                                                        >
-                                                            <Trash2Icon />
-                                                        </Button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {isEditingComment ? (
-                                            <Input
-                                                autoFocus
-                                                value={editingCommentDraft}
-                                                onChange={(e) =>
-                                                    setEditingCommentDraft(e.target.value)
-                                                }
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
-                                                        saveCommentChange(comment.id);
-                                                    }
-                                                    if (e.key === "Escape") {
-                                                        cancelEditingComment();
-                                                    }
-                                                }}
-                                            />
-                                        ) : (
-                                            <p className="whitespace-pre-wrap break-words text-sm">
-                                                {comment.text}
-                                            </p>
-                                        )}
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>
+                <Comments
+                    comments={localComments}
+                    onAdd={(comment) => task?.id && props.onAddComment(task.id, comment)}
+                    onChange={props.onCommentChange}
+                    onDelete={props.onDeleteComment}
+                />
 
                 <DialogFooter className="mt-4 sm:justify-between">
                     <Button size="sm" variant="destructive" onClick={props.onDeleteTask}>
