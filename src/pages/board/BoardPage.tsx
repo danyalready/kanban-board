@@ -109,7 +109,7 @@ export default function BoardPage() {
             <ViewEditTaskDialog
                 open={Boolean(task)}
                 task={task}
-                comments={comments}
+                comments={comments.sort((a, b) => b.createdAt - a.createdAt)}
                 onOpenChange={handleTaskDetailsModalClose}
                 onTaskChange={updateTask}
                 onAddComment={addComment}
